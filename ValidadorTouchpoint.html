@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validador Touchpoint Imagético</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ffffff 0%, #dddddd 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 30px;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            background: #f8f9ff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+        }
+
+        .upload-area.drag-over {
+            border-color: #4caf50;
+            background: #e8f5e9;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .upload-text {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .info-panel {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border-left: 4px solid #ffc107;
+        }
+
+        .preview-container {
+            position: relative;
+            display: inline-block;
+            max-width: 100%;
+            margin: 20px auto;
+            display: none;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        #imagePreview {
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .safe-area {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: rgba(76, 175, 80, 0.3);
+            border-right: 3px solid #4caf50;
+        }
+
+        .unsafe-area {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            background: rgba(244, 67, 54, 0.3);
+        }
+
+        .area-label {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-weight: bold;
+            font-size: 16px;
+            padding: 8px 16px;
+            border-radius: 4px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .safe-label {
+            left: 10px;
+            background: rgba(76, 175, 80, 0.9);
+            color: white;
+        }
+
+        .unsafe-label {
+            right: 10px;
+            background: rgba(244, 67, 54, 0.9);
+            color: white;
+        }
+
+        .preview-wrapper {
+            text-align: center;
+        }
+
+        .requirements {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .requirements h3 {
+            color: #1565c0;
+            margin-bottom: 15px;
+        }
+
+        .req-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .req-list li {
+            padding: 8px 0;
+            color: #333;
+            position: relative;
+            padding-left: 25px;
+        }
+
+        .req-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #1565c0;
+            font-weight: bold;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Validador Touchpoint Imagético</h1>
+        <p class="subtitle">Insira uma imagem para validar suas dimensões, tamanho de arquivo e visualizar sua área segura</p>
+
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">📤</div>
+            <div class="upload-text">
+                <strong>Clique para realizar o upload</strong> ou arraste a imagem aqui
+            </div>
+            <input type="file" id="fileInput" accept="image/*">
+        </div>
+
+        <div id="infoPanel" class="info-panel hidden">
+            <h3 style="margin-bottom: 15px; color: #333;">Image Information</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Dimensão</div>
+                    <div class="info-value" id="dimensions">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Tamanho de arquivo</div>
+                    <div class="info-value" id="fileSize">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Tipo de arquivo</div>
+                    <div class="info-value" id="fileType">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Status</div>
+                    <div class="info-value" id="status">-</div>
+                </div>
+            </div>
+
+            <div id="alerts"></div>
+        </div>
+
+        <div class="preview-wrapper">
+            <div class="preview-container" id="previewContainer">
+                <img id="imagePreview" alt="Preview">
+                <div class="overlay" id="overlay">
+                    <div class="safe-area" id="safeArea"></div>
+                    <div class="unsafe-area" id="unsafeArea"></div>
+                    <div class="area-label safe-label" id="safeLabel">ÁREA SEGURA</div>
+                    <div class="area-label unsafe-label">ÁREA DE CORTE</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="requirements">
+            <h3>Especificações</h3>
+            <ul class="req-list">
+                <li><strong>1920x100 pixels:</strong> Peso máximo de arquivo 400 KB | Safe area: 740px à esquerda</li>
+                <li><strong>430x140 pixels:</strong> Peso máximo de arquivo 200 KB | Safe area: 280px à esquerda</li>
+                <li><strong>Área segura:</strong> Parte esquera da imagem</li>
+                <li><strong>Área de Corte:</strong> Parte direita da imagem (poderá ser cortada)</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const infoPanel = document.getElementById('infoPanel');
+        const previewContainer = document.getElementById('previewContainer');
+        const imagePreview = document.getElementById('imagePreview');
+        const overlay = document.getElementById('overlay');
+        const alerts = document.getElementById('alerts');
+        const safeArea = document.getElementById('safeArea');
+        const unsafeArea = document.getElementById('unsafeArea');
+        const safeLabel = document.getElementById('safeLabel');
+
+        // Specifications
+        const specs = {
+            '1920x100': { 
+                maxSize: 400 * 1024, // 400 KB in bytes
+                safePixels: 740
+            },
+            '430x140': { 
+                maxSize: 200 * 1024, // 200 KB in bytes
+                safePixels: 280
+            }
+        };
+
+        // Upload area click
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        // File input change
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                processImage(file);
+            }
+        });
+
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('drag-over');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('drag-over');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                processImage(file);
+            }
+        });
+
+        function processImage(file) {
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const img = new Image();
+
+                img.onload = function() {
+                    const width = img.width;
+                    const height = img.height;
+                    const fileSize = file.size;
+                    const fileSizeKB = (fileSize / 1024).toFixed(2);
+                    const dimensionKey = `${width}x${height}`;
+
+                    // Update info panel
+                    document.getElementById('dimensions').textContent = dimensionKey + ' px';
+                    document.getElementById('fileSize').textContent = fileSizeKB + ' KB';
+                    document.getElementById('fileType').textContent = file.type.split('/')[1].toUpperCase();
+
+                    // Show info panel
+                    infoPanel.classList.remove('hidden');
+
+                    // Check if dimensions match specifications
+                    const spec = specs[dimensionKey];
+                    let alertsHTML = '';
+                    let isValid = true;
+
+                    if (spec) {
+                        // Calculate safe area percentage
+                        const safePercentage = (spec.safePixels / width * 100).toFixed(1);
+                        const unsafePixels = width - spec.safePixels;
+                        const unsafePercentage = (100 - safePercentage).toFixed(1);
+
+                        // Valid dimensions
+                        alertsHTML += '<div class="alert alert-success">✓ Dimensões de acordo com as especificaçÕes (' + dimensionKey + ')</div>';
+
+                        // Check file size
+                        if (fileSize <= spec.maxSize) {
+                            alertsHTML += '<div class="alert alert-success">✓ Peso do arquivo dentro do limite (' + fileSizeKB + ' KB / ' + (spec.maxSize / 1024) + ' KB)</div>';
+                        } else {
+                            alertsHTML += '<div class="alert alert-error">✗ Peso do arquivo acima do limite! (' + fileSizeKB + ' KB / ' + (spec.maxSize / 1024) + ' KB maximum)</div>';
+                            isValid = false;
+                        }
+
+                        // Update overlay with specific pixel measurements
+                        const safeWidthPercent = (spec.safePixels / width) * 100;
+                        safeArea.style.width = safeWidthPercent + '%';
+                        unsafeArea.style.left = safeWidthPercent + '%';
+                        unsafeArea.style.width = (100 - safeWidthPercent) + '%';
+
+                        // Update safe label text
+                        safeLabel.textContent = `ÁREA SEGURA (${spec.safePixels}px)`;
+
+                        // Show overlay
+                        overlay.style.display = 'block';
+                        alertsHTML += '<div class="alert alert-warning">⚠ Área segura: ' + spec.safePixels + 'px à esquerda | Área de corte: right ' + unsafePixels + 'px à direita</div>';
+                    } else {
+                        // Invalid dimensions
+                        alertsHTML += '<div class="alert alert-error">✗ Dimensões fora das especificações!</div>';
+                        alertsHTML += '<div class="alert alert-warning">Esperado: 1920x100 or 430x140 pixels</div>';
+                        overlay.style.display = 'none';
+                        isValid = false;
+                    }
+
+                    alerts.innerHTML = alertsHTML;
+                    document.getElementById('status').textContent = isValid ? '✓ CORRETO' : '✗ INCORRETO';
+                    document.getElementById('status').style.color = isValid ? '#28a745' : '#dc3545';
+
+                    // Show preview
+                    imagePreview.src = e.target.result;
+                    previewContainer.style.display = 'inline-block';
+                };
+
+                img.src = e.target.result;
+            };
+
+            reader.readAsDataURL(file);
+        }
+    </script>
+</body>
+</html>
