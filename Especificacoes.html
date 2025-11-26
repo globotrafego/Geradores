@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Especificações de Formatos</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f0f0f; padding: 20px; min-height: 100vh; }
+        .container { max-width: 1200px; margin: 0 auto; background: #1a1a1a; border-radius: 15px; padding: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); border: 1px solid #2a2a2a; }
+        h1 { color: #ffffff; margin-bottom: 30px; text-align: center; font-size: 2em; }
+        .config-section { background: #242424; padding: 25px; border-radius: 10px; margin-bottom: 30px; border: 1px solid #333; }
+        .config-section h2 { color: #e0e0e0; margin-bottom: 20px; font-size: 1.3em; }
+        .color-picker-group { display: flex; gap: 30px; margin-bottom: 25px; flex-wrap: wrap; }
+        .color-picker { flex: 1; min-width: 200px; }
+        .color-picker label { display: block; margin-bottom: 10px; font-weight: 600; color: #b0b0b0; }
+        .color-input-wrapper { display: flex; align-items: center; gap: 10px; }
+        input[type="color"] { width: 60px; height: 40px; border: 1px solid #444; border-radius: 5px; cursor: pointer; background: #2a2a2a; }
+        input[type="text"].color-text { flex: 1; padding: 8px; border: 1px solid #444; border-radius: 5px; font-family: monospace; background: #2a2a2a; color: #e0e0e0; }
+        .header-text-section { margin-bottom: 25px; }
+        .header-text-section label { display: block; margin-bottom: 10px; font-weight: 600; color: #b0b0b0; }
+        input[type="text"].header-text-input { width: 100%; padding: 12px; border: 1px solid #444; border-radius: 5px; background: #2a2a2a; color: #e0e0e0; font-size: 16px; }
+        input[type="text"].header-text-input::placeholder { color: #666; }
+        .logo-section { display: flex; gap: 30px; margin-bottom: 25px; flex-wrap: wrap; }
+        .logo-upload { flex: 1; min-width: 250px; }
+        .logo-upload label { display: block; margin-bottom: 10px; font-weight: 600; color: #b0b0b0; }
+        .drop-zone { border: 2px dashed #444; border-radius: 10px; padding: 30px; text-align: center; cursor: pointer; transition: all 0.3s; background: #2a2a2a; min-height: 150px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #888; }
+        .drop-zone:hover { border-color: #667eea; background: #2f2f3a; }
+        .drop-zone.dragover { border-color: #667eea; background: #353545; }
+        .drop-zone img { max-width: 100%; max-height: 100px; margin-top: 10px; }
+        .formats-section { margin-bottom: 30px; }
+        .formats-section h2 { color: #e0e0e0; margin-bottom: 20px; font-size: 1.3em; }
+        .formats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; }
+        .format-checkbox { display: flex; align-items: center; padding: 12px; background: #242424; border-radius: 5px; transition: background 0.2s; border: 1px solid #333; }
+        .format-checkbox:hover { background: #2a2a2a; border-color: #444; }
+        .format-checkbox input[type="checkbox"] { width: 18px; height: 18px; margin-right: 10px; cursor: pointer; accent-color: #667eea; }
+        .format-checkbox label { cursor: pointer; flex: 1; color: #c0c0c0; }
+        .action-buttons { display: flex; gap: 15px; justify-content: center; margin-top: 30px; flex-wrap: wrap; }
+        button { padding: 15px 40px; font-size: 16px; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; transition: all 0.3s; }
+        .generate-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .generate-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4); }
+        .select-all-btn, .deselect-all-btn { background: #3a3a3a; color: #e0e0e0; border: 1px solid #4a4a4a; }
+        .select-all-btn:hover, .deselect-all-btn:hover { background: #4a4a4a; }
+        input[type="file"] { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Gerador de Especificações de Formatos</h1>
+        <div class="config-section">
+            <h2>Configuração de Cores</h2>
+            <div class="color-picker-group">
+                <div class="color-picker">
+                    <label for="accentColor">Cor de Destaque</label>
+                    <div class="color-input-wrapper">
+                        <input type="color" id="accentColor" value="#00d9ff">
+                        <input type="text" class="color-text" id="accentColorText" value="#00d9ff">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="config-section">
+            <h2>Configuração do Cabeçalho</h2>
+            <div class="header-text-section">
+                <label for="headerText">Texto do Cabeçalho (Centro)</label>
+                <input type="text" class="header-text-input" id="headerText" placeholder="Digite o texto que aparecerá no centro do cabeçalho">
+            </div>
+            <div class="logo-section">
+                <div class="logo-upload">
+                    <label>Logo 1 (Esquerda)</label>
+                    <div class="drop-zone" id="dropZone1">
+                        <p>Arraste a imagem aqui<br>ou clique para selecionar</p>
+                        <img id="logoPreview1" style="display:none;">
+                    </div>
+                    <input type="file" id="logoInput1" accept="image/*">
+                </div>
+                <div class="logo-upload">
+                    <label>Logo 2 (Direita)</label>
+                    <div class="drop-zone" id="dropZone2">
+                        <p>Arraste a imagem aqui<br>ou clique para selecionar</p>
+                        <img id="logoPreview2" style="display:none;">
+                    </div>
+                    <input type="file" id="logoInput2" accept="image/*">
+                </div>
+            </div>
+        </div>
+        <div class="formats-section">
+            <h2>Selecione os Formatos</h2>
+            <div class="action-buttons" style="margin-bottom: 20px;">
+                <button class="select-all-btn" onclick="selectAllFormats()">Selecionar Todos</button>
+                <button class="deselect-all-btn" onclick="deselectAllFormats()">Desmarcar Todos</button>
+            </div>
+            <div class="formats-grid" id="formatsGrid"></div>
+        </div>
+        <div class="action-buttons">
+            <button class="generate-btn" onclick="generateHTML()">Gerar HTML</button>
+        </div>
+    </div>
+
+    <script>
+        const formats = [{"nome": "Badge", "dimensao": "200x200", "caracteres": "22", "tipo": "PNG, JPG", "peso": "150 kb", "info": "", "url": null}, {"nome": "Branded Card", "dimensao": "90x50", "caracteres": "Texto: 40 / CTA: 17", "tipo": "PNG", "peso": "40 kb", "info": "", "url": null}, {"nome": "Cupom Card 320x100", "dimensao": "35x25", "caracteres": "Titulo: 80 / Cupom: 15", "tipo": "PNG", "peso": "40 kb", "info": "", "url": null}, {"nome": "Cupom Card 320x50", "dimensao": "72x35", "caracteres": "Titulo: 30 / Cupom: 15", "tipo": "PNG", "peso": "40 kb", "info": "", "url": null}, {"nome": "Dash Banner", "dimensao": "90x24", "caracteres": "20", "tipo": "PNG", "peso": "40 kb", "info": "Cor do texto e botão em hexadecimal", "url": null}, {"nome": "Display Contextual", "dimensao": "975x290", "caracteres": "38", "tipo": "PNG", "peso": "900 kb", "info": "", "url": null}, {"nome": "Frame Ad", "dimensao": "1920x1080", "caracteres": "-", "tipo": "PNG", "peso": "900 kb", "info": "", "url": null}, {"nome": "Insert Animado", "dimensao": "42x24 e 58x24", "caracteres": "-", "tipo": "PNG", "peso": "150 kb", "info": "Necessário envio da cor de fundo em hexadecimal que se mescle com a cor do fundo do logo", "url": null}, {"nome": "Insert Logo", "dimensao": "90x32", "caracteres": "-", "tipo": "PNG", "peso": "40 kb", "info": "", "url": null}, {"nome": "Interstitial Video", "dimensao": "320x480", "caracteres": "-", "tipo": "MP4", "peso": "10 mb", "info": "", "url": null}, {"nome": "Interstitial Web", "dimensao": "320x480", "caracteres": "-", "tipo": "PNG", "peso": "400 kb", "info": "", "url": null}, {"nome": "Pós Escalação", "dimensao": "300x190 e 44x44", "caracteres": "Texto: 65 / CTA: 6", "tipo": "PNG", "peso": "300 kb", "info": "", "url": null}, {"nome": "Shortz Display", "dimensao": "720x1280", "caracteres": "-", "tipo": "PNG", "peso": "500 kb", "info": "", "url": null}, {"nome": "Shortz Video", "dimensao": "720x1280", "caracteres": "-", "tipo": "MP4", "peso": "10 mb", "info": "", "url": null}, {"nome": "Touchpoint Imagetico Desktop", "dimensao": "1920x100", "caracteres": "10", "tipo": "PNG", "peso": "400 kb", "info": "Necessário envio da cor do text e do botão em hexadecimal", "url": "https://negocios.globo.com/media-kit/#/touchpoint-imagetico/"}, {"nome": "Touchpoint Imagetico Mobile", "dimensao": "430x140", "caracteres": "10", "tipo": "PNG", "peso": "300 kb", "info": "Necessário envio da cor do text e do botão em hexadecimal", "url": "https://negocios.globo.com/media-kit/#/touchpoint-imagetico/"}, {"nome": "Votação patrocinada TV2.5", "dimensao": "300x250", "caracteres": "-", "tipo": "PNG", "peso": "450 kb", "info": "", "url": null}, {"nome": "Touchpoint votação", "dimensao": "70x40", "caracteres": "30", "tipo": "PNG", "peso": "40 kb", "info": "", "url": null}, {"nome": "Billboard", "dimensao": "970x250", "caracteres": "-", "tipo": "PNG, JPG, GIF", "peso": "250 kb", "info": "", "url": "https://negocios.globo.com/media-kit/#/billboard/"}, {"nome": "Retângulo Médio", "dimensao": "300x250", "caracteres": "-", "tipo": "PNG, JPG, GIF", "peso": "150 kb", "info": "", "url": "https://negocios.globo.com/media-kit/#/retangulo-medio/"}, {"nome": "Sticky Ad (320x50)", "dimensao": "320x50", "caracteres": "-", "tipo": "PNG, JPG, GIF", "peso": "100 kb", "info": "", "url": "https://negocios.globo.com/media-kit/#/sticky-ad/"}, {"nome": "Sticky Ad (320x100)", "dimensao": "320x100", "caracteres": "-", "tipo": "PNG, JPG, GIF", "peso": "100 kb", "info": "", "url": "https://negocios.globo.com/media-kit/#/sticky-ad/"}, {"nome": "Meia Página", "dimensao": "300x600", "caracteres": "-", "tipo": "PNG, JPG, GIF", "peso": "250 kb", "info": "", "url": "https://negocios.globo.com/media-kit/#/half-page/"}, {"nome": "Maxiboard", "dimensao": "970x150", "caracteres": "-", "tipo": "PNG, JPG, GIF", "peso": "200 kb", "info": "", "url": "https://negocios.globo.com/media-kit/#/maxiboard/"}, {"nome": "Podcast (Pre Roll Audio)", "dimensao": "-", "caracteres": "-", "tipo": "MP3", "peso": "1 mb", "info": "até 10 segundos", "url": "https://negocios.globo.com/media-kit/#/podcast-pre-roll-e-mid-roll-de-audio-com-oferecimento-da-marca/"}, {"nome": "Podcast (Mid Roll Audio)", "dimensao": "-", "caracteres": "-", "tipo": "MP3", "peso": "3 mb", "info": "até 30 segundos", "url": "https://negocios.globo.com/media-kit/#/podcast-pre-roll-e-mid-roll-de-audio-com-oferecimento-da-marca/"}, {"nome": "Outsream", "dimensao": "640x360", "caracteres": "-", "tipo": "MP4", "peso": "10 mb", "info": "Recomendado entre 7 e 15 segundos. Tempo máximo 30 segundos", "url": "https://negocios.globo.com/media-kit/#/outstream-in-feed-video/"}, {"nome": "In-Stream Video (Pré e Mid Roll)", "dimensao": "1280x720", "caracteres": "-", "tipo": "MP4, MOV, AVI", "peso": "512 mb", "info": "até 7s (bumper), até 15s (sem skip), até 180s (com skip)", "url": "https://negocios.globo.com/media-kit/#/in-stream-video/"}, {"nome": "DAI", "dimensao": "1920x1080", "caracteres": "-", "tipo": "MP4, MOV, AVI", "peso": "512 mb", "info": "", "url": "https://negocios.globo.com/media-kit/#/video-premium/"}, {"nome": "Banner Video (300x250)", "dimensao": "300x82 (imagem) 640x360 (video)", "caracteres": "-", "tipo": "Imagem: JPG, PNG / Vídeo: MP4, MOV, AVI", "peso": "Imagem: 100 kb / Video: 10 mb", "info": "", "url": "https://negocios.globo.com/media-kit/#/banner-video/"}, {"nome": "Banner Video (970x250)", "dimensao": "526x250 (imagem) 640x360 (video)", "caracteres": "-", "tipo": "Imagem: JPG, PNG / Vídeo: MP4, MOV, AVI", "peso": "Imagem: 100 kb / Video: 10 mb", "info": "", "url": "https://negocios.globo.com/media-kit/#/banner-video/"}, {"nome": "Banner Video (300x600)", "dimensao": "300x216 (imagem) 640x360 (video)", "caracteres": "-", "tipo": "Imagem: JPG, PNG / Vídeo: MP4, MOV, AVI", "peso": "Imagem: 100 kb / Video: 10 mb", "info": "", "url": "https://negocios.globo.com/media-kit/#/banner-video/"}, {"nome": "Banner Video (1248x250)", "dimensao": "804x250 (imagem) 640x360 (video)", "caracteres": "-", "tipo": "Imagem: JPG, PNG / Vídeo: MP4, MOV, AVI", "peso": "Imagem: 250 kb / Video: 10 mb", "info": "", "url": "https://negocios.globo.com/media-kit/#/banner-video-super-premium/"}, {"nome": "Home Super Premium", "dimensao": "1248x250", "caracteres": "-", "tipo": "PNG, JPG, GIF", "peso": "250 kb", "info": "", "url": "https://negocios.globo.com/media-kit/#/home-super-premium/"}, {"nome": "Carrossel", "dimensao": "400x300", "caracteres": "Titulo: 60 / Subtitulo: 45", "tipo": "PNG, JPG", "peso": "60 kb", "info": "São quatro imagens de 400x300 e peso máximo de 60 kb", "url": "https://negocios.globo.com/media-kit/#/carrossel/"}, {"nome": "Carrossel com Vídeo", "dimensao": "510x286 (imagem) 640x360 (video)", "caracteres": "Titulo: 20 / Subtitulo: 45", "tipo": "Imagem: JPG, PNG / Vídeo: MP4, MOV, AVI", "peso": "60 kb", "info": "Recomendado entre 7 e 15 segundos. Tempo máximo 60 segundos", "url": "https://negocios.globo.com/media-kit/#/carrossel-com-video/"}, {"nome": "Chamada Foto Ad", "dimensao": "Imagem: 424x237 / Logo: 30x70", "caracteres": "Titulo: 80 / Subtitulo: 180", "tipo": "Imagem: JPG, PNG / Logo: PNG", "peso": "Imagem: 60 kb / Logo: 20 kb", "info": "", "url": "https://negocios.globo.com/media-kit/#/chamada-foto-ad/"}, {"nome": "Chamada Video Ad", "dimensao": "Logo: 30x70 / Video: 640x360", "caracteres": "Titulo: 80 / Subtitulo: 180", "tipo": "Logo: PNG / Video: MP4, MOV, AVI", "peso": "Logo: 20 kb / Video: 10 mb", "info": "Recomendado entre 7 e 15 segundos. Tempo máximo 60 segundos", "url": "https://negocios.globo.com/media-kit/#/chamada-video-ad/"}, {"nome": "Pause Ad", "dimensao": "996x640", "caracteres": "-", "tipo": "PNG", "peso": "900 kb", "info": "A arte não deve ter fundo, sendo transparente para mesclar com o conteúdo do vídeo sendo consumido. O QR Code será gerato automaticamente pelo formato e não deve haver espaço reservado para o QR Code na peça", "url": "https://negocios.globo.com/media-kit/#/pause-ads/"}, {"nome": "Binge Ad", "dimensao": "Imagem: 996x640 / Logo: 25x25", "caracteres": "-", "tipo": "PNG", "peso": "Imagem: 900 kb / Logo: 20 kb", "info": "A arte não deve ter fundo, sendo transparente para mesclar com o conteúdo do vídeo sendo consumido. O QR Code será gerato automaticamente pelo formato e não deve haver espaço reservado para o QR Code na peça", "url": "https://negocios.globo.com/media-kit/#/binge-ads/"}];
+        let logo1Data = null, logo2Data = null;
+
+        document.addEventListener('DOMContentLoaded', initializeFormatsGrid);
+
+        function initializeFormatsGrid() {
+            const sortedFormats = [...formats].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+            const formatsGrid = document.getElementById('formatsGrid');
+            formatsGrid.innerHTML = '';
+            sortedFormats.forEach((format) => {
+                const originalIndex = formats.findIndex(f => f.nome === format.nome);
+                const div = document.createElement('div');
+                div.className = 'format-checkbox';
+                div.innerHTML = `<input type="checkbox" id="format${originalIndex}" value="${originalIndex}"><label for="format${originalIndex}">${format.nome}</label>`;
+                formatsGrid.appendChild(div);
+            });
+        }
+
+        document.getElementById('accentColor').addEventListener('input', (e) => {
+            document.getElementById('accentColorText').value = e.target.value;
+        });
+        document.getElementById('accentColorText').addEventListener('input', (e) => {
+            document.getElementById('accentColor').value = e.target.value;
+        });
+
+        function setupLogoUpload(dropZoneId, inputId, previewId, logoDataVar) {
+            const dropZone = document.getElementById(dropZoneId);
+            const input = document.getElementById(inputId);
+            const preview = document.getElementById(previewId);
+            dropZone.addEventListener('click', () => input.click());
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('dragover');
+            });
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove('dragover');
+            });
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('dragover');
+                const file = e.dataTransfer.files[0];
+                if (file && file.type.startsWith('image/')) handleFile(file, preview, logoDataVar);
+            });
+            input.addEventListener('change', (e) => {
+                if (e.target.files[0]) handleFile(e.target.files[0], preview, logoDataVar);
+            });
+        }
+
+        function handleFile(file, preview, logoDataVar) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                if (logoDataVar === 'logo1') logo1Data = e.target.result;
+                else logo2Data = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        setupLogoUpload('dropZone1', 'logoInput1', 'logoPreview1', 'logo1');
+        setupLogoUpload('dropZone2', 'logoInput2', 'logoPreview2', 'logo2');
+
+        function selectAllFormats() { document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true); }
+        function deselectAllFormats() { document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false); }
+
+        function generateHTML() {
+            const selectedFormats = [];
+            document.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
+                selectedFormats.push(formats[parseInt(cb.value)]);
+            });
+
+            if (selectedFormats.length === 0) {
+                alert('Por favor, selecione pelo menos um formato!');
+                return;
+            }
+
+            const baseColor = '#e0e0e0';
+            const accentColor = document.getElementById('accentColor').value;
+            const headerText = document.getElementById('headerText').value.trim();
+            const sanitizedText = headerText ? headerText.replace(/[^a-zA-Z0-9_\-]/g, '_') : 'formatos';
+
+            let cardsHTML = '';
+            selectedFormats.forEach(format => {
+                const specs = [];
+                if (format.dimensao !== '-') specs.push({label: 'Dimensão:', value: format.dimensao.replace(/ \/ /g, '<br>')});
+                if (format.caracteres !== '-') specs.push({label: 'Caracteres:', value: format.caracteres.replace(/ \/ /g, '<br>')});
+                specs.push({label: 'Tipo:', value: format.tipo.replace(/ \/ /g, '<br>')});
+                specs.push({label: 'Peso:', value: format.peso.replace(/ \/ /g, '<br>')});
+
+                let specHTML = '';
+                specs.forEach((spec, index) => {
+                    specHTML += '<div class="spec-item"><span class="spec-label">' + spec.label + '</span><span class="spec-value">' + spec.value + '</span></div>';
+                    if (index < specs.length - 1) specHTML += '<div class="spec-separator"></div>';
+                });
+
+                const globoadsUrl = format.url;
+                const infoHTML = format.info ? '<div class="info-box"><p><strong>ℹ️ Info:</strong> ' + format.info + '</p></div>' : '';
+                const slaHTML = (globoadsUrl ? '<a href="' + globoadsUrl + '" target="_blank" class="globoads-link">🔗 Globoads</a>' : '') + '<span>SLA - 2 dias úteis</span>';
+
+                cardsHTML += '<div class="card"><h2 class="card-title">' + format.nome + '</h2><div class="card-body">' + specHTML + infoHTML + '</div><div class="sla-line' + (globoadsUrl ? '' : ' right-only') + '">' + slaHTML + '</div></div>';
+            });
+
+            const resultHTML = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Especificações de Formatos</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f0f0f; padding: 20px; }
+        .screen-wrapper { max-width: 1400px; margin: 0 auto; }
+        .header { background: #1a1a1a; padding: 40px 30px; border-radius: 15px; margin-bottom: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.5); border: 1px solid #2a2a2a; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 25px; }
+        .logo { max-height: 120px; max-width: 350px; object-fit: contain; }
+        .header-center-text { font-size: 2.2em; font-weight: 700; color: ${baseColor}; text-align: center; flex: 1; padding: 0 20px; min-width: 300px; line-height: 1.2; }
+        .cards-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 22px; margin-bottom: 30px; }
+        .card { background: #1a1a1a; border-radius: 12px; padding: 26px; box-shadow: 0 5px 20px rgba(0,0,0,0.5); border: 1px solid #2a2a2a; page-break-inside: avoid; break-inside: avoid; display: flex; flex-direction: column; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.7); border-color: #3a3a3a; }
+        .card-title { font-size: 1.35em; font-weight: 700; color: ${baseColor}; margin-bottom: 18px; padding-bottom: 14px; border-bottom: 3px solid ${accentColor}; word-break: break-word; }
+        .card-body { flex: 1; }
+        .spec-item { display: flex; justify-content: space-between; align-items: flex-start; padding: 11px 0; line-height: 1.6; min-height: 32px; }
+        .spec-label { font-weight: 600; color: ${accentColor}; flex-shrink: 0; margin-right: 12px; min-width: 100px; }
+        .spec-value { color: #d0d0d0; text-align: right; flex: 1; word-break: break-word; font-size: 0.98em; }
+        .spec-separator { height: 1px; background: linear-gradient(to right, transparent, ${accentColor} 50%, transparent); margin: 7px 0; opacity: 0.6; }
+        .info-box { background: #242424; padding: 14px; border-radius: 7px; margin: 16px 0; border-left: 4px solid ${accentColor}; }
+        .info-box p { color: #b0b0b0; font-size: 0.88em; line-height: 1.5; margin: 0; }
+        .info-box strong { color: ${accentColor}; }
+        .sla-line { display: flex; justify-content: space-between; align-items: center; color: #b0b0b0; font-size: 0.82em; font-weight: 500; margin-top: 18px; padding-top: 14px; border-top: 1px solid #2a2a2a; gap: 12px; flex-wrap: wrap; }
+        .sla-line.right-only { justify-content: flex-end; }
+        .globoads-link { color: ${accentColor}; text-decoration: none; font-weight: 600; transition: opacity 0.3s; }
+        .globoads-link:hover { opacity: 0.8; text-decoration: underline; }
+        @media (max-width: 768px) { .cards-container { grid-template-columns: 1fr; } .header { flex-direction: column; text-align: center; } .header-center-text { order: -1; width: 100%; } }
+        @page { size: A4; margin: 10mm; }
+    </style>
+</head>
+<body>
+    <div class="screen-wrapper">
+        <div class="header">
+            ${logo1Data ? '<img src="' + logo1Data + '" alt="Logo 1" class="logo">' : '<div></div>'}
+            ${headerText ? '<div class="header-center-text">' + headerText + '</div>' : ''}
+            ${logo2Data ? '<img src="' + logo2Data + '" alt="Logo 2" class="logo">' : '<div></div>'}
+        </div>
+        <div class="cards-container">
+            ${cardsHTML}
+        </div>
+    </div>
+</body>
+</html>`;
+
+            const blob = new Blob([resultHTML], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Especificações_' + sanitizedText + '.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
