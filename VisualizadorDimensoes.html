@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizador de Dimensões de Banners - Editorias</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 600px;
+        }
+
+        .tabs-container {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            padding: 20px;
+            border-bottom: 3px solid #1a252f;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ecf0f1;
+            padding: 15px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 16px;
+            border: 2px solid transparent;
+        }
+
+        .tab:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            border-color: #2980b9;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .main-content {
+            display: flex;
+            flex: 1;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: linear-gradient(180deg, #34495e 0%, #2c3e50 100%);
+            padding: 30px 20px;
+            border-right: 3px solid #1a252f;
+            overflow-y: auto;
+            max-height: calc(100vh - 200px);
+        }
+
+        .sidebar h2 {
+            color: #ecf0f1;
+            margin-bottom: 25px;
+            font-size: 24px;
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #3498db;
+            position: sticky;
+            top: 0;
+            background: linear-gradient(180deg, #34495e 0%, #2c3e50 100%);
+            z-index: 10;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .checkbox-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .checkbox-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #3498db;
+        }
+
+        .checkbox-item label {
+            color: #ecf0f1;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .content {
+            flex: 1;
+            padding: 40px;
+            background: #f8f9fa;
+            overflow-y: auto;
+        }
+
+        .content h1 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 32px;
+            text-align: center;
+        }
+
+        .editoria-badge {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .editoria-badge span {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 18px;
+            margin-top: 100px;
+        }
+
+        .section-title {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            margin: 30px 0 20px 0;
+            font-size: 22px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-count {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .position-group {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .position-header {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .dimension-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 20px;
+        }
+
+        .dimension-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border: 2px solid #e9ecef;
+        }
+
+        .dimension-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+            border-color: #3498db;
+        }
+
+        .dimension-card h3 {
+            color: #2c3e50;
+            margin-bottom: 12px;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .dimension-preview {
+            border: 2px dashed #bdc3c7;
+            margin: 15px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%, #f0f0f0),
+                        linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%, #f0f0f0);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dimension-label {
+            position: absolute;
+            background: rgba(52, 152, 219, 0.9);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .native-badge {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 3px solid #1a252f;
+                max-height: 300px;
+            }
+
+            .dimension-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .tab {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="tabs-container">
+            <div class="tabs">
+                <div class="tab" data-editoria="globo">Globo.com</div>
+                <div class="tab active" data-editoria="homes">Homes (G1, Ge, Gshow)</div>
+                <div class="tab" data-editoria="internas">Internas (G1, Ge, Gshow)</div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <h2>Selecione as Posições</h2>
+                <div id="checkboxContainer" class="checkbox-group"></div>
+            </div>
+
+            <div class="content">
+                <h1>Dimensões de Banners</h1>
+                <div class="editoria-badge">
+                    <span id="editoriaName">Homes (G1, Ge, Gshow)</span>
+                </div>
+                <div id="displayArea">
+                    <div class="empty-state">
+                        <p>👈 Selecione uma ou mais posições ao lado para visualizar as dimensões</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const dimensionsData = {
+            'globo': {
+                'Primeira Posição': {
+                    'HOME1': ['1248x250', '970x250'],
+                    'HOME1_M': ['300x250']
+                },
+                'Segunda Posição': {
+                    'HOME2': ['1248x250', '970x250'],
+                    'HOME2_M': ['300x250']
+                },
+                'Terceira Posição': {
+                    'HOME3': ['970x250'],
+                    'HOME3_M': ['300x250']
+                },
+                'Quarta Posição': {
+                    'HOME4': ['970x250'],
+                    'HOME4_M': ['300x250']
+                },
+                'Quinta Posição': {
+                    'HOME5': ['970x250'],
+                    'HOME5_M': ['300x250']
+                },
+                'Sexta Posição': {
+                    'HOME6': ['970x250'],
+                    'HOME6_M': ['300x250']
+                },
+                'Sétima Posição': {
+                    'HOME7_M': ['300x250']
+                },
+                'Oitava Posição': {
+                    'HOME8_M': ['300x250']
+                },
+                'Nona Posição': {
+                    'HOME9_M': ['300x250']
+                },
+                'Décima Posição': {
+                    'HOME10_M': ['300x250']
+                }
+            },
+            'homes': {
+                'Primeira Posição': {
+                    'HOME1': ['970x250'],
+                    'MATERIA_TOPO_M': ['320x50']
+                },
+                'Segunda Posição': {
+                    'HOME2': ['970x250'],
+                    'HOME1_M': ['300x250'],
+                    'HOME2_M': ['300x250']
+                },
+                'Terceira Posição': {
+                    'HOME3': ['300x250'],
+                    'HOME3_M': ['300x250']
+                },
+                'Quarta Posição': {
+                    'HOME4': ['970x250'],
+                    'HOME4_M': ['300x250']
+                },
+                'Home Fim': {
+                    'HOME_FIM': ['300x250', '300x600']
+                },
+                'Home Feed': {
+                    'HOME_FEED': ['300x250', '300x600']
+                },
+                'Feed': {
+                    'FEED': ['Natives'],
+                    'FEED_M': ['Natives']
+                },
+                'Feed Especial': {
+                    'FEED_ESPECIAL': ['Natives'],
+                    'FEED_ESPECIAL_M': ['Natives']
+                },
+            },
+            'internas': {
+                'Primeira Posição': {
+                    'MATERIA_TOPO': ['970x250'],
+                    'MATERIA_TOPO_M': ['320x50', '320x100']
+                },
+                'Segunda Posição': {
+                    'MATERIA1': ['300x250'],
+                    'MATERIA1_M': ['300x250']
+                },
+                'Terceira Posição': {
+                    'MATERIA2': ['970x250'],
+                    'MATERIA2_M': ['300x250']
+                },
+                'Entrega a cada X palavras': {
+                    'MATERIA': ['970x250'],
+                    'MATERIA_M': ['300x250']
+                },
+                'Feed': {
+                    'FEED': ['970x250', '970x150', '970x90', 'Natives'],
+                    'FEED_M': ['300x250', 'Natives']
+                },
+                'Feed Especial': {
+                    'FEED_ESPECIAL': ['Natives'],
+                    'FEED_ESPECIAL_M': ['Natives']
+                },
+            }
+        };
+
+        let currentEditoria = 'homes';
+
+        function createDimensionCard(dimension, index, positionName) {
+            const card = document.createElement('div');
+            card.className = 'dimension-card';
+
+            if (dimension === 'Natives') {
+                card.innerHTML = `
+                    <h3>${positionName} - Native (#${index + 1})</h3>
+                    <div class="native-badge">
+                        🎯 NATIVE AD<br>
+                        <small>Formato nativo adaptável</small>
+                    </div>
+                `;
+                return card;
+            }
+
+            const title = document.createElement('h3');
+            title.textContent = `${positionName} - ${dimension} (#${index + 1})`;
+            card.appendChild(title);
+
+            const preview = document.createElement('div');
+            preview.className = 'dimension-preview';
+
+            const [width, height] = dimension.split('x').map(Number);
+            const scale = Math.min(220 / width, 180 / height, 1);
+            preview.style.width = (width * scale) + 'px';
+            preview.style.height = (height * scale) + 'px';
+
+            const label = document.createElement('div');
+            label.className = 'dimension-label';
+            label.textContent = dimension;
+            preview.appendChild(label);
+
+            card.appendChild(preview);
+            return card;
+        }
+
+        function renderCheckboxes() {
+            const container = document.getElementById('checkboxContainer');
+            container.innerHTML = '';
+            
+            const positions = Object.keys(dimensionsData[currentEditoria]);
+            
+            positions.forEach(position => {
+                const item = document.createElement('div');
+                item.className = 'checkbox-item';
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = `pos_${position}`;
+                checkbox.value = position;
+                checkbox.addEventListener('change', updateDisplay);
+                
+                const label = document.createElement('label');
+                label.htmlFor = `pos_${position}`;
+                
+                const group = dimensionsData[currentEditoria][position];
+                const hasMultiple = Object.keys(group).length > 1;
+                label.textContent = hasMultiple ? position.replace('_M', '') : position;
+                
+                item.appendChild(checkbox);
+                item.appendChild(label);
+                container.appendChild(item);
+                
+                item.addEventListener('click', function(e) {
+                    if (e.target.tagName !== 'INPUT') {
+                        checkbox.checked = !checkbox.checked;
+                        updateDisplay();
+                    }
+                });
+            });
+        }
+
+        function updateDisplay() {
+            const checkboxes = document.querySelectorAll('#checkboxContainer input[type="checkbox"]');
+            const selected = Array.from(checkboxes)
+                .filter(cb => cb.checked)
+                .map(cb => cb.value);
+
+            const displayArea = document.getElementById('displayArea');
+            displayArea.innerHTML = '';
+
+            if (selected.length === 0) {
+                displayArea.innerHTML = '<div class="empty-state"><p>👈 Selecione uma ou mais posições ao lado para visualizar as dimensões</p></div>';
+                return;
+            }
+
+            selected.forEach(groupKey => {
+                const group = dimensionsData[currentEditoria][groupKey];
+                
+                const positionGroup = document.createElement('div');
+                positionGroup.className = 'position-group';
+
+                const sectionTitle = document.createElement('div');
+                sectionTitle.className = 'section-title';
+                const totalDimensions = Object.values(group).reduce((sum, arr) => sum + arr.length, 0);
+                sectionTitle.innerHTML = `
+                    <span>${groupKey}</span>
+                    <span class="section-count">${totalDimensions} dimensões</span>
+                `;
+                positionGroup.appendChild(sectionTitle);
+
+                Object.keys(group).forEach(positionName => {
+                    const dimensions = group[positionName];
+                    
+                    const posHeader = document.createElement('div');
+                    posHeader.className = 'position-header';
+                    posHeader.textContent = `${positionName} (${dimensions.length} dimensões)`;
+                    positionGroup.appendChild(posHeader);
+
+                    const grid = document.createElement('div');
+                    grid.className = 'dimension-grid';
+
+                    dimensions.forEach((dimension, index) => {
+                        const card = createDimensionCard(dimension, index, positionName);
+                        grid.appendChild(card);
+                    });
+
+                    positionGroup.appendChild(grid);
+                });
+
+                displayArea.appendChild(positionGroup);
+            });
+        }
+
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                currentEditoria = this.getAttribute('data-editoria');
+                
+                const editoriaNames = {
+                    'globo': 'Globo.com',
+                    'homes': 'Homes (G1, Ge, Gshow)',
+                    'internas': 'Internas (G1, Ge, Gshow)'
+                };
+                
+                document.getElementById('editoriaName').textContent = editoriaNames[currentEditoria];
+                
+                renderCheckboxes();
+                document.getElementById('displayArea').innerHTML = '<div class="empty-state"><p>👈 Selecione uma ou mais posições ao lado para visualizar as dimensões</p></div>';
+            });
+        });
+
+        renderCheckboxes();
+    </script>
+</body>
+</html>
