@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Campanhas - Afiliada</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --bg-card: #1e1e2e;
+            --bg-section: #252538;
+            --bg-item: #2a2a3e;
+            --bg-input: #1a1a2e;
+            --bg-input-disabled: #15151f;
+            --border-color: #3d3d5c;
+            --border-section: #2d4263;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0b0;
+            --text-disabled: #808090;
+            --accent-primary: #00d4ff;
+            --accent-secondary: #00adb5;
+            --error-color: #ff6b6b;
+            --success-color: #00d1a0;
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #f5f5f5;
+            --bg-secondary: #e8e8e8;
+            --bg-card: #ffffff;
+            --bg-section: #fafafa;
+            --bg-item: #f8f8f8;
+            --bg-input: #ffffff;
+            --bg-input-disabled: #f0f0f0;
+            --border-color: #d0d0d0;
+            --border-section: #c0c0c0;
+            --text-primary: #2a2a2a;
+            --text-secondary: #5a5a5a;
+            --text-disabled: #9a9a9a;
+            --accent-primary: #0066cc;
+            --accent-secondary: #0088cc;
+            --error-color: #d32f2f;
+            --success-color: #00a86b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            color: var(--text-primary);
+            padding: 20px;
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2000;
+            background: var(--bg-section);
+            border: 1px solid var(--border-color);
+            border-radius: 25px;
+            padding: 8px 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+            font-weight: 600;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--accent-secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: var(--bg-card);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            padding: 30px;
+            transition: all 0.3s ease;
+        }
+
+        h1 {
+            color: var(--accent-primary);
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 2em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        h2 {
+            color: var(--accent-secondary);
+            margin-top: 30px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-section);
+            font-size: 1.5em;
+        }
+
+        .form-section {
+            background: var(--bg-section);
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border: 1px solid var(--border-section);
+            transition: all 0.3s ease;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 0.9em;
+        }
+
+        label.required::after {
+            content: " *";
+            color: var(--error-color);
+        }
+
+        input, select, textarea {
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent-secondary);
+            box-shadow: 0 0 0 2px rgba(0, 173, 181, 0.2);
+        }
+
+        input[readonly] {
+            background: var(--bg-input-disabled);
+            color: var(--text-disabled);
+            cursor: not-allowed;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* Custom Multi-Select Dropdown */
+        .multi-select-container {
+            position: relative;
+        }
+
+        .multi-select-display {
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            min-height: 46px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .multi-select-display:hover {
+            border-color: var(--accent-secondary);
+        }
+
+        .multi-select-display.active {
+            border-color: var(--accent-secondary);
+            box-shadow: 0 0 0 2px rgba(0, 173, 181, 0.2);
+        }
+
+        .multi-select-placeholder {
+            color: var(--text-disabled);
+        }
+
+        .multi-select-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--bg-input);
+            border: 1px solid var(--accent-secondary);
+            border-radius: 6px;
+            margin-top: 4px;
+            max-height: 280px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .multi-select-dropdown.active {
+            display: block;
+        }
+
+        .multi-select-actions {
+            display: flex;
+            gap: 8px;
+            padding: 8px;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-section);
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .multi-select-action-btn {
+            flex: 1;
+            padding: 6px 12px;
+            background: var(--accent-secondary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .multi-select-action-btn:hover {
+            background: var(--accent-primary);
+            transform: translateY(-1px);
+        }
+
+        .multi-select-action-btn.clear {
+            background: #6c757d;
+        }
+
+        .multi-select-action-btn.clear:hover {
+            background: #5a6268;
+        }
+
+        .multi-select-option {
+            padding: 10px 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .multi-select-option:hover {
+            background: var(--bg-section);
+        }
+
+        .multi-select-option input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            margin: 0;
+            padding: 0;
+        }
+
+        .multi-select-option label {
+            cursor: pointer;
+            margin: 0;
+            flex: 1;
+        }
+
+        .multi-select-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .multi-select-tag {
+            background: var(--accent-secondary);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .multi-select-tag-remove {
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1em;
+            line-height: 1;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .multi-select-tag-remove:hover {
+            opacity: 1;
+        }
+
+        .line-item {
+            background: var(--bg-item);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .line-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .line-number {
+            color: var(--accent-primary);
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .line-name {
+            color: var(--text-secondary);
+            font-size: 0.9em;
+            flex: 1;
+            margin-left: 15px;
+            padding: 8px 12px;
+            background: var(--bg-input);
+            border-radius: 4px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9em;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-secondary) 0%, var(--accent-primary) 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 173, 181, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ee5a6f 0%, var(--error-color) 100%);
+            color: white;
+            padding: 8px 16px;
+            font-size: 0.85em;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(238, 90, 111, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #00b894 0%, var(--success-color) 100%);
+            color: white;
+            padding: 14px 32px;
+            font-size: 1.1em;
+            display: block;
+            width: 100%;
+            margin-top: 30px;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 184, 148, 0.4);
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .alert-error {
+            background: rgba(238, 90, 111, 0.2);
+            border: 1px solid var(--error-color);
+            color: var(--error-color);
+        }
+
+        .generated-name-display {
+            background: var(--bg-input);
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+            border-left: 4px solid var(--accent-primary);
+        }
+
+        .generated-name-display label {
+            color: var(--accent-primary);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .generated-name-display .name-value {
+            color: var(--text-primary);
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            word-break: break-all;
+        }
+
+        .help-text {
+            font-size: 0.85em;
+            color: var(--text-disabled);
+            margin-top: 4px;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .line-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .line-name {
+                margin-left: 0;
+                margin-top: 10px;
+                width: 100%;
+            }
+
+            .theme-toggle {
+                top: 10px;
+                right: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="theme-toggle" onclick="toggleTheme()">
+        <span id="themeIcon">🌙</span>
+        <span id="themeText">Light Mode</span>
+    </div>
+
+    <div class="container">
+        <h1>Gerador de Campanhas - Afiliada</h1>
+
+        <div id="errorAlert" class="alert alert-error" style="display: none;"></div>
+
+        <div class="form-section">
+            <h2>Informações Gerais da Campanha</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="numeroRP" class="required">Número de RP</label>
+                    <input type="text" id="numeroRP" placeholder="Ex: 12345" required>
+                </div>
+                <div class="form-group">
+                    <label for="afiliada" class="required">Afiliada</label>
+                    <input type="text" id="afiliada" placeholder="Nome da afiliada" required>
+                </div>
+                <div class="form-group">
+                    <label for="orderID" class="required">Order ID</label>
+                    <input type="text" id="orderID" placeholder="Ex: 67890" required>
+                </div>
+                <div class="form-group">
+                    <label for="cliente" class="required">Cliente</label>
+                    <input type="text" id="cliente" placeholder="Nome do anunciante" required>
+                </div>
+                <div class="form-group">
+                    <label for="agencia">Agência / Direto</label>
+                    <input type="text" id="agencia" placeholder="Deixe vazio para usar 'Direto'">
+                </div>
+                <div class="form-group">
+                    <label for="mes" class="required">Mês</label>
+                    <select id="mes" required>
+                        <option value="">Selecione...</option>
+                        <option value="Janeiro">Janeiro</option>
+                        <option value="Fevereiro">Fevereiro</option>
+                        <option value="Março">Março</option>
+                        <option value="Abril">Abril</option>
+                        <option value="Maio">Maio</option>
+                        <option value="Junho">Junho</option>
+                        <option value="Julho">Julho</option>
+                        <option value="Agosto">Agosto</option>
+                        <option value="Setembro">Setembro</option>
+                        <option value="Outubro">Outubro</option>
+                        <option value="Novembro">Novembro</option>
+                        <option value="Dezembro">Dezembro</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="ano" class="required">Ano</label>
+                    <input type="text" id="ano" placeholder="Ex: 2025" maxlength="4" required>
+                </div>
+            </div>
+            <div class="generated-name-display">
+                <label>Nome da Campanha Gerado:</label>
+                <div class="name-value" id="campaignNamePreview">Preencha os campos acima</div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>Linhas de Item</h2>
+            <div id="lineItemsContainer"></div>
+            <button class="btn btn-primary" onclick="addLineItem()">Adicionar Nova Linha</button>
+        </div>
+
+        <button class="btn btn-success" onclick="generateExcel()">Gerar Arquivo Excel</button>
+    </div>
+
+    <script>
+        let lineItemCount = 0;
+
+        // ID Mappings
+        const idadeMappings = {
+            '18-20': '141615',
+            '21-24': '141617',
+            '25-29': '141619',
+            '30-34': '141622',
+            '35-39': '141623',
+            '40-44': '141624',
+            '45-49': '141625',
+            '50-54': '141626',
+            '55-59': '141627',
+            '60-64': '141628',
+            '65-69': '141629',
+            '70-74': '141630',
+            '75+': '141631'
+        };
+
+        const generoMappings = {
+            'Masculino': '124596',
+            'Feminino': '124605'
+        };
+
+        const potencialConsumoMappings = {
+            'Alto Potencial': '127837',
+            'Baixo Potencial': '127835'
+        };
+
+        const fieldDefinitions = [
+            {
+                key: "Acao",
+                label: "Ação",
+                type: "single-select",
+                options: ["Nova Linha", "Mudança de período", "Alteração de peça", "Pausar", "Reativar", "Alteração de volume", "Alteração de página", "Outro"]
+            },
+            {
+                key: "Propriedade",
+                label: "Propriedade",
+                type: "single-select",
+                options: ["Midia Avulsa", "Midia de Apoio", "Midia de Divulgação"]
+            },
+            {
+                key: "Formatos",
+                label: "Formatos",
+                type: "multi-select",
+                options: ["970x250", "300x250", "300x600", "970x150", "970x90", "320x50", "320x100", "TVG - ESP PUB", "Carousel", "Carousel Vídeo", "TVG - Chamada Vídeo Ad", "TVG - Chamada Foto Ad", "TVG - Native Video Ad", "1280x720v", "320x480", "TVG - Banner Vídeo Template - Billboard (970x250)", "TVG - Banner Vídeo Template - Retângulo Médo (300x250)", "TVG - Banner Vídeo Template - Meia Página (300x600)"]
+            },
+            {
+                key: "Posicao",
+                label: "Posição",
+                type: "multi-select",
+                options: ["HOME_FIM", "HOME2_M", "HOME3", "HOME3_M", "HOME1", "HOME_FEED", "MATERIA2_M", "MATERIA1", "MATERIA1_M", "MATERIA_TOPO", "HOME4_M", "MATERIA_TOPO_M", "FEED_M", "FEED", "HOME4", "MATERIA2", "HOME1_M", "MATERIA_M", "MATERIA", "HOME2"]
+            },
+            {
+                key: "DataInicio",
+                label: "Data de início",
+                type: "date"
+            },
+            {
+                key: "DataFim",
+                label: "Data fim",
+                type: "date"
+            },
+            {
+                key: "EntregaDeterminada",
+                label: "Entrega Determinada",
+                type: "number"
+            },
+            {
+                key: "ValorUnitario",
+                label: "Valor Unitário",
+                type: "currency"
+            },
+            {
+                key: "TotalTabela",
+                label: "Total Tabela (R$)",
+                type: "calculated",
+                readonly: true
+            },
+            {
+                key: "Desconto",
+                label: "Desconto (%)",
+                type: "decimal"
+            },
+            {
+                key: "TotalNegociado",
+                label: "Total Negociado (R$)",
+                type: "calculated",
+                readonly: true
+            },
+            {
+                key: "Site",
+                label: "Site",
+                type: "multi-select",
+                options: ["G1", "GE", "GSHOW", "REDEGLOBO", "RECEITAS", "CARTOLA", "GLOBOPLAY", "DAI"]
+            },
+            {
+                key: "EditorialPrograma",
+                label: "Editoria / Programa",
+                type: "text"
+            },
+            {
+                key: "Geolocalizacao",
+                label: "Geolocalização",
+                type: "multi-select",
+                options: ["AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO"]
+            },
+            {
+                key: "CasoUnder",
+                label: "Caso Under, programar o disponível?",
+                type: "single-select",
+                options: ["Sim", "Não"]
+            },
+            {
+                key: "Preset",
+                label: "Preset",
+                type: "text"
+            },
+            {
+                key: "Idade",
+                label: "Idade",
+                type: "multi-select-mapped",
+                options: ["18-20", "21-24", "25-29", "30-34", "35-39", "40-44", "45-49", "50-54", "55-59", "60-64", "65-69", "70-74", "75+"],
+                mapping: idadeMappings
+            },
+            {
+                key: "Genero",
+                label: "Gênero",
+                type: "multi-select-mapped",
+                options: ["Masculino", "Feminino"],
+                mapping: generoMappings
+            },
+            {
+                key: "PotencialConsumo",
+                label: "Potencial de Consumo",
+                type: "multi-select-mapped",
+                options: ["Alto Potencial", "Baixo Potencial"],
+                mapping: potencialConsumoMappings
+            },
+            {
+                key: "Interesse",
+                label: "Interesse",
+                type: "text"
+            },
+            {
+                key: "Observacoes",
+                label: "Observações",
+                type: "textarea"
+            }
+        ];
+
+        // Theme toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+
+            html.setAttribute('data-theme', newTheme);
+
+            const themeIcon = document.getElementById('themeIcon');
+            const themeText = document.getElementById('themeText');
+
+            if (newTheme === 'light') {
+                themeIcon.textContent = '☀️';
+                themeText.textContent = 'Dark Mode';
+            } else {
+                themeIcon.textContent = '🌙';
+                themeText.textContent = 'Light Mode';
+            }
+
+            localStorage.setItem('theme', newTheme);
+        }
+
+        // Load saved theme
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            if (savedTheme === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+                document.getElementById('themeIcon').textContent = '☀️';
+                document.getElementById('themeText').textContent = 'Dark Mode';
+            }
+            addLineItem();
+        });
+
+        // Multi-select functionality
+        function selectAll(fieldId, lineNumber) {
+            const container = document.getElementById(`${fieldId}_container`);
+            const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(cb => cb.checked = true);
+            updateMultiSelectDisplay(fieldId, lineNumber);
+        }
+
+        function clearAll(fieldId, lineNumber) {
+            const container = document.getElementById(`${fieldId}_container`);
+            const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(cb => cb.checked = false);
+            updateMultiSelectDisplay(fieldId, lineNumber);
+        }
+
+        function createMultiSelect(fieldId, options, lineNumber) {
+            const container = document.getElementById(`${fieldId}_container`);
+            const display = container.querySelector('.multi-select-display');
+            const dropdown = container.querySelector('.multi-select-dropdown');
+
+            // Toggle dropdown
+            display.addEventListener('click', (e) => {
+                // Don't toggle if clicking on a tag remove button
+                if (e.target.classList.contains('multi-select-tag-remove')) {
+                    return;
+                }
+
+                e.stopPropagation();
+                const wasActive = dropdown.classList.contains('active');
+
+                // Close all other dropdowns
+                document.querySelectorAll('.multi-select-dropdown.active').forEach(d => {
+                    d.classList.remove('active');
+                    d.parentElement.querySelector('.multi-select-display').classList.remove('active');
+                });
+
+                if (!wasActive) {
+                    dropdown.classList.add('active');
+                    display.classList.add('active');
+                }
+            });
+
+            // Handle option selection - DON'T close dropdown
+            dropdown.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', (e) => {
+                    e.stopPropagation();
+                    updateMultiSelectDisplay(fieldId, lineNumber);
+                });
+            });
+
+            // Prevent dropdown from closing when clicking inside it
+            dropdown.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+        }
+
+        function updateMultiSelectDisplay(fieldId, lineNumber) {
+            const container = document.getElementById(`${fieldId}_container`);
+            const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+            const tagsContainer = container.querySelector('.multi-select-tags');
+            const placeholder = container.querySelector('.multi-select-placeholder');
+
+            const selected = Array.from(checkboxes).filter(cb => cb.checked);
+
+            if (selected.length > 0) {
+                placeholder.style.display = 'none';
+                tagsContainer.innerHTML = '';
+                selected.forEach(cb => {
+                    const tag = document.createElement('span');
+                    tag.className = 'multi-select-tag';
+
+                    const text = document.createElement('span');
+                    text.textContent = cb.value;
+
+                    const removeBtn = document.createElement('span');
+                    removeBtn.className = 'multi-select-tag-remove';
+                    removeBtn.textContent = '×';
+                    removeBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        cb.checked = false;
+                        updateMultiSelectDisplay(fieldId, lineNumber);
+                    };
+
+                    tag.appendChild(text);
+                    tag.appendChild(removeBtn);
+                    tagsContainer.appendChild(tag);
+                });
+            } else {
+                placeholder.style.display = 'block';
+                tagsContainer.innerHTML = '';
+            }
+
+            updateLineName(lineNumber);
+            calculateTotals(lineNumber);
+        }
+
+        function getMultiSelectValues(fieldId) {
+            const container = document.getElementById(`${fieldId}_container`);
+            if (!container) return [];
+            const checkboxes = container.querySelectorAll('input[type="checkbox"]:checked');
+            return Array.from(checkboxes).map(cb => cb.value);
+        }
+
+        function getMultiSelectMappedValues(fieldId, mapping) {
+            const values = getMultiSelectValues(fieldId);
+            return values.map(val => mapping[val]).filter(id => id);
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.multi-select-container')) {
+                document.querySelectorAll('.multi-select-dropdown.active').forEach(d => {
+                    d.classList.remove('active');
+                    d.parentElement.querySelector('.multi-select-display').classList.remove('active');
+                });
+            }
+        });
+
+        // Update campaign name preview
+        function updateCampaignName() {
+            const rp = document.getElementById('numeroRP').value;
+            const afiliada = document.getElementById('afiliada').value;
+            const orderID = document.getElementById('orderID').value;
+            const cliente = document.getElementById('cliente').value;
+            const agenciaValue = document.getElementById('agencia').value;
+            const agencia = agenciaValue || 'Direto'; // Se vazio, usa "Direto"
+            const mes = document.getElementById('mes').value;
+            const ano = document.getElementById('ano').value;
+
+            let mesAno = '';
+            if (mes && ano) {
+                const monthNames = {
+                    'Janeiro': 'Jan',
+                    'Fevereiro': 'Fev',
+                    'Março': 'Mar',
+                    'Abril': 'Abr',
+                    'Maio': 'Mai',
+                    'Junho': 'Jun',
+                    'Julho': 'Jul',
+                    'Agosto': 'Ago',
+                    'Setembro': 'Set',
+                    'Outubro': 'Out',
+                    'Novembro': 'Nov',
+                    'Dezembro': 'Dez'
+                };
+                mesAno = monthNames[mes] + ano.substr(-2);
+            }
+
+            // Ordem: RP, Afiliada, Order ID, Cliente, Agencia, Mes, Ano
+            const parts = [rp, afiliada, orderID, cliente, agencia, mesAno].filter(p => p);
+            const name = parts.length > 0 ? parts.join('_') + '_TVGLOBO' : 'Preencha os campos acima';
+
+            document.getElementById('campaignNamePreview').textContent = name;
+        }
+
+        // Add event listeners to general info fields
+        ['numeroRP', 'afiliada', 'orderID', 'cliente', 'agencia', 'mes', 'ano'].forEach(id => {
+            document.getElementById(id).addEventListener('input', updateCampaignName);
+            document.getElementById(id).addEventListener('change', updateCampaignName);
+        });
+
+        // Validate only numbers
+        document.getElementById('numeroRP').addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+
+        document.getElementById('orderID').addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+
+        document.getElementById('ano').addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+
+        function calculateTotals(lineNumber) {
+            const valorUnitario = parseFloat(document.getElementById(`ValorUnitario_${lineNumber}`).value.replace(/[^0-9,]/g, '').replace(',', '.')) || 0;
+            const entregaDeterminada = parseFloat(document.getElementById(`EntregaDeterminada_${lineNumber}`).value.replace(/[^0-9]/g, '')) || 0;
+            const desconto = parseFloat(document.getElementById(`Desconto_${lineNumber}`).value.replace(/[^0-9,]/g, '').replace(',', '.')) || 0;
+
+            const totalTabela = valorUnitario * (entregaDeterminada / 1000);
+            const totalNegociado = totalTabela - (totalTabela * desconto / 100);
+
+            document.getElementById(`TotalTabela_${lineNumber}`).value = 'R$ ' + totalTabela.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            document.getElementById(`TotalNegociado_${lineNumber}`).value = 'R$ ' + totalNegociado.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function generateLineName(lineNumber) {
+            const propriedade = document.getElementById(`Propriedade_${lineNumber}`).value;
+            const formatos = getMultiSelectValues(`Formatos_${lineNumber}`);
+            const sites = getMultiSelectValues(`Site_${lineNumber}`);
+            const geos = getMultiSelectValues(`Geolocalizacao_${lineNumber}`);
+            const dataInicio = document.getElementById(`DataInicio_${lineNumber}`).value;
+            const dataFim = document.getElementById(`DataFim_${lineNumber}`).value;
+
+            let parts = [];
+
+            // Propriedade abbreviation with parentheses
+            if (propriedade === 'Midia Avulsa') parts.push('(MAVULSA)');
+            else if (propriedade === 'Midia de Apoio') parts.push('(MAPOIO)');
+            else if (propriedade === 'Midia de Divulgação') parts.push('(MD)');
+            else if (propriedade) parts.push('(' + propriedade + ')');
+
+            // Formatos
+            if (formatos.length > 3) {
+                parts.push('Diversos');
+            } else if (formatos.length > 0) {
+                parts.push(formatos.join('+'));
+            }
+
+            // Sites
+            if (sites.length > 0) {
+                parts.push(sites.join('+'));
+            }
+
+            // Geolocalização
+            if (geos.length > 0) {
+                parts.push(geos.join('+'));
+            }
+
+            // Dates
+            if (dataInicio) {
+                const date = new Date(dataInicio);
+                const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+                parts.push(monthNames[date.getMonth()] + date.getFullYear().toString().substr(-2));
+            }
+
+            if (dataFim) {
+                const date = new Date(dataFim);
+                const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+                parts.push(monthNames[date.getMonth()] + date.getFullYear().toString().substr(-2));
+            }
+
+            // Line number
+            parts.push(lineNumber);
+
+            return parts.filter(p => p).join('_');
+        }
+
+        function updateLineName(lineNumber) {
+            const lineName = generateLineName(lineNumber);
+            document.getElementById(`lineName_${lineNumber}`).textContent = lineName || 'Preencha os campos para gerar o nome';
+        }
+
+        function addLineItem() {
+            lineItemCount++;
+            const container = document.getElementById('lineItemsContainer');
+
+            const lineDiv = document.createElement('div');
+            lineDiv.className = 'line-item';
+            lineDiv.id = `lineItem_${lineItemCount}`;
+
+            let html = `
+                <div class="line-header">
+                    <span class="line-number">Linha ${lineItemCount}</span>
+                    <span class="line-name" id="lineName_${lineItemCount}">Preencha os campos para gerar o nome</span>
+                    <button class="btn btn-danger" onclick="removeLineItem(${lineItemCount})">Remover</button>
+                </div>
+                <div class="form-grid">
+            `;
+
+            fieldDefinitions.forEach(field => {
+                const fieldId = `${field.key}_${lineItemCount}`;
+
+                html += `<div class="form-group">`;
+                html += `<label for="${fieldId}">${field.label}</label>`;
+
+                if (field.type === 'single-select') {
+                    html += `<select id="${fieldId}" onchange="updateLineName(${lineItemCount})">`;
+                    html += `<option value="">Selecione...</option>`;
+                    field.options.forEach(opt => {
+                        html += `<option value="${opt}">${opt}</option>`;
+                    });
+                    html += `</select>`;
+                } else if (field.type === 'multi-select' || field.type === 'multi-select-mapped') {
+                    html += `<div class="multi-select-container" id="${fieldId}_container">`;
+                    html += `<div class="multi-select-display">`;
+                    html += `<span class="multi-select-placeholder">Selecione...</span>`;
+                    html += `<div class="multi-select-tags"></div>`;
+                    html += `</div>`;
+                    html += `<div class="multi-select-dropdown">`;
+                    html += `<div class="multi-select-actions">`;
+                    html += `<button class="multi-select-action-btn" onclick="selectAll('${fieldId}', ${lineItemCount}); event.stopPropagation();">Selecionar Todos</button>`;
+                    html += `<button class="multi-select-action-btn clear" onclick="clearAll('${fieldId}', ${lineItemCount}); event.stopPropagation();">Desmarcar Todos</button>`;
+                    html += `</div>`;
+                    field.options.forEach(opt => {
+                        html += `<div class="multi-select-option">`;
+                        html += `<input type="checkbox" value="${opt}" id="${fieldId}_${opt.replace(/[^a-zA-Z0-9]/g, '_')}">`;
+                        html += `<label for="${fieldId}_${opt.replace(/[^a-zA-Z0-9]/g, '_')}">${opt}</label>`;
+                        html += `</div>`;
+                    });
+                    html += `</div>`;
+                    html += `</div>`;
+                } else if (field.type === 'date') {
+                    html += `<input type="date" id="${fieldId}" onchange="updateLineName(${lineItemCount})">`;
+                } else if (field.type === 'number') {
+                    html += `<input type="text" id="${fieldId}" oninput="this.value=this.value.replace(/[^0-9]/g,''); calculateTotals(${lineItemCount})">`;
+                } else if (field.type === 'currency') {
+                    html += `<input type="text" id="${fieldId}" placeholder="R$ 0,00" oninput="calculateTotals(${lineItemCount})">`;
+                } else if (field.type === 'decimal') {
+                    html += `<input type="text" id="${fieldId}" placeholder="0,00" oninput="calculateTotals(${lineItemCount})">`;
+                } else if (field.type === 'calculated') {
+                    html += `<input type="text" id="${fieldId}" readonly>`;
+                } else if (field.type === 'textarea') {
+                    html += `<textarea id="${fieldId}"></textarea>`;
+                } else {
+                    html += `<input type="text" id="${fieldId}">`;
+                }
+
+                html += `</div>`;
+            });
+
+            html += `</div>`;
+            lineDiv.innerHTML = html;
+            container.appendChild(lineDiv);
+
+            // Initialize multi-select dropdowns
+            fieldDefinitions.forEach(field => {
+                if (field.type === 'multi-select' || field.type === 'multi-select-mapped') {
+                    const fieldId = `${field.key}_${lineItemCount}`;
+                    createMultiSelect(fieldId, field.options, lineItemCount);
+                }
+            });
+
+            // Scroll to the new item
+            lineDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function removeLineItem(lineNumber) {
+            const lineItem = document.getElementById(`lineItem_${lineNumber}`);
+            if (lineItem) {
+                lineItem.remove();
+            }
+        }
+
+        function validateGeneralInfo() {
+            const numeroRP = document.getElementById('numeroRP').value;
+            const afiliada = document.getElementById('afiliada').value;
+            const orderID = document.getElementById('orderID').value;
+            const cliente = document.getElementById('cliente').value;
+            const mes = document.getElementById('mes').value;
+            const ano = document.getElementById('ano').value;
+
+            if (!numeroRP) {
+                return 'O campo "Número de RP" é obrigatório.';
+            }
+
+            if (!afiliada) {
+                return 'O campo "Afiliada" é obrigatório.';
+            }
+
+            if (!orderID) {
+                return 'O campo "Order ID" é obrigatório.';
+            }
+
+            if (!cliente) {
+                return 'O campo "Cliente" é obrigatório.';
+            }
+
+            if (!mes) {
+                return 'O campo "Mês" é obrigatório.';
+            }
+
+            if (!ano) {
+                return 'O campo "Ano" é obrigatório.';
+            }
+
+            if (ano.length !== 4) {
+                return 'O campo "Ano" deve conter 4 dígitos.';
+            }
+
+            return null;
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorAlert');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            errorDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function generateExcel() {
+            const error = validateGeneralInfo();
+            if (error) {
+                showError(error);
+                return;
+            }
+
+            const campaignName = document.getElementById('campaignNamePreview').textContent;
+
+            // Prepare data for Excel in two columns format
+            const excelData = [];
+
+            // Add campaign name at the top
+            excelData.push(['Nome da Campanha', campaignName]);
+            excelData.push(['', '']); // Empty row
+
+            // Add general info
+            excelData.push(['INFORMAÇÕES GERAIS', '']);
+            excelData.push(['Número de RP', document.getElementById('numeroRP').value]);
+            excelData.push(['Afiliada', document.getElementById('afiliada').value]);
+            excelData.push(['Order ID', document.getElementById('orderID').value]);
+            excelData.push(['Cliente', document.getElementById('cliente').value]);
+            excelData.push(['Agência / Direto', document.getElementById('agencia').value || 'Direto']);
+            excelData.push(['Mês', document.getElementById('mes').value]);
+            excelData.push(['Ano', document.getElementById('ano').value]);
+            excelData.push(['', '']); // Empty row
+
+            // Add line items
+            const lineItemElements = document.querySelectorAll('.line-item');
+
+            lineItemElements.forEach((lineElement, index) => {
+                const lineNumber = lineElement.id.split('_')[1];
+
+                excelData.push([`LINHA ${lineNumber}`, '']);
+                excelData.push(['Nome da Linha', document.getElementById(`lineName_${lineNumber}`).textContent]);
+
+                fieldDefinitions.forEach(field => {
+                    let value = '';
+
+                    if (field.type === 'multi-select-mapped') {
+                        const ids = getMultiSelectMappedValues(`${field.key}_${lineNumber}`, field.mapping);
+                        value = ids.join(', ');
+                    } else if (field.type === 'multi-select') {
+                        const selected = getMultiSelectValues(`${field.key}_${lineNumber}`);
+                        value = selected.join(', ');
+                    } else {
+                        const fieldElement = document.getElementById(`${field.key}_${lineNumber}`);
+                        if (fieldElement) {
+                            value = fieldElement.value;
+                        }
+                    }
+
+                    excelData.push([field.label, value]);
+                });
+
+                excelData.push(['', '']); // Empty row between lines
+            });
+
+            // Create workbook
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(excelData);
+
+            // Set column widths
+            ws['!cols'] = [
+                { wch: 30 },
+                { wch: 80 }
+            ];
+
+            XLSX.utils.book_append_sheet(wb, ws, 'Campanha');
+
+            // Generate filename
+            const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+            const filename = `Campanha_${campaignName.substring(0, 30).replace(/[^a-zA-Z0-9]/g, '_')}_${timestamp}.xlsx`;
+
+            // Save file
+            XLSX.writeFile(wb, filename);
+        }
+    </script>
+</body>
+</html>
