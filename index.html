@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Ferramentas de Tráfego - Globo">
+    <title>Geradores - Ferramentas de Tráfego</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+            color: white;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-icon {
+            height: 180px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+        }
+
+        .card-body {
+            padding: 25px;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #2d3748;
+        }
+
+        .card-description {
+            font-size: 0.95rem;
+            color: #718096;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .card-tag {
+            display: inline-block;
+            background: #edf2f7;
+            color: #667eea;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2rem;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🛠️ Ferramentas de Tráfego</h1>
+            <p>Gerencie campanhas e valide configurações com eficiência</p>
+        </header>
+
+        <div class="grid">
+            <!-- Visualizador de Dimensões -->
+            <a href="https://globotrafego.github.io/Geradores/VisualizadorDimensoes.html" class="card">
+                <div class="card-icon">📐</div>
+                <div class="card-body">
+                    <h2 class="card-title">Visualizador de Dimensões</h2>
+                    <p class="card-description">
+                        Visualize e valide dimensões de criativos para campanhas de display. 
+                        Ferramenta essencial para conferir tamanhos e formatos de anúncios.
+                    </p>
+                    <span class="card-tag">Display</span>
+                    <span class="card-tag">Validação</span>
+                </div>
+            </a>
+
+            <!-- Validador de Touchpoint -->
+            <a href="https://globotrafego.github.io/Geradores/ValidadorTouchpoint.html" class="card">
+                <div class="card-icon">✓</div>
+                <div class="card-body">
+                    <h2 class="card-title">Validador de Touchpoint</h2>
+                    <p class="card-description">
+                        Valide configurações de touchpoints e garanta que todas as especificações 
+                        estejam corretas antes do agendamento em GAM.
+                    </p>
+                    <span class="card-tag">GAM</span>
+                    <span class="card-tag">Validação</span>
+                </div>
+            </a>
+
+            <!-- Afiliadas -->
+            <a href="https://globotrafego.github.io/Geradores/Afiliadas.html" class="card">
+                <div class="card-icon">🏢</div>
+                <div class="card-body">
+                    <h2 class="card-title">Afiliadas</h2>
+                    <p class="card-description">
+                        Gerencie informações de afiliadas e configure campanhas com dados 
+                        padronizados seguindo o padrão RP estabelecido.
+                    </p>
+                    <span class="card-tag">Gestão</span>
+                    <span class="card-tag">Configuração</span>
+                </div>
+            </a>
+
+            <!-- Especificações -->
+            <a href="https://globotrafego.github.io/Geradores/Especificacoes.html" class="card">
+                <div class="card-icon">📋</div>
+                <div class="card-body">
+                    <h2 class="card-title">Especificações</h2>
+                    <p class="card-description">
+                        Acesse e consulte especificações técnicas de campanhas, formatos de anúncios 
+                        e requisitos para programação em GAM e Triton.
+                    </p>
+                    <span class="card-tag">Documentação</span>
+                    <span class="card-tag">Referência</span>
+                </div>
+            </a>
+        </div>
+    </div>
+</body>
+</html>
