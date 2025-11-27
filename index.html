@@ -17,7 +17,6 @@
             --shadow: rgba(0, 0, 0, 0.08);
             --shadow-hover: rgba(0, 0, 0, 0.16);
             --accent: #6366f1;
-            --accent-hover: #4f46e5;
             --tag-bg: #edf2f7;
             --tag-text: #4f46e5;
         }
@@ -33,7 +32,6 @@
             --shadow: rgba(15, 23, 42, 0.8);
             --shadow-hover: rgba(15, 23, 42, 0.95);
             --accent: #6366f1;
-            --accent-hover: #4f46e5;
             --tag-bg: #111827;
             --tag-text: #a5b4fc;
         }
@@ -60,7 +58,6 @@
 
         header {
             margin-bottom: 40px;
-            position: relative;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -154,6 +151,8 @@
             display: flex;
             flex-direction: column;
             transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+            text-decoration: none;
+            color: inherit;
         }
 
         :root[data-theme="light"] .card {
@@ -169,46 +168,183 @@
         .card-preview-wrapper {
             position: relative;
             overflow: hidden;
-            background: #020617;
+            height: 0;
+            padding-bottom: 56.25%; /* 16:9 */
         }
 
-        .card-preview {
-            width: 100%;
-            aspect-ratio: 16 / 9;
-            border: none;
-            display: block;
-            transform: scale(1);
-            transform-origin: top;
-            transition: transform 0.3s ease, opacity 0.3s ease;
-        }
-
-        .card:hover .card-preview {
-            transform: scale(1.02);
-        }
-
-        .card-overlay {
+        .thumb {
             position: absolute;
             inset: 0;
-            background: linear-gradient(to top, rgba(15, 23, 42, 0.9), transparent 55%);
-            pointer-events: none;
         }
 
-        .card-cta {
+        /* Base thumbnail style */
+        .thumb-base {
+            width: 100%;
+            height: 100%;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.4);
+        }
+
+        /* 1) Visualizador de Dimensões: grid / rulers vibe */
+        .thumb-visualizador {
+            background:
+                linear-gradient(90deg, rgba(148, 163, 184, 0.06) 1px, transparent 1px),
+                linear-gradient(180deg, rgba(148, 163, 184, 0.06) 1px, transparent 1px),
+                radial-gradient(circle at 15% 20%, rgba(56, 189, 248, 0.4), transparent 55%),
+                radial-gradient(circle at 80% 70%, rgba(129, 140, 248, 0.45), transparent 55%),
+                linear-gradient(135deg, #020617, #020617 35%, #0f172a 100%);
+            background-size: 22px 22px, 22px 22px, auto, auto, auto;
+            position: relative;
+        }
+
+        .thumb-visualizador::before,
+        .thumb-visualizador::after {
+            content: "";
             position: absolute;
-            right: 14px;
-            bottom: 14px;
-            padding: 6px 10px;
-            border-radius: 999px;
-            background: rgba(15, 23, 42, 0.85);
-            color: #e5e7eb;
-            font-size: 0.75rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
+            border-radius: 12px;
+            border: 1px solid rgba(226, 232, 240, 0.4);
+            background: rgba(15, 23, 42, 0.7);
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.6);
         }
 
-        .card-cta span {
-            font-size: 0.9rem;
+        .thumb-visualizador::before {
+            inset: 18% 16% 34% 10%;
+        }
+
+        .thumb-visualizador::after {
+            inset: 44% 28% 16% 24%;
+        }
+
+        /* 2) Validador de Touchpoint: nodes / connections */
+        .thumb-touchpoint {
+            background:
+                radial-gradient(circle at 15% 25%, rgba(52, 211, 153, 0.35), transparent 55%),
+                radial-gradient(circle at 85% 35%, rgba(96, 165, 250, 0.35), transparent 55%),
+                radial-gradient(circle at 40% 80%, rgba(244, 114, 182, 0.4), transparent 60%),
+                linear-gradient(145deg, #020617, #020617 30%, #111827 100%);
+            position: relative;
+        }
+
+        .thumb-touchpoint::before,
+        .thumb-touchpoint::after {
+            content: "";
+            position: absolute;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.7);
+            box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.15);
+        }
+
+        .thumb-touchpoint::before {
+            width: 18px;
+            height: 18px;
+            left: 20%;
+            top: 30%;
+            background: radial-gradient(circle, #22c55e, #16a34a);
+        }
+
+        .thumb-touchpoint::after {
+            width: 18px;
+            height: 18px;
+            right: 18%;
+            top: 46%;
+            background: radial-gradient(circle, #3b82f6, #1d4ed8);
+        }
+
+        .thumb-touchpoint .link-line {
+            position: absolute;
+            left: 20%;
+            top: 31%;
+            width: 55%;
+            height: 2px;
+            background: linear-gradient(90deg, rgba(148, 163, 184, 0.1), rgba(148, 163, 184, 0.9));
+            transform-origin: left center;
+            transform: rotate(8deg);
+        }
+
+        .thumb-touchpoint .link-line::before,
+        .thumb-touchpoint .link-line::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(circle, rgba(248, 250, 252, 0.9), transparent 60%);
+            background-size: 18px 18px;
+            opacity: 0.35;
+        }
+
+        /* 3) Afiliadas: cards / columns */
+        .thumb-afiliadas {
+            background:
+                linear-gradient(135deg, #020617, #020617 35%, #0b1220 100%),
+                radial-gradient(circle at 0 0, rgba(96, 165, 250, 0.25), transparent 55%);
+            position: relative;
+        }
+
+        .thumb-afiliadas::before,
+        .thumb-afiliadas::after {
+            content: "";
+            position: absolute;
+            border-radius: 14px;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(148, 163, 184, 0.7);
+            box-shadow: 0 18px 35px rgba(15, 23, 42, 0.8);
+        }
+
+        .thumb-afiliadas::before {
+            inset: 18% 52% 20% 8%;
+        }
+
+        .thumb-afiliadas::after {
+            inset: 22% 10% 16% 42%;
+        }
+
+        .thumb-afiliadas .col-line {
+            position: absolute;
+            left: 16%;
+            right: 18%;
+            height: 2px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(148, 163, 184, 0.1), rgba(148, 163, 184, 0.7));
+        }
+
+        .thumb-afiliadas .col-line.l1 { top: 32%; }
+        .thumb-afiliadas .col-line.l2 { top: 41%; width: 60%; }
+        .thumb-afiliadas .col-line.l3 { top: 50%; width: 45%; }
+        .thumb-afiliadas .col-line.l4 { top: 63%; width: 70%; }
+
+        /* 4) Especificações: document / list style */
+        .thumb-especificacoes {
+            background:
+                linear-gradient(120deg, #020617, #020617 30%, #020617 40%, #111827 100%),
+                radial-gradient(circle at 100% 0, rgba(251, 191, 36, 0.25), transparent 60%);
+            position: relative;
+        }
+
+        .thumb-especificacoes::before {
+            content: "";
+            position: absolute;
+            inset: 18% 18% 18% 18%;
+            border-radius: 16px;
+            background:
+                linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.9)),
+                repeating-linear-gradient(
+                    to bottom,
+                    rgba(55, 65, 81, 0.9) 0,
+                    rgba(55, 65, 81, 0.9) 1px,
+                    transparent 1px,
+                    transparent 9px
+                );
+            border: 1px solid rgba(148, 163, 184, 0.7);
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.9);
+        }
+
+        .thumb-especificacoes::after {
+            content: "";
+            position: absolute;
+            left: 22%;
+            right: 22%;
+            bottom: 24%;
+            height: 3px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #facc15, #fb923c);
         }
 
         .card-body {
@@ -302,17 +438,7 @@
             <!-- Visualizador de Dimensões -->
             <a href="https://globotrafego.github.io/Geradores/VisualizadorDimensoes.html" class="card" target="_blank" rel="noopener">
                 <div class="card-preview-wrapper">
-                    <iframe
-                        class="card-preview"
-                        src="https://globotrafego.github.io/Geradores/VisualizadorDimensoes.html"
-                        loading="lazy"
-                        title="Preview - Visualizador de Dimensões">
-                    </iframe>
-                    <div class="card-overlay"></div>
-                    <div class="card-cta">
-                        <span>Abrir ferramenta</span>
-                        <span>↗</span>
-                    </div>
+                    <div class="thumb thumb-base thumb-visualizador"></div>
                 </div>
                 <div class="card-body">
                     <h2 class="card-title">Visualizador de Dimensões</h2>
@@ -329,16 +455,8 @@
             <!-- Validador de Touchpoint -->
             <a href="https://globotrafego.github.io/Geradores/ValidadorTouchpoint.html" class="card" target="_blank" rel="noopener">
                 <div class="card-preview-wrapper">
-                    <iframe
-                        class="card-preview"
-                        src="https://globotrafego.github.io/Geradores/ValidadorTouchpoint.html"
-                        loading="lazy"
-                        title="Preview - Validador de Touchpoint">
-                    </iframe>
-                    <div class="card-overlay"></div>
-                    <div class="card-cta">
-                        <span>Abrir ferramenta</span>
-                        <span>↗</span>
+                    <div class="thumb thumb-base thumb-touchpoint">
+                        <div class="link-line"></div>
                     </div>
                 </div>
                 <div class="card-body">
@@ -356,16 +474,11 @@
             <!-- Afiliadas -->
             <a href="https://globotrafego.github.io/Geradores/Afiliadas.html" class="card" target="_blank" rel="noopener">
                 <div class="card-preview-wrapper">
-                    <iframe
-                        class="card-preview"
-                        src="https://globotrafego.github.io/Geradores/Afiliadas.html"
-                        loading="lazy"
-                        title="Preview - Afiliadas">
-                    </iframe>
-                    <div class="card-overlay"></div>
-                    <div class="card-cta">
-                        <span>Abrir ferramenta</span>
-                        <span>↗</span>
+                    <div class="thumb thumb-base thumb-afiliadas">
+                        <div class="col-line l1"></div>
+                        <div class="col-line l2"></div>
+                        <div class="col-line l3"></div>
+                        <div class="col-line l4"></div>
                     </div>
                 </div>
                 <div class="card-body">
@@ -383,17 +496,7 @@
             <!-- Especificações -->
             <a href="https://globotrafego.github.io/Geradores/Especificacoes.html" class="card" target="_blank" rel="noopener">
                 <div class="card-preview-wrapper">
-                    <iframe
-                        class="card-preview"
-                        src="https://globotrafego.github.io/Geradores/Especificacoes.html"
-                        loading="lazy"
-                        title="Preview - Especificações">
-                    </iframe>
-                    <div class="card-overlay"></div>
-                    <div class="card-cta">
-                        <span>Abrir ferramenta</span>
-                        <span>↗</span>
-                    </div>
+                    <div class="thumb thumb-base thumb-especificacoes"></div>
                 </div>
                 <div class="card-body">
                     <h2 class="card-title">Especificações</h2>
@@ -413,7 +516,6 @@
         const html = document.documentElement;
         const toggle = document.querySelector('.theme-toggle');
 
-        // Load saved preference or default to dark
         const savedTheme = localStorage.getItem('theme') || 'dark';
         html.setAttribute('data-theme', savedTheme);
         toggle.dataset.mode = savedTheme;
