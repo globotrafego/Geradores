@@ -14,29 +14,27 @@
             --text-secondary: #4a5568;
             --text-tertiary: #718096;
             --border-color: #e2e8f0;
-            --shadow: rgba(0, 0, 0, 0.1);
-            --shadow-hover: rgba(0, 0, 0, 0.15);
-            --accent: #667eea;
-            --accent-hover: #5a67d8;
-            --card-icon-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --shadow: rgba(0, 0, 0, 0.08);
+            --shadow-hover: rgba(0, 0, 0, 0.16);
+            --accent: #6366f1;
+            --accent-hover: #4f46e5;
             --tag-bg: #edf2f7;
-            --tag-text: #667eea;
+            --tag-text: #4f46e5;
         }
 
         :root[data-theme="dark"] {
-            --bg-primary: #0f1419;
-            --bg-secondary: #1a1f2e;
-            --bg-card: #1e2433;
-            --text-primary: #e4e6eb;
-            --text-secondary: #b0b8c1;
-            --text-tertiary: #8b92a0;
-            --border-color: #2d3548;
-            --shadow: rgba(0, 0, 0, 0.3);
-            --shadow-hover: rgba(0, 0, 0, 0.5);
-            --accent: #818cf8;
-            --accent-hover: #6366f1;
-            --card-icon-bg: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            --tag-bg: #2d3548;
+            --bg-primary: #050814;
+            --bg-secondary: #0f172a;
+            --bg-card: #020617;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --text-tertiary: #6b7280;
+            --border-color: #1f2937;
+            --shadow: rgba(15, 23, 42, 0.8);
+            --shadow-hover: rgba(15, 23, 42, 0.95);
+            --accent: #6366f1;
+            --accent-hover: #4f46e5;
+            --tag-bg: #111827;
             --tag-text: #a5b4fc;
         }
 
@@ -48,11 +46,11 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: var(--bg-primary);
+            background: radial-gradient(circle at top, var(--bg-secondary) 0, var(--bg-primary) 45%, #000 100%);
             color: var(--text-primary);
             min-height: 100vh;
             padding: 40px 20px;
-            transition: background-color 0.3s ease, color 0.3s ease;
+            transition: background 0.4s ease, color 0.3s ease;
         }
 
         .container {
@@ -61,132 +59,216 @@
         }
 
         header {
-            text-align: center;
-            margin-bottom: 50px;
+            margin-bottom: 40px;
             position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .header-text {
+            flex: 1;
         }
 
         header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
+            font-size: 2.3rem;
+            margin-bottom: 6px;
             font-weight: 700;
             color: var(--text-primary);
+            letter-spacing: 0.02em;
         }
 
         header p {
-            font-size: 1.1rem;
+            font-size: 0.98rem;
             color: var(--text-secondary);
         }
 
         /* Theme Toggle */
         .theme-toggle {
-            position: absolute;
-            top: 0;
-            right: 0;
-            background: var(--bg-card);
-            border: 2px solid var(--border-color);
-            border-radius: 30px;
-            padding: 8px;
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: 999px;
+            border: 1px solid var(--border-color);
+            padding: 4px;
+            display: inline-flex;
+            gap: 4px;
+            align-items: center;
+            position: relative;
             cursor: pointer;
+            overflow: hidden;
+        }
+
+        .toggle-pill {
+            position: absolute;
+            top: 4px;
+            bottom: 4px;
+            width: 50%;
+            border-radius: 999px;
+            background: rgba(99, 102, 241, 0.2);
+            border: 1px solid rgba(129, 140, 248, 0.8);
+            transition: transform 0.25s ease;
+        }
+
+        .theme-toggle[data-mode="light"] .toggle-pill {
+            transform: translateX(0%);
+        }
+
+        .theme-toggle[data-mode="dark"] .toggle-pill {
+            transform: translateX(100%);
+        }
+
+        .toggle-option {
+            position: relative;
+            z-index: 1;
+            padding: 6px 10px;
+            border-radius: 999px;
             display: flex;
             align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
+            gap: 6px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
         }
 
-        .theme-toggle:hover {
-            border-color: var(--accent);
+        .toggle-option span.icon {
+            font-size: 1rem;
         }
 
-        .theme-icon {
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            font-size: 1.2rem;
-            transition: all 0.3s ease;
-        }
-
-        .theme-icon.active {
-            background: var(--accent);
+        .theme-toggle[data-mode="light"] .toggle-option.light,
+        .theme-toggle[data-mode="dark"] .toggle-option.dark {
+            color: #e5e7eb;
         }
 
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-top: 40px;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 26px;
+            margin-top: 10px;
         }
 
         .card {
-            background: var(--bg-card);
+            background: rgba(15, 23, 42, 0.9);
             border: 1px solid var(--border-color);
-            border-radius: 16px;
+            border-radius: 18px;
+            box-shadow: 0 16px 40px var(--shadow);
             overflow: hidden;
-            box-shadow: 0 4px 12px var(--shadow);
-            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-            cursor: pointer;
-            text-decoration: none;
-            color: inherit;
-            display: block;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+        }
+
+        :root[data-theme="light"] .card {
+            background: rgba(255, 255, 255, 0.96);
         }
 
         .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 24px var(--shadow-hover);
+            transform: translateY(-4px);
+            box-shadow: 0 24px 60px var(--shadow-hover);
             border-color: var(--accent);
         }
 
-        .card-icon {
-            height: 180px;
-            background: var(--card-icon-bg);
-            display: flex;
+        .card-preview-wrapper {
+            position: relative;
+            overflow: hidden;
+            background: #020617;
+        }
+
+        .card-preview {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            border: none;
+            display: block;
+            transform: scale(1);
+            transform-origin: top;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .card:hover .card-preview {
+            transform: scale(1.02);
+        }
+
+        .card-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(15, 23, 42, 0.9), transparent 55%);
+            pointer-events: none;
+        }
+
+        .card-cta {
+            position: absolute;
+            right: 14px;
+            bottom: 14px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.85);
+            color: #e5e7eb;
+            font-size: 0.75rem;
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
-            font-size: 4rem;
-            transition: background 0.3s ease;
+            gap: 4px;
+        }
+
+        .card-cta span {
+            font-size: 0.9rem;
         }
 
         .card-body {
-            padding: 25px;
+            padding: 18px 20px 20px;
         }
 
         .card-title {
-            font-size: 1.5rem;
+            font-size: 1.15rem;
             font-weight: 600;
-            margin-bottom: 12px;
+            margin-bottom: 6px;
             color: var(--text-primary);
         }
 
         .card-description {
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             color: var(--text-tertiary);
-            line-height: 1.6;
-            margin-bottom: 15px;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        .card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
         }
 
         .card-tag {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
             background: var(--tag-bg);
             color: var(--tag-text);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            margin-right: 8px;
-            margin-bottom: 8px;
+            padding: 3px 9px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+        }
+
+        .card-tag-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent);
         }
 
         @media (max-width: 768px) {
+            body {
+                padding: 24px 16px;
+            }
+
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
             header h1 {
-                font-size: 2rem;
+                font-size: 1.8rem;
             }
 
             .theme-toggle {
-                position: relative;
-                margin: 20px auto;
+                align-self: flex-end;
             }
 
             .grid {
@@ -198,103 +280,151 @@
 <body>
     <div class="container">
         <header>
-            <button class="theme-toggle" aria-label="Alternar tema">
-                <span class="theme-icon sun-icon">☀️</span>
-                <span class="theme-icon moon-icon active">🌙</span>
+            <div class="header-text">
+                <h1>Ferramentas de Tráfego</h1>
+                <p>Pré-visualize e acesse rapidamente os utilitários que você usa no dia a dia.</p>
+            </div>
+
+            <button class="theme-toggle" type="button" aria-label="Alternar tema" data-mode="dark">
+                <div class="toggle-pill"></div>
+                <div class="toggle-option light">
+                    <span class="icon">☀️</span>
+                    <span>Claro</span>
+                </div>
+                <div class="toggle-option dark">
+                    <span class="icon">🌙</span>
+                    <span>Escuro</span>
+                </div>
             </button>
-            <h1>🛠️ Ferramentas de Tráfego</h1>
-            <p>Gerencie campanhas e valide configurações com eficiência</p>
         </header>
 
         <div class="grid">
             <!-- Visualizador de Dimensões -->
-            <a href="https://globotrafego.github.io/Geradores/VisualizadorDimensoes.html" class="card">
-                <div class="card-icon">📐</div>
+            <a href="https://globotrafego.github.io/Geradores/VisualizadorDimensoes.html" class="card" target="_blank" rel="noopener">
+                <div class="card-preview-wrapper">
+                    <iframe
+                        class="card-preview"
+                        src="https://globotrafego.github.io/Geradores/VisualizadorDimensoes.html"
+                        loading="lazy"
+                        title="Preview - Visualizador de Dimensões">
+                    </iframe>
+                    <div class="card-overlay"></div>
+                    <div class="card-cta">
+                        <span>Abrir ferramenta</span>
+                        <span>↗</span>
+                    </div>
+                </div>
                 <div class="card-body">
                     <h2 class="card-title">Visualizador de Dimensões</h2>
                     <p class="card-description">
-                        Visualize e valide dimensões de criativos para campanhas de display. 
-                        Ferramenta essencial para conferir tamanhos e formatos de anúncios.
+                        Visualize rapidamente o layout e a responsividade dos criativos antes de subir para o ad server.
                     </p>
-                    <span class="card-tag">Display</span>
-                    <span class="card-tag">Validação</span>
+                    <div class="card-tags">
+                        <span class="card-tag"><span class="card-tag-dot"></span>Display</span>
+                        <span class="card-tag"><span class="card-tag-dot"></span>QA</span>
+                    </div>
                 </div>
             </a>
 
             <!-- Validador de Touchpoint -->
-            <a href="https://globotrafego.github.io/Geradores/ValidadorTouchpoint.html" class="card">
-                <div class="card-icon">✓</div>
+            <a href="https://globotrafego.github.io/Geradores/ValidadorTouchpoint.html" class="card" target="_blank" rel="noopener">
+                <div class="card-preview-wrapper">
+                    <iframe
+                        class="card-preview"
+                        src="https://globotrafego.github.io/Geradores/ValidadorTouchpoint.html"
+                        loading="lazy"
+                        title="Preview - Validador de Touchpoint">
+                    </iframe>
+                    <div class="card-overlay"></div>
+                    <div class="card-cta">
+                        <span>Abrir ferramenta</span>
+                        <span>↗</span>
+                    </div>
+                </div>
                 <div class="card-body">
                     <h2 class="card-title">Validador de Touchpoint</h2>
                     <p class="card-description">
-                        Valide configurações de touchpoints e garanta que todas as especificações 
-                        estejam corretas antes do agendamento em GAM.
+                        Confira se IDs, posicionamentos e parâmetros de touchpoints estão prontos para serem ativados.
                     </p>
-                    <span class="card-tag">GAM</span>
-                    <span class="card-tag">Validação</span>
+                    <div class="card-tags">
+                        <span class="card-tag"><span class="card-tag-dot"></span>GAM</span>
+                        <span class="card-tag"><span class="card-tag-dot"></span>Validação</span>
+                    </div>
                 </div>
             </a>
 
             <!-- Afiliadas -->
-            <a href="https://globotrafego.github.io/Geradores/Afiliadas.html" class="card">
-                <div class="card-icon">🏢</div>
+            <a href="https://globotrafego.github.io/Geradores/Afiliadas.html" class="card" target="_blank" rel="noopener">
+                <div class="card-preview-wrapper">
+                    <iframe
+                        class="card-preview"
+                        src="https://globotrafego.github.io/Geradores/Afiliadas.html"
+                        loading="lazy"
+                        title="Preview - Afiliadas">
+                    </iframe>
+                    <div class="card-overlay"></div>
+                    <div class="card-cta">
+                        <span>Abrir ferramenta</span>
+                        <span>↗</span>
+                    </div>
+                </div>
                 <div class="card-body">
                     <h2 class="card-title">Afiliadas</h2>
                     <p class="card-description">
-                        Gerencie informações de afiliadas e configure campanhas com dados 
-                        padronizados seguindo o padrão RP estabelecido.
+                        Centralize informações de afiliadas e reduza retrabalho na criação de nomes de campanha e ordens.
                     </p>
-                    <span class="card-tag">Gestão</span>
-                    <span class="card-tag">Configuração</span>
+                    <div class="card-tags">
+                        <span class="card-tag"><span class="card-tag-dot"></span>Operação</span>
+                        <span class="card-tag"><span class="card-tag-dot"></span>Padronização</span>
+                    </div>
                 </div>
             </a>
 
             <!-- Especificações -->
-            <a href="https://globotrafego.github.io/Geradores/Especificacoes.html" class="card">
-                <div class="card-icon">📋</div>
+            <a href="https://globotrafego.github.io/Geradores/Especificacoes.html" class="card" target="_blank" rel="noopener">
+                <div class="card-preview-wrapper">
+                    <iframe
+                        class="card-preview"
+                        src="https://globotrafego.github.io/Geradores/Especificacoes.html"
+                        loading="lazy"
+                        title="Preview - Especificações">
+                    </iframe>
+                    <div class="card-overlay"></div>
+                    <div class="card-cta">
+                        <span>Abrir ferramenta</span>
+                        <span>↗</span>
+                    </div>
+                </div>
                 <div class="card-body">
                     <h2 class="card-title">Especificações</h2>
                     <p class="card-description">
-                        Acesse e consulte especificações técnicas de campanhas, formatos de anúncios 
-                        e requisitos para programação em GAM e Triton.
+                        Consulte rapidamente requisitos de formato, peso e duração para cada tipo de campanha.
                     </p>
-                    <span class="card-tag">Documentação</span>
-                    <span class="card-tag">Referência</span>
+                    <div class="card-tags">
+                        <span class="card-tag"><span class="card-tag-dot"></span>Documentação</span>
+                        <span class="card-tag"><span class="card-tag-dot"></span>Referência</span>
+                    </div>
                 </div>
             </a>
         </div>
     </div>
 
     <script>
-        // Theme toggle functionality
         const html = document.documentElement;
-        const themeToggle = document.querySelector('.theme-toggle');
-        const sunIcon = document.querySelector('.sun-icon');
-        const moonIcon = document.querySelector('.moon-icon');
+        const toggle = document.querySelector('.theme-toggle');
 
-        // Check for saved theme preference or default to 'dark'
-        const currentTheme = localStorage.getItem('theme') || 'dark';
-        html.setAttribute('data-theme', currentTheme);
-        updateIcons(currentTheme);
+        // Load saved preference or default to dark
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        html.setAttribute('data-theme', savedTheme);
+        toggle.dataset.mode = savedTheme;
 
-        themeToggle.addEventListener('click', () => {
-            const newTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-            html.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            updateIcons(newTheme);
+        toggle.addEventListener('click', () => {
+            const current = html.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            toggle.dataset.mode = next;
+            localStorage.setItem('theme', next);
         });
-
-        function updateIcons(theme) {
-            if (theme === 'dark') {
-                moonIcon.classList.add('active');
-                sunIcon.classList.remove('active');
-                themeToggle.setAttribute('aria-label', 'Mudar para modo claro');
-            } else {
-                sunIcon.classList.add('active');
-                moonIcon.classList.remove('active');
-                themeToggle.setAttribute('aria-label', 'Mudar para modo escuro');
-            }
-        }
     </script>
 </body>
 </html>
