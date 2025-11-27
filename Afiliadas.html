@@ -195,7 +195,6 @@
             min-height: 80px;
         }
 
-        /* Custom Multi-Select Dropdown */
         .multi-select-container {
             position: relative;
         }
@@ -564,7 +563,6 @@
     <script>
         let lineItemCount = 0;
 
-        // ID Mappings
         const idadeMappings = {
             '18-20': '141615',
             '21-24': '141617',
@@ -677,10 +675,10 @@
                 options: ["Sim", "Não"]
             },
             {
-                key: "Preset",
-                label: "Preset",
+                key: "Cidades",
+                label: "Cidades",
                 type: "text",
-                helper: 'Uso obrigatório acima de 10 cidades'
+                helper: "Preset obrigatório acima de 10 cidades"
             },
             {
                 key: "Idade",
@@ -708,8 +706,8 @@
                 label: "Interesse",
                 type: "text",
                 helperLink: {
-                    text: 'Segmentos disponíveis',
-                    url: 'https://app.powerbi.com/view?r=eyJrIjoiNWYyZTczN2EtNGJhNy00ZDYxLTk1NTYtZWRiYzhmNmQzOGQ0IiwidCI6ImE3Y2RjNDQ3LTNiMjktNGI0MS1iNzNlLThhMmNiNTRiMDZjNiIsImMiOjR9'
+                    text: "Segmentos disponíveis",
+                    url: "https://app.powerbi.com/view?r=eyJrIjoiNWYyZTczN2EtNGJhNy00ZDYxLTk1NTYtZWRiYzhmNmQzOGQ0IiwidCI6ImE3Y2RjNDQ3LTNiMjktNGI0MS1iNzNlLThhMmNiNTRiMDZjNiIsImMiOjR9"
                 }
             },
             {
@@ -719,7 +717,6 @@
             }
         ];
 
-        // Theme toggle
         function toggleTheme() {
             const html = document.documentElement;
             const currentTheme = html.getAttribute('data-theme');
@@ -741,7 +738,6 @@
             localStorage.setItem('theme', newTheme);
         }
 
-        // Load saved theme and ensure no scroll on load
         window.addEventListener('DOMContentLoaded', () => {
             const savedTheme = localStorage.getItem('theme') || 'dark';
             if (savedTheme === 'light') {
@@ -752,12 +748,10 @@
 
             addLineItem();
 
-            // Garantir que a página não faça scroll automático ao carregar
             window.scrollTo(0, 0);
             setTimeout(() => window.scrollTo(0, 0), 0);
         });
 
-        // Multi-select functionality
         function selectAll(fieldId, lineNumber) {
             const container = document.getElementById(`${fieldId}_container`);
             const checkboxes = container.querySelectorAll('input[type="checkbox"]');
@@ -777,7 +771,6 @@
             const display = container.querySelector('.multi-select-display');
             const dropdown = container.querySelector('.multi-select-dropdown');
 
-            // Toggle dropdown
             display.addEventListener('click', (e) => {
                 if (e.target.classList.contains('multi-select-tag-remove')) {
                     return;
@@ -923,9 +916,13 @@
         });
 
         function calculateTotals(lineNumber) {
-            const valorUnitario = parseFloat(document.getElementById(`ValorUnitario_${lineNumber}`).value.replace(/[^0-9,]/g, '').replace(',', '.')) || 0;
-            const entregaDeterminada = parseFloat(document.getElementById(`EntregaDeterminada_${lineNumber}`).value.replace(/[^0-9]/g, '')) || 0;
-            const desconto = parseFloat(document.getElementById(`Desconto_${lineNumber}`).value.replace(/[^0-9,]/g, '').replace(',', '.')) || 0;
+            const valorUnitarioRaw = document.getElementById(`ValorUnitario_${lineNumber}`).value || '';
+            const entregaDetRaw = document.getElementById(`EntregaDeterminada_${lineNumber}`).value || '';
+            const descontoRaw = document.getElementById(`Desconto_${lineNumber}`).value || '';
+
+            const valorUnitario = parseFloat(valorUnitarioRaw.replace(/[^0-9,]/g, '').replace(',', '.')) || 0;
+            const entregaDeterminada = parseFloat(entregaDetRaw.replace(/[^0-9]/g, '')) || 0;
+            const desconto = parseFloat(descontoRaw.replace(/[^0-9,]/g, '').replace(',', '.')) || 0;
 
             const totalTabela = valorUnitario * (entregaDeterminada / 1000);
             const totalNegociado = totalTabela - (totalTabela * desconto / 100);
