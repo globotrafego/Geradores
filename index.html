@@ -8,32 +8,34 @@
     <style>
         :root[data-theme="light"] {
             --bg-primary: #ffffff;
-            --bg-secondary: #f8f9fa;
+            --bg-secondary: #f3f4f6;
             --bg-card: #ffffff;
-            --text-primary: #1a202c;
-            --text-secondary: #4a5568;
-            --text-tertiary: #718096;
-            --border-color: #e2e8f0;
-            --shadow: rgba(0, 0, 0, 0.08);
-            --shadow-hover: rgba(0, 0, 0, 0.16);
-            --accent: #6366f1;
-            --tag-bg: #edf2f7;
-            --tag-text: #4f46e5;
+            --text-primary: #111827;
+            --text-secondary: #4b5563;
+            --text-tertiary: #6b7280;
+            --border-color: #e5e7eb;
+            --shadow: rgba(15, 23, 42, 0.08);
+            --shadow-hover: rgba(15, 23, 42, 0.16);
+            --accent: #2563eb;
+            --tag-bg: #eff6ff;
+            --tag-text: #1d4ed8;
+            --thumb-overlay: rgba(255, 255, 255, 0.12);
         }
 
         :root[data-theme="dark"] {
-            --bg-primary: #050814;
-            --bg-secondary: #0f172a;
+            --bg-primary: #020617;
+            --bg-secondary: #020617;
             --bg-card: #020617;
             --text-primary: #e5e7eb;
             --text-secondary: #9ca3af;
             --text-tertiary: #6b7280;
             --border-color: #1f2937;
-            --shadow: rgba(15, 23, 42, 0.8);
-            --shadow-hover: rgba(15, 23, 42, 0.95);
-            --accent: #6366f1;
+            --shadow: rgba(15, 23, 42, 0.7);
+            --shadow-hover: rgba(15, 23, 42, 0.9);
+            --accent: #60a5fa;
             --tag-bg: #111827;
-            --tag-text: #a5b4fc;
+            --tag-text: #bfdbfe;
+            --thumb-overlay: rgba(15, 23, 42, 0.2);
         }
 
         * {
@@ -43,21 +45,21 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: radial-gradient(circle at top, var(--bg-secondary) 0, var(--bg-primary) 45%, #000 100%);
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: var(--bg-primary);
             color: var(--text-primary);
             min-height: 100vh;
             padding: 40px 20px;
-            transition: background 0.4s ease, color 0.3s ease;
+            transition: background-color 0.25s ease, color 0.25s ease;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1100px;
             margin: 0 auto;
         }
 
         header {
-            margin-bottom: 40px;
+            margin-bottom: 32px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -69,21 +71,20 @@
         }
 
         header h1 {
-            font-size: 2.3rem;
-            margin-bottom: 6px;
-            font-weight: 700;
-            color: var(--text-primary);
-            letter-spacing: 0.02em;
+            font-size: 2rem;
+            margin-bottom: 4px;
+            font-weight: 650;
+            letter-spacing: 0.01em;
         }
 
         header p {
-            font-size: 0.98rem;
+            font-size: 0.95rem;
             color: var(--text-secondary);
         }
 
         /* Theme Toggle */
         .theme-toggle {
-            background: rgba(15, 23, 42, 0.8);
+            background: rgba(15, 23, 42, 0.6);
             border-radius: 999px;
             border: 1px solid var(--border-color);
             padding: 4px;
@@ -95,14 +96,18 @@
             overflow: hidden;
         }
 
+        :root[data-theme="light"] .theme-toggle {
+            background: rgba(243, 244, 246, 0.95);
+        }
+
         .toggle-pill {
             position: absolute;
             top: 4px;
             bottom: 4px;
             width: 50%;
             border-radius: 999px;
-            background: rgba(99, 102, 241, 0.2);
-            border: 1px solid rgba(129, 140, 248, 0.8);
+            background: rgba(37, 99, 235, 0.18);
+            border: 1px solid rgba(96, 165, 250, 0.9);
             transition: transform 0.25s ease;
         }
 
@@ -132,234 +137,141 @@
 
         .theme-toggle[data-mode="light"] .toggle-option.light,
         .theme-toggle[data-mode="dark"] .toggle-option.dark {
-            color: #e5e7eb;
+            color: var(--text-primary);
         }
 
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 26px;
-            margin-top: 10px;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
         }
 
         .card {
-            background: rgba(15, 23, 42, 0.9);
+            background: var(--bg-card);
             border: 1px solid var(--border-color);
-            border-radius: 18px;
-            box-shadow: 0 16px 40px var(--shadow);
+            border-radius: 16px;
+            box-shadow: 0 12px 30px var(--shadow);
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
             text-decoration: none;
             color: inherit;
         }
 
-        :root[data-theme="light"] .card {
-            background: rgba(255, 255, 255, 0.96);
-        }
-
         .card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 24px 60px var(--shadow-hover);
+            transform: translateY(-3px);
+            box-shadow: 0 18px 40px var(--shadow-hover);
             border-color: var(--accent);
         }
 
+        /* Minimal thumbnails */
         .card-preview-wrapper {
             position: relative;
-            overflow: hidden;
             height: 0;
             padding-bottom: 56.25%; /* 16:9 */
+            overflow: hidden;
         }
 
         .thumb {
             position: absolute;
             inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 14px 16px;
+            color: #f9fafb;
+            font-size: 0.78rem;
         }
 
-        /* Base thumbnail style */
-        .thumb-base {
-            width: 100%;
-            height: 100%;
-            border-bottom: 1px solid rgba(148, 163, 184, 0.4);
+        .thumb-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        /* 1) Visualizador de Dimensões: grid / rulers vibe */
-        .thumb-visualizador {
-            background:
-                linear-gradient(90deg, rgba(148, 163, 184, 0.06) 1px, transparent 1px),
-                linear-gradient(180deg, rgba(148, 163, 184, 0.06) 1px, transparent 1px),
-                radial-gradient(circle at 15% 20%, rgba(56, 189, 248, 0.4), transparent 55%),
-                radial-gradient(circle at 80% 70%, rgba(129, 140, 248, 0.45), transparent 55%),
-                linear-gradient(135deg, #020617, #020617 35%, #0f172a 100%);
-            background-size: 22px 22px, 22px 22px, auto, auto, auto;
-            position: relative;
-        }
-
-        .thumb-visualizador::before,
-        .thumb-visualizador::after {
-            content: "";
-            position: absolute;
-            border-radius: 12px;
-            border: 1px solid rgba(226, 232, 240, 0.4);
-            background: rgba(15, 23, 42, 0.7);
-            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.6);
-        }
-
-        .thumb-visualizador::before {
-            inset: 18% 16% 34% 10%;
-        }
-
-        .thumb-visualizador::after {
-            inset: 44% 28% 16% 24%;
-        }
-
-        /* 2) Validador de Touchpoint: nodes / connections */
-        .thumb-touchpoint {
-            background:
-                radial-gradient(circle at 15% 25%, rgba(52, 211, 153, 0.35), transparent 55%),
-                radial-gradient(circle at 85% 35%, rgba(96, 165, 250, 0.35), transparent 55%),
-                radial-gradient(circle at 40% 80%, rgba(244, 114, 182, 0.4), transparent 60%),
-                linear-gradient(145deg, #020617, #020617 30%, #111827 100%);
-            position: relative;
-        }
-
-        .thumb-touchpoint::before,
-        .thumb-touchpoint::after {
-            content: "";
-            position: absolute;
+        .thumb-icon {
+            width: 26px;
+            height: 26px;
             border-radius: 999px;
-            border: 1px solid rgba(148, 163, 184, 0.7);
-            box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            background: rgba(15, 23, 42, 0.35);
         }
 
-        .thumb-touchpoint::before {
-            width: 18px;
-            height: 18px;
-            left: 20%;
-            top: 30%;
-            background: radial-gradient(circle, #22c55e, #16a34a);
+        .thumb-label {
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
         }
 
-        .thumb-touchpoint::after {
-            width: 18px;
-            height: 18px;
-            right: 18%;
-            top: 46%;
-            background: radial-gradient(circle, #3b82f6, #1d4ed8);
+        .thumb-meta {
+            font-size: 0.7rem;
+            opacity: 0.9;
         }
 
-        .thumb-touchpoint .link-line {
-            position: absolute;
-            left: 20%;
-            top: 31%;
-            width: 55%;
-            height: 2px;
-            background: linear-gradient(90deg, rgba(148, 163, 184, 0.1), rgba(148, 163, 184, 0.9));
-            transform-origin: left center;
-            transform: rotate(8deg);
+        .thumb-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.7rem;
+            opacity: 0.95;
         }
 
-        .thumb-touchpoint .link-line::before,
-        .thumb-touchpoint .link-line::after {
+        .thumb-pill {
+            padding: 3px 8px;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.35);
+        }
+
+        .thumb-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .thumb-cta span.arrow {
+            font-size: 0.8rem;
+        }
+
+        .thumb::after {
             content: "";
             position: absolute;
             inset: 0;
-            background-image: radial-gradient(circle, rgba(248, 250, 252, 0.9), transparent 60%);
-            background-size: 18px 18px;
-            opacity: 0.35;
+            background: linear-gradient(to bottom right, transparent, var(--thumb-overlay));
         }
 
-        /* 3) Afiliadas: cards / columns */
+        /* Palette per tool (simple flat gradients) */
+        .thumb-visualizador {
+            background: linear-gradient(135deg, #0ea5e9, #6366f1);
+        }
+
+        .thumb-touchpoint {
+            background: linear-gradient(135deg, #22c55e, #0ea5e9);
+        }
+
         .thumb-afiliadas {
-            background:
-                linear-gradient(135deg, #020617, #020617 35%, #0b1220 100%),
-                radial-gradient(circle at 0 0, rgba(96, 165, 250, 0.25), transparent 55%);
-            position: relative;
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
         }
 
-        .thumb-afiliadas::before,
-        .thumb-afiliadas::after {
-            content: "";
-            position: absolute;
-            border-radius: 14px;
-            background: rgba(15, 23, 42, 0.9);
-            border: 1px solid rgba(148, 163, 184, 0.7);
-            box-shadow: 0 18px 35px rgba(15, 23, 42, 0.8);
-        }
-
-        .thumb-afiliadas::before {
-            inset: 18% 52% 20% 8%;
-        }
-
-        .thumb-afiliadas::after {
-            inset: 22% 10% 16% 42%;
-        }
-
-        .thumb-afiliadas .col-line {
-            position: absolute;
-            left: 16%;
-            right: 18%;
-            height: 2px;
-            border-radius: 999px;
-            background: linear-gradient(90deg, rgba(148, 163, 184, 0.1), rgba(148, 163, 184, 0.7));
-        }
-
-        .thumb-afiliadas .col-line.l1 { top: 32%; }
-        .thumb-afiliadas .col-line.l2 { top: 41%; width: 60%; }
-        .thumb-afiliadas .col-line.l3 { top: 50%; width: 45%; }
-        .thumb-afiliadas .col-line.l4 { top: 63%; width: 70%; }
-
-        /* 4) Especificações: document / list style */
         .thumb-especificacoes {
-            background:
-                linear-gradient(120deg, #020617, #020617 30%, #020617 40%, #111827 100%),
-                radial-gradient(circle at 100% 0, rgba(251, 191, 36, 0.25), transparent 60%);
-            position: relative;
-        }
-
-        .thumb-especificacoes::before {
-            content: "";
-            position: absolute;
-            inset: 18% 18% 18% 18%;
-            border-radius: 16px;
-            background:
-                linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.9)),
-                repeating-linear-gradient(
-                    to bottom,
-                    rgba(55, 65, 81, 0.9) 0,
-                    rgba(55, 65, 81, 0.9) 1px,
-                    transparent 1px,
-                    transparent 9px
-                );
-            border: 1px solid rgba(148, 163, 184, 0.7);
-            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.9);
-        }
-
-        .thumb-especificacoes::after {
-            content: "";
-            position: absolute;
-            left: 22%;
-            right: 22%;
-            bottom: 24%;
-            height: 3px;
-            border-radius: 999px;
-            background: linear-gradient(90deg, #facc15, #fb923c);
+            background: linear-gradient(135deg, #f97316, #eab308);
         }
 
         .card-body {
-            padding: 18px 20px 20px;
+            padding: 16px 18px 18px;
         }
 
         .card-title {
-            font-size: 1.15rem;
+            font-size: 1rem;
             font-weight: 600;
-            margin-bottom: 6px;
-            color: var(--text-primary);
+            margin-bottom: 4px;
         }
 
         .card-description {
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             color: var(--text-tertiary);
             line-height: 1.5;
             margin-bottom: 10px;
@@ -377,9 +289,9 @@
             gap: 4px;
             background: var(--tag-bg);
             color: var(--tag-text);
-            padding: 3px 9px;
+            padding: 3px 8px;
             border-radius: 999px;
-            font-size: 0.75rem;
+            font-size: 0.72rem;
         }
 
         .card-tag-dot {
@@ -397,18 +309,15 @@
             header {
                 flex-direction: column;
                 align-items: flex-start;
+                gap: 12px;
             }
 
             header h1 {
-                font-size: 1.8rem;
+                font-size: 1.6rem;
             }
 
             .theme-toggle {
                 align-self: flex-end;
-            }
-
-            .grid {
-                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -418,7 +327,7 @@
         <header>
             <div class="header-text">
                 <h1>Ferramentas de Tráfego</h1>
-                <p>Pré-visualize e acesse rapidamente os utilitários que você usa no dia a dia.</p>
+                <p>Atalhos rápidos para os utilitários que você realmente usa.</p>
             </div>
 
             <button class="theme-toggle" type="button" aria-label="Alternar tema" data-mode="dark">
@@ -438,12 +347,27 @@
             <!-- Visualizador de Dimensões -->
             <a href="https://globotrafego.github.io/Geradores/VisualizadorDimensoes.html" class="card" target="_blank" rel="noopener">
                 <div class="card-preview-wrapper">
-                    <div class="thumb thumb-base thumb-visualizador"></div>
+                    <div class="thumb thumb-visualizador">
+                        <div class="thumb-header">
+                            <div class="thumb-icon">📐</div>
+                            <div>
+                                <div class="thumb-label">Visualizador</div>
+                                <div class="thumb-meta">Dimensões de criativos</div>
+                            </div>
+                        </div>
+                        <div class="thumb-footer">
+                            <span class="thumb-pill">Grid • Tamanhos</span>
+                            <span class="thumb-cta">
+                                Ver tela
+                                <span class="arrow">↗</span>
+                            </span>
+                        </div>
+                    </div>
                 </div>
                 <div class="card-body">
                     <h2 class="card-title">Visualizador de Dimensões</h2>
                     <p class="card-description">
-                        Visualize rapidamente o layout e a responsividade dos criativos antes de subir para o ad server.
+                        Confere rapidamente se os formatos enviados batem com as dimensões suportadas antes de subir no ad server.
                     </p>
                     <div class="card-tags">
                         <span class="card-tag"><span class="card-tag-dot"></span>Display</span>
@@ -455,14 +379,27 @@
             <!-- Validador de Touchpoint -->
             <a href="https://globotrafego.github.io/Geradores/ValidadorTouchpoint.html" class="card" target="_blank" rel="noopener">
                 <div class="card-preview-wrapper">
-                    <div class="thumb thumb-base thumb-touchpoint">
-                        <div class="link-line"></div>
+                    <div class="thumb thumb-touchpoint">
+                        <div class="thumb-header">
+                            <div class="thumb-icon">✅</div>
+                            <div>
+                                <div class="thumb-label">Touchpoint</div>
+                                <div class="thumb-meta">IDs • Parâmetros</div>
+                            </div>
+                        </div>
+                        <div class="thumb-footer">
+                            <span class="thumb-pill">Verificação rápida</span>
+                            <span class="thumb-cta">
+                                Validar
+                                <span class="arrow">↗</span>
+                            </span>
+                        </div>
                     </div>
                 </div>
                 <div class="card-body">
                     <h2 class="card-title">Validador de Touchpoint</h2>
                     <p class="card-description">
-                        Confira se IDs, posicionamentos e parâmetros de touchpoints estão prontos para serem ativados.
+                        Garante que IDs, posicionamentos e parâmetros estejam corretos antes do disparo em GAM.
                     </p>
                     <div class="card-tags">
                         <span class="card-tag"><span class="card-tag-dot"></span>GAM</span>
@@ -474,17 +411,27 @@
             <!-- Afiliadas -->
             <a href="https://globotrafego.github.io/Geradores/Afiliadas.html" class="card" target="_blank" rel="noopener">
                 <div class="card-preview-wrapper">
-                    <div class="thumb thumb-base thumb-afiliadas">
-                        <div class="col-line l1"></div>
-                        <div class="col-line l2"></div>
-                        <div class="col-line l3"></div>
-                        <div class="col-line l4"></div>
+                    <div class="thumb thumb-afiliadas">
+                        <div class="thumb-header">
+                            <div class="thumb-icon">🏢</div>
+                            <div>
+                                <div class="thumb-label">Afiliadas</div>
+                                <div class="thumb-meta">Tabelas • Codificação</div>
+                            </div>
+                        </div>
+                        <div class="thumb-footer">
+                            <span class="thumb-pill">Cadastro padrão</span>
+                            <span class="thumb-cta">
+                                Abrir
+                                <span class="arrow">↗</span>
+                            </span>
+                        </div>
                     </div>
                 </div>
                 <div class="card-body">
                     <h2 class="card-title">Afiliadas</h2>
                     <p class="card-description">
-                        Centralize informações de afiliadas e reduza retrabalho na criação de nomes de campanha e ordens.
+                        Padroniza nomes e códigos de afiliadas para reduzir retrabalho na criação das campanhas.
                     </p>
                     <div class="card-tags">
                         <span class="card-tag"><span class="card-tag-dot"></span>Operação</span>
@@ -496,12 +443,27 @@
             <!-- Especificações -->
             <a href="https://globotrafego.github.io/Geradores/Especificacoes.html" class="card" target="_blank" rel="noopener">
                 <div class="card-preview-wrapper">
-                    <div class="thumb thumb-base thumb-especificacoes"></div>
+                    <div class="thumb thumb-especificacoes">
+                        <div class="thumb-header">
+                            <div class="thumb-icon">📋</div>
+                            <div>
+                                <div class="thumb-label">Specs</div>
+                                <div class="thumb-meta">Formatos • Pesos</div>
+                            </div>
+                        </div>
+                        <div class="thumb-footer">
+                            <span class="thumb-pill">Guia rápido</span>
+                            <span class="thumb-cta">
+                                Consultar
+                                <span class="arrow">↗</span>
+                            </span>
+                        </div>
+                    </div>
                 </div>
                 <div class="card-body">
                     <h2 class="card-title">Especificações</h2>
                     <p class="card-description">
-                        Consulte rapidamente requisitos de formato, peso e duração para cada tipo de campanha.
+                        Consulta centralizada de requisitos de criativo para cada tipo de campanha.
                     </p>
                     <div class="card-tags">
                         <span class="card-tag"><span class="card-tag-dot"></span>Documentação</span>
