@@ -1,11 +1,45 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Ferramentas de Tráfego - Globo">
     <title>Geradores - Ferramentas de Tráfego</title>
     <style>
+        :root[data-theme="light"] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-card: #ffffff;
+            --text-primary: #1a202c;
+            --text-secondary: #4a5568;
+            --text-tertiary: #718096;
+            --border-color: #e2e8f0;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --shadow-hover: rgba(0, 0, 0, 0.15);
+            --accent: #667eea;
+            --accent-hover: #5a67d8;
+            --card-icon-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --tag-bg: #edf2f7;
+            --tag-text: #667eea;
+        }
+
+        :root[data-theme="dark"] {
+            --bg-primary: #0f1419;
+            --bg-secondary: #1a1f2e;
+            --bg-card: #1e2433;
+            --text-primary: #e4e6eb;
+            --text-secondary: #b0b8c1;
+            --text-tertiary: #8b92a0;
+            --border-color: #2d3548;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --shadow-hover: rgba(0, 0, 0, 0.5);
+            --accent: #818cf8;
+            --accent-hover: #6366f1;
+            --card-icon-bg: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            --tag-bg: #2d3548;
+            --tag-text: #a5b4fc;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -14,10 +48,11 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--bg-primary);
+            color: var(--text-primary);
             min-height: 100vh;
             padding: 40px 20px;
-            color: #333;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         .container {
@@ -28,18 +63,54 @@
         header {
             text-align: center;
             margin-bottom: 50px;
-            color: white;
+            position: relative;
         }
 
         header h1 {
             font-size: 2.5rem;
             margin-bottom: 10px;
             font-weight: 700;
+            color: var(--text-primary);
         }
 
         header p {
             font-size: 1.1rem;
-            opacity: 0.9;
+            color: var(--text-secondary);
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: 30px;
+            padding: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--accent);
+        }
+
+        .theme-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .theme-icon.active {
+            background: var(--accent);
         }
 
         .grid {
@@ -50,11 +121,12 @@
         }
 
         .card {
-            background: white;
-            border-radius: 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 12px var(--shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
             cursor: pointer;
             text-decoration: none;
             color: inherit;
@@ -63,16 +135,18 @@
 
         .card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 12px 24px var(--shadow-hover);
+            border-color: var(--accent);
         }
 
         .card-icon {
             height: 180px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--card-icon-bg);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 4rem;
+            transition: background 0.3s ease;
         }
 
         .card-body {
@@ -83,20 +157,20 @@
             font-size: 1.5rem;
             font-weight: 600;
             margin-bottom: 12px;
-            color: #2d3748;
+            color: var(--text-primary);
         }
 
         .card-description {
             font-size: 0.95rem;
-            color: #718096;
+            color: var(--text-tertiary);
             line-height: 1.6;
             margin-bottom: 15px;
         }
 
         .card-tag {
             display: inline-block;
-            background: #edf2f7;
-            color: #667eea;
+            background: var(--tag-bg);
+            color: var(--tag-text);
             padding: 4px 12px;
             border-radius: 20px;
             font-size: 0.85rem;
@@ -110,6 +184,11 @@
                 font-size: 2rem;
             }
 
+            .theme-toggle {
+                position: relative;
+                margin: 20px auto;
+            }
+
             .grid {
                 grid-template-columns: 1fr;
             }
@@ -119,6 +198,10 @@
 <body>
     <div class="container">
         <header>
+            <button class="theme-toggle" aria-label="Alternar tema">
+                <span class="theme-icon sun-icon">☀️</span>
+                <span class="theme-icon moon-icon active">🌙</span>
+            </button>
             <h1>🛠️ Ferramentas de Tráfego</h1>
             <p>Gerencie campanhas e valide configurações com eficiência</p>
         </header>
@@ -181,5 +264,37 @@
             </a>
         </div>
     </div>
+
+    <script>
+        // Theme toggle functionality
+        const html = document.documentElement;
+        const themeToggle = document.querySelector('.theme-toggle');
+        const sunIcon = document.querySelector('.sun-icon');
+        const moonIcon = document.querySelector('.moon-icon');
+
+        // Check for saved theme preference or default to 'dark'
+        const currentTheme = localStorage.getItem('theme') || 'dark';
+        html.setAttribute('data-theme', currentTheme);
+        updateIcons(currentTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const newTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateIcons(newTheme);
+        });
+
+        function updateIcons(theme) {
+            if (theme === 'dark') {
+                moonIcon.classList.add('active');
+                sunIcon.classList.remove('active');
+                themeToggle.setAttribute('aria-label', 'Mudar para modo claro');
+            } else {
+                sunIcon.classList.add('active');
+                moonIcon.classList.remove('active');
+                themeToggle.setAttribute('aria-label', 'Mudar para modo escuro');
+            }
+        }
+    </script>
 </body>
 </html>
