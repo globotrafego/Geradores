@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Campanhas - Afiliada</title>
+    <title>Gerador de Campanhas - Afiliadas</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -144,6 +144,28 @@
         label.required::after {
             content: " *";
             color: var(--error-color);
+        }
+
+        .label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 10px;
+        }
+
+        .label-helper {
+            font-size: 0.8em;
+            color: var(--text-disabled);
+            font-weight: 400;
+        }
+
+        .label-helper a {
+            color: var(--accent-secondary);
+            text-decoration: none;
+        }
+
+        .label-helper a:hover {
+            text-decoration: underline;
         }
 
         input, select, textarea {
@@ -474,7 +496,7 @@
     </div>
 
     <div class="container">
-        <h1>Gerador de Campanhas - Afiliada</h1>
+        <h1>Gerador de Campanhas - Afiliadas</h1>
 
         <div id="errorAlert" class="alert alert-error" style="display: none;"></div>
 
@@ -486,8 +508,8 @@
                     <input type="text" id="numeroRP" placeholder="Ex: 12345" required>
                 </div>
                 <div class="form-group">
-                    <label for="afiliada" class="required">Afiliada</label>
-                    <input type="text" id="afiliada" placeholder="Nome da afiliada" required>
+                    <label for="afiliada" class="required">Afiliadas</label>
+                    <input type="text" id="afiliada" placeholder="Nome da(s) afiliada(s)" required>
                 </div>
                 <div class="form-group">
                     <label for="orderID" class="required">Order ID</label>
@@ -657,7 +679,8 @@
             {
                 key: "Preset",
                 label: "Preset",
-                type: "text"
+                type: "text",
+                helper: 'Uso obrigatório acima de 10 cidades'
             },
             {
                 key: "Idade",
@@ -683,7 +706,11 @@
             {
                 key: "Interesse",
                 label: "Interesse",
-                type: "text"
+                type: "text",
+                helperLink: {
+                    text: 'Segmentos disponíveis',
+                    url: 'https://app.powerbi.com/view?r=eyJrIjoiNWYyZTczN2EtNGJhNy00ZDYxLTk1NTYtZWRiYzhmNmQzOGQ0IiwidCI6ImE3Y2RjNDQ3LTNiMjktNGI0MS1iNzNlLThhMmNiNTRiMDZjNiIsImMiOjR9'
+                }
             },
             {
                 key: "Observacoes",
@@ -714,7 +741,7 @@
             localStorage.setItem('theme', newTheme);
         }
 
-        // Load saved theme
+        // Load saved theme and ensure no scroll on load
         window.addEventListener('DOMContentLoaded', () => {
             const savedTheme = localStorage.getItem('theme') || 'dark';
             if (savedTheme === 'light') {
@@ -722,7 +749,12 @@
                 document.getElementById('themeIcon').textContent = '☀️';
                 document.getElementById('themeText').textContent = 'Dark Mode';
             }
+
             addLineItem();
+
+            // Garantir que a página não faça scroll automático ao carregar
+            window.scrollTo(0, 0);
+            setTimeout(() => window.scrollTo(0, 0), 0);
         });
 
         // Multi-select functionality
@@ -747,7 +779,6 @@
 
             // Toggle dropdown
             display.addEventListener('click', (e) => {
-                // Don't toggle if clicking on a tag remove button
                 if (e.target.classList.contains('multi-select-tag-remove')) {
                     return;
                 }
@@ -755,7 +786,6 @@
                 e.stopPropagation();
                 const wasActive = dropdown.classList.contains('active');
 
-                // Close all other dropdowns
                 document.querySelectorAll('.multi-select-dropdown.active').forEach(d => {
                     d.classList.remove('active');
                     d.parentElement.querySelector('.multi-select-display').classList.remove('active');
@@ -767,7 +797,6 @@
                 }
             });
 
-            // Handle option selection - DON'T close dropdown
             dropdown.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
                 checkbox.addEventListener('change', (e) => {
                     e.stopPropagation();
@@ -775,7 +804,6 @@
                 });
             });
 
-            // Prevent dropdown from closing when clicking inside it
             dropdown.addEventListener('click', (e) => {
                 e.stopPropagation();
             });
@@ -833,7 +861,6 @@
             return values.map(val => mapping[val]).filter(id => id);
         }
 
-        // Close dropdowns when clicking outside
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.multi-select-container')) {
                 document.querySelectorAll('.multi-select-dropdown.active').forEach(d => {
@@ -843,14 +870,13 @@
             }
         });
 
-        // Update campaign name preview
         function updateCampaignName() {
             const rp = document.getElementById('numeroRP').value;
             const afiliada = document.getElementById('afiliada').value;
             const orderID = document.getElementById('orderID').value;
             const cliente = document.getElementById('cliente').value;
             const agenciaValue = document.getElementById('agencia').value;
-            const agencia = agenciaValue || 'Direto'; // Se vazio, usa "Direto"
+            const agencia = agenciaValue || 'Direto';
             const mes = document.getElementById('mes').value;
             const ano = document.getElementById('ano').value;
 
@@ -873,20 +899,17 @@
                 mesAno = monthNames[mes] + ano.substr(-2);
             }
 
-            // Ordem: RP, Afiliada, Order ID, Cliente, Agencia, Mes, Ano
             const parts = [rp, afiliada, orderID, cliente, agencia, mesAno].filter(p => p);
             const name = parts.length > 0 ? parts.join('_') + '_TVGLOBO' : 'Preencha os campos acima';
 
             document.getElementById('campaignNamePreview').textContent = name;
         }
 
-        // Add event listeners to general info fields
         ['numeroRP', 'afiliada', 'orderID', 'cliente', 'agencia', 'mes', 'ano'].forEach(id => {
             document.getElementById(id).addEventListener('input', updateCampaignName);
             document.getElementById(id).addEventListener('change', updateCampaignName);
         });
 
-        // Validate only numbers
         document.getElementById('numeroRP').addEventListener('input', function(e) {
             this.value = this.value.replace(/[^0-9]/g, '');
         });
@@ -921,30 +944,25 @@
 
             let parts = [];
 
-            // Propriedade abbreviation with parentheses
             if (propriedade === 'Midia Avulsa') parts.push('(MAVULSA)');
             else if (propriedade === 'Midia de Apoio') parts.push('(MAPOIO)');
             else if (propriedade === 'Midia de Divulgação') parts.push('(MD)');
             else if (propriedade) parts.push('(' + propriedade + ')');
 
-            // Formatos
             if (formatos.length > 3) {
                 parts.push('Diversos');
             } else if (formatos.length > 0) {
                 parts.push(formatos.join('+'));
             }
 
-            // Sites
             if (sites.length > 0) {
                 parts.push(sites.join('+'));
             }
 
-            // Geolocalização
             if (geos.length > 0) {
                 parts.push(geos.join('+'));
             }
 
-            // Dates
             if (dataInicio) {
                 const date = new Date(dataInicio);
                 const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
@@ -957,7 +975,6 @@
                 parts.push(monthNames[date.getMonth()] + date.getFullYear().toString().substr(-2));
             }
 
-            // Line number
             parts.push(lineNumber);
 
             return parts.filter(p => p).join('_');
@@ -989,7 +1006,20 @@
                 const fieldId = `${field.key}_${lineItemCount}`;
 
                 html += `<div class="form-group">`;
-                html += `<label for="${fieldId}">${field.label}</label>`;
+
+                if (field.helper || field.helperLink) {
+                    html += `<div class="label-row">`;
+                    html += `<label for="${fieldId}">${field.label}</label>`;
+                    if (field.helper) {
+                        html += `<span class="label-helper">${field.helper}</span>`;
+                    }
+                    if (field.helperLink) {
+                        html += `<span class="label-helper"><a href="${field.helperLink.url}" target="_blank">${field.helperLink.text}</a></span>`;
+                    }
+                    html += `</div>`;
+                } else {
+                    html += `<label for="${fieldId}">${field.label}</label>`;
+                }
 
                 if (field.type === 'single-select') {
                     html += `<select id="${fieldId}" onchange="updateLineName(${lineItemCount})">`;
@@ -1040,16 +1070,12 @@
             lineDiv.innerHTML = html;
             container.appendChild(lineDiv);
 
-            // Initialize multi-select dropdowns
             fieldDefinitions.forEach(field => {
                 if (field.type === 'multi-select' || field.type === 'multi-select-mapped') {
                     const fieldId = `${field.key}_${lineItemCount}`;
                     createMultiSelect(fieldId, field.options, lineItemCount);
                 }
             });
-
-            // Scroll to the new item
-            lineDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
         function removeLineItem(lineNumber) {
@@ -1072,7 +1098,7 @@
             }
 
             if (!afiliada) {
-                return 'O campo "Afiliada" é obrigatório.';
+                return 'O campo "Afiliadas" é obrigatório.';
             }
 
             if (!orderID) {
@@ -1116,26 +1142,23 @@
             }
 
             const campaignName = document.getElementById('campaignNamePreview').textContent;
+            const rpValue = document.getElementById('numeroRP').value || 'SemRP';
 
-            // Prepare data for Excel in two columns format
             const excelData = [];
 
-            // Add campaign name at the top
             excelData.push(['Nome da Campanha', campaignName]);
-            excelData.push(['', '']); // Empty row
+            excelData.push(['', '']);
 
-            // Add general info
             excelData.push(['INFORMAÇÕES GERAIS', '']);
             excelData.push(['Número de RP', document.getElementById('numeroRP').value]);
-            excelData.push(['Afiliada', document.getElementById('afiliada').value]);
+            excelData.push(['Afiliadas', document.getElementById('afiliada').value]);
             excelData.push(['Order ID', document.getElementById('orderID').value]);
             excelData.push(['Cliente', document.getElementById('cliente').value]);
             excelData.push(['Agência / Direto', document.getElementById('agencia').value || 'Direto']);
             excelData.push(['Mês', document.getElementById('mes').value]);
             excelData.push(['Ano', document.getElementById('ano').value]);
-            excelData.push(['', '']); // Empty row
+            excelData.push(['', '']);
 
-            // Add line items
             const lineItemElements = document.querySelectorAll('.line-item');
 
             lineItemElements.forEach((lineElement, index) => {
@@ -1163,14 +1186,12 @@
                     excelData.push([field.label, value]);
                 });
 
-                excelData.push(['', '']); // Empty row between lines
+                excelData.push(['', '']);
             });
 
-            // Create workbook
             const wb = XLSX.utils.book_new();
             const ws = XLSX.utils.aoa_to_sheet(excelData);
 
-            // Set column widths
             ws['!cols'] = [
                 { wch: 30 },
                 { wch: 80 }
@@ -1178,11 +1199,9 @@
 
             XLSX.utils.book_append_sheet(wb, ws, 'Campanha');
 
-            // Generate filename
             const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-            const filename = `Campanha_${campaignName.substring(0, 30).replace(/[^a-zA-Z0-9]/g, '_')}_${timestamp}.xlsx`;
+            const filename = `RP_${rpValue}_${timestamp}.xlsx`;
 
-            // Save file
             XLSX.writeFile(wb, filename);
         }
     </script>
