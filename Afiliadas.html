@@ -561,7 +561,7 @@
     </div>
 
     <script>
-        let lineItemCount = 0;
+        let lineItemUniqueId = 0;
 
         const idadeMappings = {
             '18-20': '141615',
@@ -678,7 +678,7 @@
                 key: "Cidades",
                 label: "Cidades",
                 type: "text",
-                helper: "Preset obrigatório acima de 10 cidades"
+                helper: "Uso de preset obrigatório para acima de 10 cidades"
             },
             {
                 key: "Idade",
@@ -752,21 +752,45 @@
             setTimeout(() => window.scrollTo(0, 0), 0);
         });
 
-        function selectAll(fieldId, lineNumber) {
+        function getSequentialLineNumber(uniqueId) {
+            const container = document.getElementById('lineItemsContainer');
+            const allLines = Array.from(container.querySelectorAll('.line-item'));
+            const index = allLines.findIndex(line => line.dataset.uniqueId == uniqueId);
+            return index + 1;
+        }
+
+        function renumberAllLines() {
+            const container = document.getElementById('lineItemsContainer');
+            const allLines = container.querySelectorAll('.line-item');
+            
+            allLines.forEach((line, index) => {
+                const sequentialNumber = index + 1;
+                const uniqueId = line.dataset.uniqueId;
+                
+                const lineNumberSpan = line.querySelector('.line-number');
+                if (lineNumberSpan) {
+                    lineNumberSpan.textContent = `Linha ${sequentialNumber}`;
+                }
+                
+                updateLineName(uniqueId);
+            });
+        }
+
+        function selectAll(fieldId, uniqueId) {
             const container = document.getElementById(`${fieldId}_container`);
             const checkboxes = container.querySelectorAll('input[type="checkbox"]');
             checkboxes.forEach(cb => cb.checked = true);
-            updateMultiSelectDisplay(fieldId, lineNumber);
+            updateMultiSelectDisplay(fieldId, uniqueId);
         }
 
-        function clearAll(fieldId, lineNumber) {
+        function clearAll(fieldId, uniqueId) {
             const container = document.getElementById(`${fieldId}_container`);
             const checkboxes = container.querySelectorAll('input[type="checkbox"]');
             checkboxes.forEach(cb => cb.checked = false);
-            updateMultiSelectDisplay(fieldId, lineNumber);
+            updateMultiSelectDisplay(fieldId, uniqueId);
         }
 
-        function createMultiSelect(fieldId, options, lineNumber) {
+        function createMultiSelect(fieldId, options, uniqueId) {
             const container = document.getElementById(`${fieldId}_container`);
             const display = container.querySelector('.multi-select-display');
             const dropdown = container.querySelector('.multi-select-dropdown');
@@ -793,7 +817,7 @@
             dropdown.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
                 checkbox.addEventListener('change', (e) => {
                     e.stopPropagation();
-                    updateMultiSelectDisplay(fieldId, lineNumber);
+                    updateMultiSelectDisplay(fieldId, uniqueId);
                 });
             });
 
@@ -802,7 +826,7 @@
             });
         }
 
-        function updateMultiSelectDisplay(fieldId, lineNumber) {
+        function updateMultiSelectDisplay(fieldId, uniqueId) {
             const container = document.getElementById(`${fieldId}_container`);
             const checkboxes = container.querySelectorAll('input[type="checkbox"]');
             const tagsContainer = container.querySelector('.multi-select-tags');
@@ -826,7 +850,7 @@
                     removeBtn.onclick = (e) => {
                         e.stopPropagation();
                         cb.checked = false;
-                        updateMultiSelectDisplay(fieldId, lineNumber);
+                        updateMultiSelectDisplay(fieldId, uniqueId);
                     };
 
                     tag.appendChild(text);
@@ -838,8 +862,8 @@
                 tagsContainer.innerHTML = '';
             }
 
-            updateLineName(lineNumber);
-            calculateTotals(lineNumber);
+            updateLineName(uniqueId);
+            calculateTotals(uniqueId);
         }
 
         function getMultiSelectValues(fieldId) {
@@ -915,10 +939,10 @@
             this.value = this.value.replace(/[^0-9]/g, '');
         });
 
-        function calculateTotals(lineNumber) {
-            const valorUnitarioRaw = document.getElementById(`ValorUnitario_${lineNumber}`).value || '';
-            const entregaDetRaw = document.getElementById(`EntregaDeterminada_${lineNumber}`).value || '';
-            const descontoRaw = document.getElementById(`Desconto_${lineNumber}`).value || '';
+        function calculateTotals(uniqueId) {
+            const valorUnitarioRaw = document.getElementById(`ValorUnitario_${uniqueId}`).value || '';
+            const entregaDetRaw = document.getElementById(`EntregaDeterminada_${uniqueId}`).value || '';
+            const descontoRaw = document.getElementById(`Desconto_${uniqueId}`).value || '';
 
             const valorUnitario = parseFloat(valorUnitarioRaw.replace(/[^0-9,]/g, '').replace(',', '.')) || 0;
             const entregaDeterminada = parseFloat(entregaDetRaw.replace(/[^0-9]/g, '')) || 0;
@@ -927,17 +951,18 @@
             const totalTabela = valorUnitario * (entregaDeterminada / 1000);
             const totalNegociado = totalTabela - (totalTabela * desconto / 100);
 
-            document.getElementById(`TotalTabela_${lineNumber}`).value = 'R$ ' + totalTabela.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            document.getElementById(`TotalNegociado_${lineNumber}`).value = 'R$ ' + totalNegociado.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            document.getElementById(`TotalTabela_${uniqueId}`).value = 'R$ ' + totalTabela.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            document.getElementById(`TotalNegociado_${uniqueId}`).value = 'R$ ' + totalNegociado.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
 
-        function generateLineName(lineNumber) {
-            const propriedade = document.getElementById(`Propriedade_${lineNumber}`).value;
-            const formatos = getMultiSelectValues(`Formatos_${lineNumber}`);
-            const sites = getMultiSelectValues(`Site_${lineNumber}`);
-            const geos = getMultiSelectValues(`Geolocalizacao_${lineNumber}`);
-            const dataInicio = document.getElementById(`DataInicio_${lineNumber}`).value;
-            const dataFim = document.getElementById(`DataFim_${lineNumber}`).value;
+        function generateLineName(uniqueId) {
+            const sequentialNumber = getSequentialLineNumber(uniqueId);
+            const propriedade = document.getElementById(`Propriedade_${uniqueId}`).value;
+            const formatos = getMultiSelectValues(`Formatos_${uniqueId}`);
+            const sites = getMultiSelectValues(`Site_${uniqueId}`);
+            const geos = getMultiSelectValues(`Geolocalizacao_${uniqueId}`);
+            const dataInicio = document.getElementById(`DataInicio_${uniqueId}`).value;
+            const dataFim = document.getElementById(`DataFim_${uniqueId}`).value;
 
             let parts = [];
 
@@ -961,46 +986,50 @@
             }
 
             if (dataInicio) {
-                const date = new Date(dataInicio);
+                const date = new Date(dataInicio + 'T00:00:00');
                 const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
                 parts.push(monthNames[date.getMonth()] + date.getFullYear().toString().substr(-2));
             }
 
             if (dataFim) {
-                const date = new Date(dataFim);
+                const date = new Date(dataFim + 'T00:00:00');
                 const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
                 parts.push(monthNames[date.getMonth()] + date.getFullYear().toString().substr(-2));
             }
 
-            parts.push(lineNumber);
+            parts.push(sequentialNumber);
 
             return parts.filter(p => p).join('_');
         }
 
-        function updateLineName(lineNumber) {
-            const lineName = generateLineName(lineNumber);
-            document.getElementById(`lineName_${lineNumber}`).textContent = lineName || 'Preencha os campos para gerar o nome';
+        function updateLineName(uniqueId) {
+            const lineName = generateLineName(uniqueId);
+            document.getElementById(`lineName_${uniqueId}`).textContent = lineName || 'Preencha os campos para gerar o nome';
         }
 
         function addLineItem() {
-            lineItemCount++;
+            lineItemUniqueId++;
+            const uniqueId = lineItemUniqueId;
             const container = document.getElementById('lineItemsContainer');
+            
+            const currentLineCount = container.querySelectorAll('.line-item').length + 1;
 
             const lineDiv = document.createElement('div');
             lineDiv.className = 'line-item';
-            lineDiv.id = `lineItem_${lineItemCount}`;
+            lineDiv.id = `lineItem_${uniqueId}`;
+            lineDiv.dataset.uniqueId = uniqueId;
 
             let html = `
                 <div class="line-header">
-                    <span class="line-number">Linha ${lineItemCount}</span>
-                    <span class="line-name" id="lineName_${lineItemCount}">Preencha os campos para gerar o nome</span>
-                    <button class="btn btn-danger" onclick="removeLineItem(${lineItemCount})">Remover</button>
+                    <span class="line-number">Linha ${currentLineCount}</span>
+                    <span class="line-name" id="lineName_${uniqueId}">Preencha os campos para gerar o nome</span>
+                    <button class="btn btn-danger" onclick="removeLineItem(${uniqueId})">Remover</button>
                 </div>
                 <div class="form-grid">
             `;
 
             fieldDefinitions.forEach(field => {
-                const fieldId = `${field.key}_${lineItemCount}`;
+                const fieldId = `${field.key}_${uniqueId}`;
 
                 html += `<div class="form-group">`;
 
@@ -1019,7 +1048,7 @@
                 }
 
                 if (field.type === 'single-select') {
-                    html += `<select id="${fieldId}" onchange="updateLineName(${lineItemCount})">`;
+                    html += `<select id="${fieldId}" onchange="updateLineName(${uniqueId})">`;
                     html += `<option value="">Selecione...</option>`;
                     field.options.forEach(opt => {
                         html += `<option value="${opt}">${opt}</option>`;
@@ -1033,8 +1062,8 @@
                     html += `</div>`;
                     html += `<div class="multi-select-dropdown">`;
                     html += `<div class="multi-select-actions">`;
-                    html += `<button class="multi-select-action-btn" onclick="selectAll('${fieldId}', ${lineItemCount}); event.stopPropagation();">Selecionar Todos</button>`;
-                    html += `<button class="multi-select-action-btn clear" onclick="clearAll('${fieldId}', ${lineItemCount}); event.stopPropagation();">Desmarcar Todos</button>`;
+                    html += `<button class="multi-select-action-btn" onclick="selectAll('${fieldId}', ${uniqueId}); event.stopPropagation();">Selecionar Todos</button>`;
+                    html += `<button class="multi-select-action-btn clear" onclick="clearAll('${fieldId}', ${uniqueId}); event.stopPropagation();">Desmarcar Todos</button>`;
                     html += `</div>`;
                     field.options.forEach(opt => {
                         html += `<div class="multi-select-option">`;
@@ -1045,13 +1074,13 @@
                     html += `</div>`;
                     html += `</div>`;
                 } else if (field.type === 'date') {
-                    html += `<input type="date" id="${fieldId}" onchange="updateLineName(${lineItemCount})">`;
+                    html += `<input type="date" id="${fieldId}" onchange="updateLineName(${uniqueId})">`;
                 } else if (field.type === 'number') {
-                    html += `<input type="text" id="${fieldId}" oninput="this.value=this.value.replace(/[^0-9]/g,''); calculateTotals(${lineItemCount})">`;
+                    html += `<input type="text" id="${fieldId}" oninput="this.value=this.value.replace(/[^0-9]/g,''); calculateTotals(${uniqueId})">`;
                 } else if (field.type === 'currency') {
-                    html += `<input type="text" id="${fieldId}" placeholder="R$ 0,00" oninput="calculateTotals(${lineItemCount})">`;
+                    html += `<input type="text" id="${fieldId}" placeholder="R$ 0,00" oninput="calculateTotals(${uniqueId})">`;
                 } else if (field.type === 'decimal') {
-                    html += `<input type="text" id="${fieldId}" placeholder="0,00" oninput="calculateTotals(${lineItemCount})">`;
+                    html += `<input type="text" id="${fieldId}" placeholder="0,00" oninput="calculateTotals(${uniqueId})">`;
                 } else if (field.type === 'calculated') {
                     html += `<input type="text" id="${fieldId}" readonly>`;
                 } else if (field.type === 'textarea') {
@@ -1069,16 +1098,17 @@
 
             fieldDefinitions.forEach(field => {
                 if (field.type === 'multi-select' || field.type === 'multi-select-mapped') {
-                    const fieldId = `${field.key}_${lineItemCount}`;
-                    createMultiSelect(fieldId, field.options, lineItemCount);
+                    const fieldId = `${field.key}_${uniqueId}`;
+                    createMultiSelect(fieldId, field.options, uniqueId);
                 }
             });
         }
 
-        function removeLineItem(lineNumber) {
-            const lineItem = document.getElementById(`lineItem_${lineNumber}`);
+        function removeLineItem(uniqueId) {
+            const lineItem = document.getElementById(`lineItem_${uniqueId}`);
             if (lineItem) {
                 lineItem.remove();
+                renumberAllLines();
             }
         }
 
@@ -1159,22 +1189,23 @@
             const lineItemElements = document.querySelectorAll('.line-item');
 
             lineItemElements.forEach((lineElement, index) => {
-                const lineNumber = lineElement.id.split('_')[1];
+                const uniqueId = lineElement.dataset.uniqueId;
+                const sequentialNumber = index + 1;
 
-                excelData.push([`LINHA ${lineNumber}`, '']);
-                excelData.push(['Nome da Linha', document.getElementById(`lineName_${lineNumber}`).textContent]);
+                excelData.push([`LINHA ${sequentialNumber}`, '']);
+                excelData.push(['Nome da Linha', document.getElementById(`lineName_${uniqueId}`).textContent]);
 
                 fieldDefinitions.forEach(field => {
                     let value = '';
 
                     if (field.type === 'multi-select-mapped') {
-                        const ids = getMultiSelectMappedValues(`${field.key}_${lineNumber}`, field.mapping);
+                        const ids = getMultiSelectMappedValues(`${field.key}_${uniqueId}`, field.mapping);
                         value = ids.join(', ');
                     } else if (field.type === 'multi-select') {
-                        const selected = getMultiSelectValues(`${field.key}_${lineNumber}`);
+                        const selected = getMultiSelectValues(`${field.key}_${uniqueId}`);
                         value = selected.join(', ');
                     } else {
-                        const fieldElement = document.getElementById(`${field.key}_${lineNumber}`);
+                        const fieldElement = document.getElementById(`${field.key}_${uniqueId}`);
                         if (fieldElement) {
                             value = fieldElement.value;
                         }
