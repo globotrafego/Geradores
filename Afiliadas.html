@@ -197,12 +197,14 @@
 
         /* Date input calendar styling for dark mode */
         input[type="date"]::-webkit-calendar-picker-indicator {
-            filter: invert(0.8);
+            filter: invert(1) brightness(1.2);
             cursor: pointer;
+            opacity: 1;
         }
 
         [data-theme="light"] input[type="date"]::-webkit-calendar-picker-indicator {
-            filter: invert(0);
+            filter: none;
+            opacity: 1;
         }
 
         input[type="date"]::-webkit-datetime-edit-text,
@@ -214,12 +216,12 @@
 
         input[type="date"]::-webkit-inner-spin-button,
         input[type="date"]::-webkit-clear-button {
-            filter: invert(0.8);
+            filter: invert(1) brightness(1.2);
         }
 
         [data-theme="light"] input[type="date"]::-webkit-inner-spin-button,
         [data-theme="light"] input[type="date"]::-webkit-clear-button {
-            filter: invert(0);
+            filter: none;
         }
 
         /* Additional dark mode calendar support for Firefox and other browsers */
