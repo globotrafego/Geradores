@@ -195,6 +195,42 @@
             min-height: 80px;
         }
 
+        /* Date input calendar styling for dark mode */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(0.8);
+            cursor: pointer;
+        }
+
+        [data-theme="light"] input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(0);
+        }
+
+        input[type="date"]::-webkit-datetime-edit-text,
+        input[type="date"]::-webkit-datetime-edit-month-field,
+        input[type="date"]::-webkit-datetime-edit-day-field,
+        input[type="date"]::-webkit-datetime-edit-year-field {
+            color: var(--text-primary);
+        }
+
+        input[type="date"]::-webkit-inner-spin-button,
+        input[type="date"]::-webkit-clear-button {
+            filter: invert(0.8);
+        }
+
+        [data-theme="light"] input[type="date"]::-webkit-inner-spin-button,
+        [data-theme="light"] input[type="date"]::-webkit-clear-button {
+            filter: invert(0);
+        }
+
+        /* Additional dark mode calendar support for Firefox and other browsers */
+        input[type="date"] {
+            color-scheme: dark;
+        }
+
+        [data-theme="light"] input[type="date"] {
+            color-scheme: light;
+        }
+
         .multi-select-container {
             position: relative;
         }
@@ -508,7 +544,43 @@
                 </div>
                 <div class="form-group">
                     <label for="afiliada" class="required">Afiliadas</label>
-                    <input type="text" id="afiliada" placeholder="Nome da(s) afiliada(s)" required>
+                    <select id="afiliada" required>
+                        <option value="">Selecione...</option>
+                        <option value="Eptv">Eptv</option>
+                        <option value="Intertv_mg">Intertv_mg</option>
+                        <option value="Intertv_rj">Intertv_rj</option>
+                        <option value="Intertv_rn">Intertv_rn</option>
+                        <option value="Rpctv">Rpctv</option>
+                        <option value="Tvamazonica_ac">Tvamazonica_ac</option>
+                        <option value="Tvamazonica_ap">Tvamazonica_ap</option>
+                        <option value="Tvamazonica_am">Tvamazonica_am</option>
+                        <option value="Tvamazonica_ro">Tvamazonica_ro</option>
+                        <option value="Tvamazônica_rr">Tvamazônica_rr</option>
+                        <option value="Tvanhanguera">Tvanhanguera</option>
+                        <option value="Tvasabranca">Tvasabranca</option>
+                        <option value="Redebahia">Redebahia</option>
+                        <option value="Tvcabobranco">Tvcabobranco</option>
+                        <option value="Tvcentroamerica">Tvcentroamerica</option>
+                        <option value="Tvclube">Tvclube</option>
+                        <option value="Tvdiario">Tvdiario</option>
+                        <option value="Tvfronteira">Tvfronteira</option>
+                        <option value="Tvgazeta_es">Tvgazeta_es</option>
+                        <option value="Tvgazeta_al">Tvgazeta_al</option>
+                        <option value="Tvgranderio">Tvgranderio</option>
+                        <option value="Tvintegracao">Tvintegracao</option>
+                        <option value="Tvliberal">Tvliberal</option>
+                        <option value="Tvmirante">Tvmirante</option>
+                        <option value="Tvmorena">Tvmorena</option>
+                        <option value="TvRBS">TvRBS</option>
+                        <option value="NSC">NSC</option>
+                        <option value="Tvriosul">Tvriosul</option>
+                        <option value="Tvtem">Tvtem</option>
+                        <option value="TvVanguarda">TvVanguarda</option>
+                        <option value="Tvtribuna">Tvtribuna</option>
+                        <option value="Tvsergipe">Tvsergipe</option>
+                        <option value="TvVerdesMares">TvVerdesMares</option>
+                        <option value="Tvtapajós">Tvtapajós</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label for="orderID" class="required">Order ID</label>
