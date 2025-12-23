@@ -678,7 +678,7 @@
                 key: "Cidades",
                 label: "Cidades",
                 type: "text",
-                helper: "Preset obrigatório acima de 10 cidades"
+                helper: "Uso de preset obrigatório para acima de 10 cidades"
             },
             {
                 key: "Idade",
@@ -1087,7 +1087,8 @@
                 } else if (field.type === 'textarea') {
                     html += `<textarea id="${fieldId}"></textarea>`;
                 } else {
-                    html += `<input type="text" id="${fieldId}">`;
+                    const placeholderAttr = field.placeholder ? ` placeholder="${field.placeholder}"` : '';
+                    html += `<input type="text" id="${fieldId}"${placeholderAttr}>`;
                 }
 
                 html += `</div>`;
