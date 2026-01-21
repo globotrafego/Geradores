@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Calendário Intercâmbio Semanal</title>
-  <!-- Bootstrap (CSS e JS) e Luxon via CDN -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <style>
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -121,6 +122,11 @@
       color: #999;
       margin-top: 4px;
     }
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
     @media (max-width: 768px) {
       .day-cell {
         min-height: 80px;
@@ -134,10 +140,9 @@
 <body>
   <h1>Calendário de Intercâmbio Semanal</h1>
   <div class="subtitle">
-    Dados da aba <strong>Cronograma</strong> — campos: Dia (pt-BR), Analista, Área Origem, Área Destino e Anjo.
+    Dados da aba <strong>Cronograma</strong> do Google Sheets (atualização automática).
   </div>
 
-  <!-- FILTROS -->
   <div class="filters">
     <div class="form-floating">
       <select class="form-select" id="filterAnalista">
@@ -145,34 +150,27 @@
       </select>
       <label for="filterAnalista">Filtrar por analista</label>
     </div>
-
     <div class="form-floating">
       <select class="form-select" id="filterAreaOrigem">
         <option value="">Todas</option>
       </select>
       <label for="filterAreaOrigem">Área origem</label>
     </div>
-
     <div class="form-floating">
       <select class="form-select" id="filterAreaDestino">
         <option value="">Todas</option>
       </select>
       <label for="filterAreaDestino">Área destino</label>
     </div>
-
     <div class="form-floating">
       <select class="form-select" id="filterAnjo">
         <option value="">Todos</option>
       </select>
       <label for="filterAnjo">Anjo</label>
     </div>
-
-    <button class="btn btn-outline-secondary" id="btnClearFilters">
-      Limpar filtros
-    </button>
+    <button class="btn btn-outline-secondary" id="btnClearFilters">Limpar filtros</button>
   </div>
 
-  <!-- CABEÇALHO DO CALENDÁRIO -->
   <div class="calendar-header">
     <div>
       <button class="btn btn-sm btn-outline-primary" id="prevMonth">&laquo; Anterior</button>
@@ -181,19 +179,18 @@
     <div class="month-label" id="monthLabel"></div>
     <div>
       <button class="btn btn-sm btn-outline-dark" id="todayBtn">Hoje</button>
+      <button class="btn btn-sm btn-secondary" id="refreshBtn">🔄 Atualizar</button>
     </div>
   </div>
 
-  <!-- GRADE DO CALENDÁRIO -->
   <div class="calendar-grid" id="calendarGrid">
-    <!-- Preenchido via JS -->
+    <div class="loading">Carregando dados do Google Sheets...</div>
   </div>
 
   <div class="legend">
     <span><span class="legend-dot legend-dot-area"></span>Intercâmbios (origem → destino)</span>
   </div>
 
-  <!-- MODAL DETALHES -->
   <div class="modal fade" id="eventModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable">
       <div class="modal-content">
@@ -210,132 +207,14 @@
 
   <script>
     const DateTime = luxon.DateTime;
+    let events = [];
+    let currentMonth = DateTime.now().startOf("month");
 
-    // =========================
-    // DADOS EMBUTIDOS (aba Cronograma)
-    // =========================
-    // Campos: Semana, Dia (pt-BR), Analista, Área Origem, Área Destino, Anjo
-    const rawData = [
-      ["1","Dia 03/02/2026, Terça","Adriano","Criativos","Checking","Michel"],
-      ["1","Dia 03/02/2026, Terça","Aldemir","Checking","Tráfego","Helio"],
-      ["1","Dia 03/02/2026, Terça","Amanda","Tráfego","Roteiros","Carla"],
-      ["1","Dia 03/02/2026, Terça","Anna","Roteiros","Criativos","Larissa"],
-      ["1","Dia 04/02/2026, Quarta","Adriano","Criativos","Roteiros","Carla"],
-      ["1","Dia 04/02/2026, Quarta","Aldemir","Checking","Criativos","Larissa"],
-      ["1","Dia 04/02/2026, Quarta","Amanda","Tráfego","Checking","Michel"],
-      ["1","Dia 04/02/2026, Quarta","Anna","Roteiros","Tráfego","Helio"],
-      ["1","Dia 05/02/2026, Quinta","Adriano","Criativos","Tráfego","Helio"],
-      ["1","Dia 05/02/2026, Quinta","Aldemir","Checking","Roteiros","Liliane"],
-      ["1","Dia 05/02/2026, Quinta","Amanda","Tráfego","Criativos","Larissa"],
-      ["1","Dia 05/02/2026, Quinta","Anna","Roteiros","Checking","Paula"],
-      ["2","Dia 10/02/2026, Terça","Mari","Tráfego","Criativos","Leomir"],
-      ["2","Dia 10/02/2026, Terça","Carla","Roteiros","Checking","Mirelle"],
-      ["2","Dia 10/02/2026, Terça","Carlinhos","Criativos","Tráfego","Felipe"],
-      ["2","Dia 10/02/2026, Terça","Denise","Checking","Roteiros","Anna"],
-      ["2","Dia 11/02/2026, Quarta","Mari","Tráfego","Roteiros","Gui"],
-      ["2","Dia 11/02/2026, Quarta","Carla","Roteiros","Tráfego","Felipe"],
-      ["2","Dia 11/02/2026, Quarta","Carlinhos","Criativos","Checking","Mirelle"],
-      ["2","Dia 11/02/2026, Quarta","Denise","Checking","Criativos","Leomir"],
-      ["2","Dia 12/02/2026, Quinta","Mari","Tráfego","Checking","Mirelle"],
-      ["2","Dia 12/02/2026, Quinta","Carla","Roteiros","Criativos","Leomir"],
-      ["2","Dia 12/02/2026, Quinta","Carlinhos","Criativos","Roteiros","Gui"],
-      ["2","Dia 12/02/2026, Quinta","Denise","Checking","Tráfego","Felipe"],
-      ["3","Dia 24/02/2026, Terça","Pedro","Roteiros","Criativos","Adriano"],
-      ["3","Dia 24/02/2026, Terça","Mirelle","Checking","Roteiros","Pedro"],
-      ["3","Dia 24/02/2026, Terça","Fabiana","Tráfego","Checking","Will"],
-      ["3","Dia 24/02/2026, Terça","Geo","Criativos","Tráfego","Amanda"],
-      ["3","Dia 25/02/2026, Quarta","Pedro","Roteiros","Checking","Will"],
-      ["3","Dia 25/02/2026, Quarta","Mirelle","Checking","Tráfego","Amanda"],
-      ["3","Dia 25/02/2026, Quarta","Fabiana","Tráfego","Criativos","Adriano"],
-      ["3","Dia 25/02/2026, Quarta","Geo","Criativos","Roteiros","Pedro"],
-      ["3","Dia 26/02/2026, Quinta","Pedro","Roteiros","Tráfego","Amanda"],
-      ["3","Dia 26/02/2026, Quinta","Mirelle","Checking","Criativos","Adriano"],
-      ["3","Dia 26/02/2026, Quinta","Fabiana","Tráfego","Roteiros","Pedro"],
-      ["3","Dia 26/02/2026, Quinta","Geo","Criativos","Checking","Will"],
-      ["4","Dia 10/03/2026, Terça","Fabi","Roteiros","Criativos","Carlinhos"],
-      ["4","Dia 10/03/2026, Terça","Felipe","Tráfego","Checking","Michel"],
-      ["4","Dia 10/03/2026, Terça","Gabi","Checking","Roteiros","Lari"],
-      ["4","Dia 10/03/2026, Terça","Larissa","Criativos","Tráfego","Mari"],
-      ["4","Dia 11/03/2026, Quarta","Fabi","Roteiros","Tráfego","Mari"],
-      ["4","Dia 11/03/2026, Quarta","Felipe","Tráfego","Roteiros","Sarah"],
-      ["4","Dia 11/03/2026, Quarta","Gabi","Checking","Criativos","Carlinhos"],
-      ["4","Dia 11/03/2026, Quarta","Larissa","Criativos","Checking","Michel"],
-      ["4","Dia 12/03/2026, Quinta","Fabi","Roteiros","Checking","Lucia"],
-      ["4","Dia 12/03/2026, Quinta","Felipe","Tráfego","Criativos","Carlinhos"],
-      ["4","Dia 12/03/2026, Quinta","Gabi","Checking","Tráfego","Mari"],
-      ["4","Dia 12/03/2026, Quinta","Larissa","Criativos","Roteiros","Sarah"],
-      ["6","Dia 17/03/2026, Terça","Gui","Roteiros","Tráfego","Wagner"],
-      ["6","Dia 17/03/2026, Terça","Helio","Tráfego","Criativos","Mateus"],
-      ["6","Dia 17/03/2026, Terça","Jonathan","Checking","Roteiros","Leandro"],
-      ["6","Dia 17/03/2026, Terça","Leomir","Criativos","Checking","Mirelle"],
-      ["6","Dia 18/03/2026, Quarta","Gui","Roteiros","Checking","Mirelle"],
-      ["6","Dia 18/03/2026, Quarta","Helio","Tráfego","Roteiros","Carla"],
-      ["6","Dia 18/03/2026, Quarta","Jonathan","Checking","Criativos","Mateus"],
-      ["6","Dia 18/03/2026, Quarta","Leomir","Criativos","Tráfego","Wagner"],
-      ["6","Dia 19/03/2026, Quinta","Gui","Roteiros","Criativos","Mateus"],
-      ["6","Dia 19/03/2026, Quinta","Helio","Tráfego","Checking","Mirelle"],
-      ["6","Dia 19/03/2026, Quinta","Jonathan","Checking","Tráfego","Wagner"],
-      ["6","Dia 19/03/2026, Quinta","Leomir","Criativos","Roteiros","Carla"],
-      ["7","Dia 24/03/2026, Terça","Jose","Tráfego","Criativos","Larissa"],
-      ["7","Dia 24/03/2026, Terça","Julianne","Checking","Roteiros","Cris"],
-      ["7","Dia 24/03/2026, Terça","Lari","Roteiros","Checking","Julianne"],
-      ["7","Dia 24/03/2026, Terça","Mateus","Criativos","Tráfego","Fabiana"],
-      ["7","Dia 25/03/2026, Quarta","Jose","Tráfego","Checking","Julianne"],
-      ["7","Dia 25/03/2026, Quarta","Julianne","Checking","Tráfego","Fabiana"],
-      ["7","Dia 25/03/2026, Quarta","Lari","Roteiros","Criativos","Larissa"],
-      ["7","Dia 25/03/2026, Quarta","Mateus","Criativos","Roteiros","Gui"],
-      ["7","Dia 26/03/2026, Quinta","Jose","Tráfego","Roteiros","Gui"],
-      ["7","Dia 26/03/2026, Quinta","Julianne","Checking","Criativos","Larissa"],
-      ["7","Dia 26/03/2026, Quinta","Lari","Roteiros","Tráfego","Fabiana"],
-      ["7","Dia 26/03/2026, Quinta","Mateus","Criativos","Checking","Will"],
-      ["8","Dia 31/03/2026, Terça","Kath","Tráfego","Criativos","Leomir"],
-      ["8","Dia 31/03/2026, Terça","Leandro","Roteiros","Tráfego","Felipe"],
-      ["8","Dia 31/03/2026, Terça","Lucas","Checking","Roteiros","Sarah"],
-      ["8","Dia 01/04/2026, Quarta","Kath","Tráfego","Checking","Michel"],
-      ["8","Dia 01/04/2026, Quarta","Leandro","Roteiros","Criativos","Leomir"],
-      ["8","Dia 01/04/2026, Quarta","Lucas","Checking","Tráfego","Felipe"],
-      ["8","Dia 02/04/2026, Quinta","Kath","Tráfego","Roteiros","Sarah"],
-      ["8","Dia 02/04/2026, Quinta","Leandro","Roteiros","Checking","Aldemir"],
-      ["8","Dia 02/04/2026, Quinta","Lucas","Checking","Criativos","Leomir"],
-      ["9","Dia 07/04/2026, Terça","Lili","Roteiros","Criativos","Adriano"],
-      ["9","Dia 07/04/2026, Terça","Lucia","Checking","Roteiros","Fabi"],
-      ["9","Dia 07/04/2026, Terça","Flavia","Tráfego","Criativos","Adriano"],
-      ["9","Dia 08/04/2026, Quarta","Lili","Roteiros","Tráfego","Amanda"],
-      ["9","Dia 08/04/2026, Quarta","Lucia","Checking","Criativos","Adriano"],
-      ["9","Dia 08/04/2026, Quarta","Flavia","Tráfego","Roteiros","Pedro"],
-      ["9","Dia 09/04/2026, Quinta","Lili","Roteiros","Checking","Gabi"],
-      ["9","Dia 09/04/2026, Quinta","Lucia","Checking","Tráfego","Amanda"],
-      ["9","Dia 09/04/2026, Quinta","Flavia","Tráfego","Checking","Mirelle"],
-      ["10","Dia 14/04/2026, Terça","Marcos","Roteiros","Criativos","Carlinhos"],
-      ["10","Dia 14/04/2026, Terça","Michel","Checking","Roteiros","Pedro"],
-      ["10","Dia 14/04/2026, Terça","Michele","Tráfego","Checking","Will"],
-      ["10","Dia 15/04/2026, Quarta","Marcos","Roteiros","Checking","Jonathan"],
-      ["10","Dia 15/04/2026, Quarta","Michel","Checking","Tráfego","Mari"],
-      ["10","Dia 15/04/2026, Quarta","Michele","Tráfego","Criativos","Carlinhos"],
-      ["10","Dia 16/04/2026, Quinta","Marcos","Roteiros","Tráfego","Mari"],
-      ["10","Dia 16/04/2026, Quinta","Michel","Checking","Criativos","Carlinhos"],
-      ["10","Dia 16/04/2026, Quinta","Michele","Tráfego","Roteiros","Pedro"],
-      ["11","Dia 05/05/2026, Terça","Everton","Checking","Roteiros","Marcos"],
-      ["11","Dia 05/05/2026, Terça","Cris","Roteiros","Checking","Paula"],
-      ["11","Dia 05/05/2026, Terça","Wagner","Tráfego","Criativos","Mateus"],
-      ["11","Dia 06/05/2026, Quarta","Everton","Checking","Tráfego","Helio"],
-      ["11","Dia 06/05/2026, Quarta","Cris","Roteiros","Criativos","Mateus"],
-      ["11","Dia 06/05/2026, Quarta","Wagner","Tráfego","Roteiros","Carla"],
-      ["11","Dia 07/05/2026, Quinta","Everton","Checking","Criativos","Mateus"],
-      ["11","Dia 07/05/2026, Quinta","Cris","Roteiros","Tráfego","Helio"],
-      ["11","Dia 07/05/2026, Quinta","Wagner","Tráfego","Checking","Michel"],
-      ["12","Dia 12/05/2026, Terça","Sarah","Roteiros","Criativos","Leomir"],
-      ["12","Dia 12/05/2026, Terça","Will","Checking","Roteiros","Carla"],
-      ["12","Dia 13/05/2026, Quarta","Sarah","Roteiros","Tráfego","Wagner"],
-      ["12","Dia 13/05/2026, Quarta","Will","Checking","Criativos","Leomir"],
-      ["12","Dia 14/05/2026, Quinta","Sarah","Roteiros","Checking","Mirelle"],
-      ["12","Dia 14/05/2026, Quinta","Will","Checking","Tráfego","Wagner"],
-      ["13","Dia 19/05/2026, Terça","Paula","Checking","Criativos","Larissa"],
-      ["13","Dia 20/05/2026, Quarta","Paula","Checking","Tráfego","Fabiana"],
-      ["13","Dia 21/05/2026, Quinta","Paula","Checking","Roteiros","Lari"]
-    ];
+    const calendarGrid = document.getElementById('calendarGrid');
+    const monthLabel = document.getElementById('monthLabel');
 
-    // Parser de "Dia 03/02/2026, Terça"
+    const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRh5F3JKuIGDw9PKXnajm6BP-t7dlVheVVm9Aez0L12BGLD0_5FbpAASaVW7j9mdjX1SBFGswjbrI8u/pub?gid=1979237160&single=true&output=csv";
+
     function parsePtBrDate(diaStr) {
       const match = diaStr.match(/Dia\s+(\d{2})\/(\d{2})\/(\d{4})/);
       if (!match) return null;
@@ -343,64 +222,63 @@
       return DateTime.fromISO(`${yyyy}-${mm}-${dd}`);
     }
 
-    // Converte rawData em objetos estruturados
-    const events = rawData.map(row => {
-      const semana = row[0];
-      const diaPt = row[1];
-      const analista = row[2];
-      const origem = row[3];
-      const destino = row[4];
-      const anjo = row[5];
-      const date = parsePtBrDate(diaPt);
-      return {
-        semana,
-        date,
-        diaPt,
-        analista,
-        origem,
-        destino,
-        anjo
-      };
-    }).filter(e => e.date);
+    async function loadData() {
+      try {
+        calendarGrid.innerHTML = '<div class="loading">Carregando dados do Google Sheets...</div>';
+        
+        const resp = await fetch(SHEET_CSV_URL);
+        const csvText = await resp.text();
+        const parsed = Papa.parse(csvText, { header: true, skipEmptyLines: true });
 
-    // =========================
-    // ESTADO DO CALENDÁRIO
-    // =========================
-    let currentMonth = events.length
-      ? events[0].date.startOf('month')
-      : DateTime.now().startOf('month');
+        events = parsed.data
+          .filter(row => row["Dia (pt-BR)"])
+          .map(row => {
+            const diaPt = row["Dia (pt-BR)"];
+            const date = parsePtBrDate(diaPt);
+            return {
+              semana: row["Semana"] || "",
+              date,
+              diaPt,
+              analista: row["Analista"] || "",
+              origem: row["Área Origem"] || "",
+              destino: row["Área Destino"] || "",
+              anjo: row["Anjo"] || ""
+            };
+          })
+          .filter(e => e.date && e.date.isValid);
 
-    const calendarGrid = document.getElementById('calendarGrid');
-    const monthLabel = document.getElementById('monthLabel');
+        if (events.length) {
+          currentMonth = events[0].date.startOf("month");
+        }
 
-    // Preenche os filtros com valores únicos
+        initFilters();
+        renderCalendar();
+      } catch (err) {
+        console.error("Erro ao carregar Google Sheets:", err);
+        calendarGrid.innerHTML = '<div class="loading text-danger">Erro ao carregar dados. Verifique a conexão ou URL da planilha.</div>';
+      }
+    }
+
     function initFilters() {
-      const selectAnalista = document.getElementById('filterAnalista');
-      const selectOrigem = document.getElementById('filterAreaOrigem');
-      const selectDestino = document.getElementById('filterAreaDestino');
-      const selectAnjo = document.getElementById('filterAnjo');
+      const selects = {
+        filterAnalista: [...new Set(events.map(e => e.analista))].sort(),
+        filterAreaOrigem: [...new Set(events.map(e => e.origem))].sort(),
+        filterAreaDestino: [...new Set(events.map(e => e.destino))].sort(),
+        filterAnjo: [...new Set(events.map(e => e.anjo))].sort()
+      };
 
-      const uniqueAnalistas = [...new Set(events.map(e => e.analista))].sort();
-      const uniqueOrigem = [...new Set(events.map(e => e.origem))].sort();
-      const uniqueDestino = [...new Set(events.map(e => e.destino))].sort();
-      const uniqueAnjo = [...new Set(events.map(e => e.anjo))].sort();
-
-      function fillSelect(select, values) {
-        values.forEach(v => {
+      Object.keys(selects).forEach(id => {
+        const sel = document.getElementById(id);
+        while (sel.options.length > 1) sel.remove(1);
+        selects[id].forEach(v => {
           const opt = document.createElement('option');
           opt.value = v;
           opt.textContent = v;
-          select.appendChild(opt);
+          sel.appendChild(opt);
         });
-      }
-
-      fillSelect(selectAnalista, uniqueAnalistas);
-      fillSelect(selectOrigem, uniqueOrigem);
-      fillSelect(selectDestino, uniqueDestino);
-      fillSelect(selectAnjo, uniqueAnjo);
+      });
     }
 
-    // Aplica filtros nos eventos
     function getFilteredEvents() {
       const fAnalista = document.getElementById('filterAnalista').value;
       const fOrigem = document.getElementById('filterAreaOrigem').value;
@@ -416,15 +294,13 @@
       });
     }
 
-    // Renderiza o calendário do mês atual
     function renderCalendar() {
+      if (!events.length) return;
+
       const filtered = getFilteredEvents();
-
       monthLabel.textContent = currentMonth.setLocale('pt-BR').toFormat("MMMM yyyy");
-
       calendarGrid.innerHTML = "";
 
-      // Cabeçalho: dias da semana
       const weekdays = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
       weekdays.forEach(d => {
         const div = document.createElement('div');
@@ -433,18 +309,10 @@
         calendarGrid.appendChild(div);
       });
 
-      // Primeiro dia do mês (segunda-feira como início de semana)
       const startOfMonth = currentMonth.startOf('month');
-      const endOfMonth = currentMonth.endOf('month');
-      let startWeekday = startOfMonth.weekday; // 1=Seg...7=Dom
-
-      // Quantos dias mostrar antes do 1º para alinhar com segunda
+      const startWeekday = startOfMonth.weekday;
       const daysBefore = startWeekday - 1;
-
-      // Data inicial do grid (pode ser do mês anterior)
-      let gridStart = startOfMonth.minus({ days: daysBefore });
-
-      // Número total de células (6 semanas * 7 dias = 42)
+      const gridStart = startOfMonth.minus({ days: daysBefore });
       const totalCells = 42;
 
       for (let i = 0; i < totalCells; i++) {
@@ -452,25 +320,19 @@
         const inCurrentMonth = dayDate.hasSame(currentMonth, 'month');
         const cell = document.createElement('div');
         cell.className = "day-cell";
-        if (!inCurrentMonth) {
-          cell.classList.add('off-month');
-        }
+        if (!inCurrentMonth) cell.classList.add('off-month');
 
-        // Destacar dia de hoje (apenas se ano/mês/dia coincidirem)
         const today = DateTime.now();
-        if (dayDate.hasSame(today, 'day')) {
-          cell.classList.add('day-today');
-        }
+        if (dayDate.hasSame(today, 'day')) cell.classList.add('day-today');
 
         const dayNumber = document.createElement('div');
         dayNumber.className = "day-number";
         dayNumber.textContent = dayDate.day;
         cell.appendChild(dayNumber);
 
-        // Eventos do dia (filtrados)
         const dayEvents = filtered.filter(e => e.date.hasSame(dayDate, 'day'));
 
-        if (dayEvents.length === 0) {
+        if (!dayEvents.length) {
           const noEv = document.createElement('div');
           noEv.className = "no-events";
           noEv.textContent = "Sem intercâmbios";
@@ -490,13 +352,11 @@
       }
     }
 
-    // Abre modal com detalhes do dia
     function openDayModal(dayDate, dayEvents) {
       const modalBody = document.getElementById('eventModalBody');
       const dateStr = dayDate.setLocale('pt-BR').toFormat("dd/MM/yyyy, cccc");
 
-      let html = `<h6>${dateStr}</h6>`;
-      html += `<ul class="list-group mt-2">`;
+      let html = `<h6>${dateStr}</h6><ul class="list-group mt-2">`;
       dayEvents.forEach(ev => {
         html += `
           <li class="list-group-item">
@@ -509,31 +369,35 @@
           </li>`;
       });
       html += `</ul>`;
-
       modalBody.innerHTML = html;
       const modal = new bootstrap.Modal(document.getElementById('eventModal'));
       modal.show();
     }
 
-    // Navegação de mês
     document.getElementById('prevMonth').addEventListener('click', () => {
       currentMonth = currentMonth.minus({ months: 1 });
       renderCalendar();
     });
+
     document.getElementById('nextMonth').addEventListener('click', () => {
       currentMonth = currentMonth.plus({ months: 1 });
       renderCalendar();
     });
+
     document.getElementById('todayBtn').addEventListener('click', () => {
       currentMonth = DateTime.now().startOf('month');
       renderCalendar();
     });
 
-    // Filtros
+    document.getElementById('refreshBtn').addEventListener('click', () => {
+      loadData();
+    });
+
     document.getElementById('filterAnalista').addEventListener('change', renderCalendar);
     document.getElementById('filterAreaOrigem').addEventListener('change', renderCalendar);
     document.getElementById('filterAreaDestino').addEventListener('change', renderCalendar);
     document.getElementById('filterAnjo').addEventListener('change', renderCalendar);
+
     document.getElementById('btnClearFilters').addEventListener('click', () => {
       document.getElementById('filterAnalista').value = "";
       document.getElementById('filterAreaOrigem').value = "";
@@ -542,10 +406,7 @@
       renderCalendar();
     });
 
-    // Inicialização
-    initFilters();
-    renderCalendar();
+    loadData();
   </script>
 </body>
 </html>
-
