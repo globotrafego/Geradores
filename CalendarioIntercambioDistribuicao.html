@@ -225,9 +225,31 @@
       return DateTime.fromISO(`${yyyy}-${mm}-${dd}`);
     }
 
+    function generateOutlookWebLink(event) {
+      const startDateTime = event.date.set({ hour: 9, minute: 0, second: 0 });
+      const endDateTime = event.date.set({ hour: 18, minute: 0, second: 0 });
+      
+      const subject = encodeURIComponent(`Intercâmbio - ${event.destino}`);
+      const body = encodeURIComponent(
+        `Intercâmbio Semanal\n\n` +
+        `Analista: ${event.analista}\n` +
+        `Área Origem: ${event.origem}\n` +
+        `Área Destino: ${event.destino}\n` +
+        `Anjo: ${event.anjo}\n` +
+        `Semana: ${event.semana}\n\n` +
+        `Data: ${event.diaPt}`
+      );
+      const location = encodeURIComponent(event.destino);
+      const startdt = startDateTime.toISO();
+      const enddt = endDateTime.toISO();
+
+      return `https://outlook.office.com/calendar/0/deeplink/compose?subject=${subject}&body=${body}&startdt=${startdt}&enddt=${enddt}&location=${location}&path=/calendar/action/compose&rru=addevent`;
+    }
+
     function generateICS(event) {
       const dateStr = event.date.toFormat('yyyyMMdd');
-      const timestamp = DateTime.now().toFormat("yyyyMMdd'T'HHmmss");
+      const timestamp = DateTime.now().toFormat("yyyyMMdd'T'HHmmss'Z'");
+      const uid = `${timestamp}-${event.analista.replace(/\s/g, '')}@intercambio.local`;
       
       const icsContent = [
         'BEGIN:VCALENDAR',
@@ -239,7 +261,7 @@
         `DTSTART;VALUE=DATE:${dateStr}`,
         `DTEND;VALUE=DATE:${dateStr}`,
         `DTSTAMP:${timestamp}`,
-        `UID:${timestamp}-${event.analista}@intercambio.local`,
+        `UID:${uid}`,
         `SUMMARY:Intercâmbio - ${event.destino}`,
         `DESCRIPTION:Analista: ${event.analista}\\nÁrea Origem: ${event.origem}\\nÁrea Destino: ${event.destino}\\nAnjo: ${event.anjo}\\nSemana: ${event.semana}`,
         `LOCATION:${event.destino}`,
@@ -262,7 +284,7 @@
       const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      link.download = `intercambio-${event.analista}-${event.date.toFormat('yyyy-MM-dd')}.ics`;
+      link.download = `intercambio-${event.analista.replace(/\s/g, '_')}-${event.date.toFormat('yyyy-MM-dd')}.ics`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -405,6 +427,7 @@
 
       let html = `<h6>${dateStr}</h6><ul class="list-group mt-2">`;
       dayEvents.forEach(ev => {
+        const eventIndex = events.indexOf(ev);
         html += `
           <li class="list-group-item">
             <div><strong>Analista:</strong> ${ev.analista}</div>
@@ -413,16 +436,20 @@
             <div><strong>Anjo:</strong> ${ev.anjo}</div>
             <div><strong>Semana:</strong> ${ev.semana}</div>
             <div><strong>Dia (pt-BR):</strong> ${ev.diaPt}</div>
-            <button class="btn btn-sm btn-primary btn-outlook" data-event-index="${events.indexOf(ev)}">
-              📅 Adicionar ao Outlook
-            </button>
+            <div class="mt-2">
+              <a href="${generateOutlookWebLink(ev)}" target="_blank" class="btn btn-sm btn-primary">
+                📅 Abrir no Outlook Web
+              </a>
+              <button class="btn btn-sm btn-outline-primary btn-download-ics" data-event-index="${eventIndex}">
+                💾 Baixar para Outlook Desktop
+              </button>
+            </div>
           </li>`;
       });
       html += `</ul>`;
       modalBody.innerHTML = html;
 
-      // Adicionar event listeners aos botões
-      modalBody.querySelectorAll('.btn-outlook').forEach(btn => {
+      modalBody.querySelectorAll('.btn-download-ics').forEach(btn => {
         btn.addEventListener('click', function() {
           const eventIndex = parseInt(this.getAttribute('data-event-index'));
           const event = events[eventIndex];
