@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calendário Backlog</title>
+    <title>Calendário de Tarefas</title>
     <style>
         :root {
             --bg-primary: #ffffff;
@@ -326,7 +326,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>📅 Calendário Backlog</h1>
+            <h1>📅 Calendário de Tarefas</h1>
             <button class="theme-toggle" id="themeToggle">
                 <span id="themeIcon">🌙</span>
                 <span id="themeText">Modo Escuro</span>
@@ -464,26 +464,56 @@
         }
 
         function parseDate(dateStr) {
-            if (!dateStr) return null;
+            if (!dateStr || dateStr.trim() === '') return null;
 
-            // Try parsing as ISO date first
-            let date = new Date(dateStr);
+            dateStr = dateStr.trim();
 
-            // If that fails, try parsing DD/MM/YYYY format
-            if (isNaN(date)) {
+            // Check for DD/MM/YYYY format (Brazilian format) - prioritize this
+            if (dateStr.includes('/')) {
                 const parts = dateStr.split('/');
                 if (parts.length === 3) {
-                    // DD/MM/YYYY
-                    date = new Date(parts[2], parts[1] - 1, parts[0]);
+                    const day = parseInt(parts[0], 10);
+                    const month = parseInt(parts[1], 10) - 1; // Month is 0-indexed
+                    const year = parseInt(parts[2], 10);
+
+                    if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
+                        const date = new Date(year, month, day);
+                        if (!isNaN(date.getTime())) {
+                            return date;
+                        }
+                    }
                 }
             }
 
-            return isNaN(date) ? null : date;
+            // Check for DD-MM-YYYY format
+            if (dateStr.includes('-')) {
+                const parts = dateStr.split('-');
+                if (parts.length === 3 && parts[0].length <= 2) {
+                    // Looks like DD-MM-YYYY
+                    const day = parseInt(parts[0], 10);
+                    const month = parseInt(parts[1], 10) - 1;
+                    const year = parseInt(parts[2], 10);
+
+                    if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
+                        const date = new Date(year, month, day);
+                        if (!isNaN(date.getTime())) {
+                            return date;
+                        }
+                    }
+                }
+            }
+
+            // Try standard Date parsing as fallback (for ISO format)
+            const date = new Date(dateStr);
+            return isNaN(date.getTime()) ? null : date;
         }
 
         function formatDate(dateStr) {
             const date = parseDate(dateStr);
-            if (!date) return dateStr || '';
+            if (!date) {
+                // If parsing fails, return the original string
+                return dateStr || '';
+            }
             return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
         }
 
@@ -626,13 +656,23 @@
 
             renderOrder.forEach(({ weekNum, isCurrent, isPast }) => {
                 const week = weeks[weekNum];
-                const inicio = formatDate(week.inicio);
-                const fim = formatDate(week.fim);
+
+                // Format the dates or keep the original if they exist
+                const inicioFormatted = formatDate(week.inicio);
+                const fimFormatted = formatDate(week.fim);
+
                 const collapsedClass = isPast ? 'collapsed' : '';
                 const currentClass = isCurrent ? 'current' : '';
 
-                // Display formatted dates or show message if missing
-                const dateDisplay = (inicio && fim) ? `${inicio} - ${fim}` : 'Datas não disponíveis';
+                // Display dates - show original if formatting fails
+                let dateDisplay;
+                if (inicioFormatted && fimFormatted) {
+                    dateDisplay = `${inicioFormatted} - ${fimFormatted}`;
+                } else if (week.inicio && week.fim) {
+                    dateDisplay = `${week.inicio} - ${week.fim}`;
+                } else {
+                    dateDisplay = 'Datas não disponíveis';
+                }
 
                 html += `
                     <div class="week-section ${collapsedClass} ${currentClass}" data-week="${weekNum}">
