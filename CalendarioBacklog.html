@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calendário Backlog</title>
+    <title>Calendário de Tarefas</title>
     <style>
         :root {
             --bg-primary: #ffffff;
@@ -266,7 +266,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>📅 Calendário Backlog</h1>
+            <h1>📅 Calendário de Tarefas</h1>
             <button class="theme-toggle" id="themeToggle">
                 <span id="themeIcon">🌙</span>
                 <span id="themeText">Modo Escuro</span>
@@ -403,74 +403,29 @@
             return 'dai'; // default
         }
 
-        function parseDate(dateStr) {
-            if (!dateStr || dateStr === '') return null;
-
-            // Remove any extra whitespace
-            dateStr = dateStr.trim();
-
-            // Try DD/MM/YYYY or DD-MM-YYYY format first (Brazilian format)
-            let match = dateStr.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
-            if (match) {
-                const day = parseInt(match[1]);
-                const month = parseInt(match[2]) - 1; // JS months are 0-indexed
-                const year = parseInt(match[3]);
-                const date = new Date(year, month, day);
-                // Validate the date is real
-                if (date.getFullYear() === year && date.getMonth() === month && date.getDate() === day) {
-                    return date;
-                }
-            }
-
-            // Try ISO format YYYY-MM-DD
-            match = dateStr.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$/);
-            if (match) {
-                const year = parseInt(match[1]);
-                const month = parseInt(match[2]) - 1;
-                const day = parseInt(match[3]);
-                const date = new Date(year, month, day);
-                if (date.getFullYear() === year && date.getMonth() === month && date.getDate() === day) {
-                    return date;
-                }
-            }
-
-            // Try standard Date parsing as last resort
-            const date = new Date(dateStr);
-            if (!isNaN(date.getTime())) {
-                return date;
-            }
-
-            console.warn('Could not parse date:', dateStr);
-            return null;
-        }
-
         function formatDate(dateStr) {
-            if (!dateStr || dateStr === '') return '';
-            const date = parseDate(dateStr);
-            if (!date) return dateStr;
-
-            const day = String(date.getDate()).padStart(2, '0');
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const year = date.getFullYear();
-            return `${day}/${month}/${year}`;
+            if (!dateStr) return '';
+            const date = new Date(dateStr);
+            if (isNaN(date)) return dateStr;
+            return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
         }
 
-        function createOutlookLink(task, startDateStr, endDateStr) {
+        function createOutlookLink(task, startDate, endDate) {
             // Parse dates
-            const start = parseDate(startDateStr);
-            const end = parseDate(endDateStr);
+            const start = new Date(startDate);
+            const end = new Date(endDate);
 
-            if (!start || !end) {
-                console.warn('Invalid dates for Outlook:', startDateStr, endDateStr);
-                return '#';
+            // Set default times if dates are valid (9 AM start, 6 PM end)
+            if (!isNaN(start)) {
+                start.setHours(9, 0, 0, 0);
             }
-
-            // Set default times (9 AM start, 6 PM end)
-            start.setHours(9, 0, 0, 0);
-            end.setHours(18, 0, 0, 0);
+            if (!isNaN(end)) {
+                end.setHours(18, 0, 0, 0);
+            }
 
             // Format dates for Outlook (ISO format: YYYY-MM-DDTHH:MM:SS)
             const formatOutlookDate = (date) => {
+                if (isNaN(date)) return '';
                 const year = date.getFullYear();
                 const month = String(date.getMonth() + 1).padStart(2, '0');
                 const day = String(date.getDate()).padStart(2, '0');
@@ -484,9 +439,9 @@
             const endDt = formatOutlookDate(end);
 
             // Create event body with task details
-            const body = `Tarefa: ${task.tarefa}\n\nExperiente: ${task.experiente || 'Não definido'}\nNovato: ${task.novato || 'Não definido'}\n\nPeríodo: ${formatDate(startDateStr)} - ${formatDate(endDateStr)}`;
+            const body = `Tarefa: ${task.tarefa}\n\nExperiente: ${task.experiente || 'Não definido'}\nNovato: ${task.novato || 'Não definido'}`;
 
-            // Build Outlook Web URL
+            // Build Outlook Web URL (works for both outlook.com and office365)
             const outlookUrl = new URL('https://outlook.office.com/calendar/0/deeplink/compose');
             outlookUrl.searchParams.append('path', '/calendar/action/compose');
             outlookUrl.searchParams.append('rru', 'addevent');
@@ -518,7 +473,9 @@
                 weeks[weekNum].tasks.push({
                     tarefa: row.Tarefa || row.tarefa,
                     experiente: row.Experiente || row.experiente,
-                    novato: row.Notavo || row.notavo || row.Novato || row.novato
+                    novato: row.Notavo || row.notavo || row.Novato || row.novato,
+                    inicio: row.Inicio || row.inicio,
+                    fim: row.Fim || row.fim
                 });
             });
 
@@ -536,27 +493,16 @@
                 const inicio = formatDate(week.inicio);
                 const fim = formatDate(week.fim);
 
-                // Show date range or just what's available
-                let dateDisplay = '';
-                if (inicio && fim) {
-                    dateDisplay = `${inicio} - ${fim}`;
-                } else if (inicio) {
-                    dateDisplay = inicio;
-                } else if (fim) {
-                    dateDisplay = fim;
-                }
-
                 html += `
                     <div class="week-section">
                         <div class="week-header">Semana ${weekNum}</div>
-                        <div class="week-dates">${dateDisplay}</div>
+                        <div class="week-dates">${inicio} - ${fim}</div>
                         <div class="tasks-grid">
                 `;
 
                 week.tasks.forEach(task => {
                     const taskClass = getTaskClass(task.tarefa);
-                    // Use the week's start and end dates for the Outlook link
-                    const outlookLink = createOutlookLink(task, week.inicio, week.fim);
+                    const outlookLink = createOutlookLink(task, task.inicio, task.fim);
 
                     html += `
                         <div class="task-card ${taskClass}">
