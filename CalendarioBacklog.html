@@ -211,6 +211,35 @@
             color: var(--text-secondary);
         }
 
+        .outlook-button {
+            margin-top: 12px;
+            padding: 8px 16px;
+            background: #0078d4;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s;
+            text-decoration: none;
+            width: 100%;
+        }
+
+        .outlook-button:hover {
+            background: #106ebe;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 120, 212, 0.3);
+        }
+
+        .outlook-button:active {
+            transform: translateY(0);
+        }
+
         @media (max-width: 768px) {
             h1 {
                 font-size: 1.5rem;
@@ -381,6 +410,50 @@
             return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
         }
 
+        function createOutlookLink(task, startDate, endDate) {
+            // Parse dates
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+
+            // Set default times if dates are valid (9 AM start, 6 PM end)
+            if (!isNaN(start)) {
+                start.setHours(9, 0, 0, 0);
+            }
+            if (!isNaN(end)) {
+                end.setHours(18, 0, 0, 0);
+            }
+
+            // Format dates for Outlook (ISO format: YYYY-MM-DDTHH:MM:SS)
+            const formatOutlookDate = (date) => {
+                if (isNaN(date)) return '';
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                const seconds = String(date.getSeconds()).padStart(2, '0');
+                return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+            };
+
+            const startDt = formatOutlookDate(start);
+            const endDt = formatOutlookDate(end);
+
+            // Create event body with task details
+            const body = `Tarefa: ${task.tarefa}\n\nExperiente: ${task.experiente || 'Não definido'}\nNovato: ${task.novato || 'Não definido'}`;
+
+            // Build Outlook Web URL (works for both outlook.com and office365)
+            const outlookUrl = new URL('https://outlook.office.com/calendar/0/deeplink/compose');
+            outlookUrl.searchParams.append('path', '/calendar/action/compose');
+            outlookUrl.searchParams.append('rru', 'addevent');
+            outlookUrl.searchParams.append('startdt', startDt);
+            outlookUrl.searchParams.append('enddt', endDt);
+            outlookUrl.searchParams.append('subject', task.tarefa || 'Tarefa');
+            outlookUrl.searchParams.append('body', body);
+            outlookUrl.searchParams.append('allday', 'false');
+
+            return outlookUrl.toString();
+        }
+
         function renderCalendar(data) {
             // Group by week
             const weeks = {};
@@ -400,7 +473,9 @@
                 weeks[weekNum].tasks.push({
                     tarefa: row.Tarefa || row.tarefa,
                     experiente: row.Experiente || row.experiente,
-                    novato: row.Notavo || row.notavo || row.Novato || row.novato
+                    novato: row.Notavo || row.notavo || row.Novato || row.novato,
+                    inicio: row.Inicio || row.inicio,
+                    fim: row.Fim || row.fim
                 });
             });
 
@@ -427,6 +502,8 @@
 
                 week.tasks.forEach(task => {
                     const taskClass = getTaskClass(task.tarefa);
+                    const outlookLink = createOutlookLink(task, task.inicio, task.fim);
+
                     html += `
                         <div class="task-card ${taskClass}">
                             <div class="task-title">${task.tarefa || 'Sem título'}</div>
@@ -438,6 +515,9 @@
                                 <span class="person-label">🎓 Novato:</span>
                                 <span class="person-name">${task.novato || '-'}</span>
                             </div>
+                            <a href="${outlookLink}" target="_blank" class="outlook-button">
+                                📅 Adicionar ao Outlook
+                            </a>
                         </div>
                     `;
                 });
