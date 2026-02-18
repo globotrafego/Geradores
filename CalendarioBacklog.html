@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendário de Tarefas</title>
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --border-color: #dee2e6;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --dai-color: #0d6efd;
+            --d2c-color: #198754;
+            --revisao-color: #dc3545;
+            --dai-bg: #cfe2ff;
+            --d2c-bg: #d1e7dd;
+            --revisao-bg: #f8d7da;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --text-primary: #e9ecef;
+            --text-secondary: #adb5bd;
+            --border-color: #495057;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --dai-bg: #0a3d91;
+            --d2c-bg: #0f5132;
+            --revisao-bg: #842029;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s, color 0.3s;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 600;
+        }
+
+        .theme-toggle {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            padding: 8px 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            transition: all 0.3s;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+        }
+
+        .error {
+            background-color: var(--revisao-bg);
+            color: var(--revisao-color);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+            padding: 15px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+        }
+
+        .week-section {
+            margin-bottom: 40px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        .week-header {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .week-dates {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .tasks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 15px;
+        }
+
+        .task-card {
+            background: var(--bg-primary);
+            border-radius: 8px;
+            padding: 16px;
+            border-left: 4px solid;
+            box-shadow: 0 1px 4px var(--shadow);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .task-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        .task-card.dai {
+            border-left-color: var(--dai-color);
+            background: var(--dai-bg);
+        }
+
+        .task-card.d2c {
+            border-left-color: var(--d2c-color);
+            background: var(--d2c-bg);
+        }
+
+        .task-card.revisao {
+            border-left-color: var(--revisao-color);
+            background: var(--revisao-bg);
+        }
+
+        .task-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .task-person {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .person-label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .person-name {
+            font-size: 0.95rem;
+        }
+
+        .experiente {
+            color: var(--text-primary);
+        }
+
+        .novato {
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .tasks-grid {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+        }
+
+        .icon {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📅 Calendário de Tarefas</h1>
+            <button class="theme-toggle" id="themeToggle">
+                <span id="themeIcon">🌙</span>
+                <span id="themeText">Modo Escuro</span>
+            </button>
+        </header>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: var(--dai-color);"></div>
+                <span>DAI</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: var(--d2c-color);"></div>
+                <span>D2C</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: var(--revisao-color);"></div>
+                <span>Revisão de Diárias</span>
+            </div>
+        </div>
+
+        <div id="calendar">
+            <div class="loading">Carregando calendário...</div>
+        </div>
+    </div>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const themeText = document.getElementById('themeText');
+        const html = document.documentElement;
+
+        // Check for saved theme preference
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', currentTheme);
+        updateThemeButton(currentTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const theme = html.getAttribute('data-theme');
+            const newTheme = theme === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeButton(newTheme);
+        });
+
+        function updateThemeButton(theme) {
+            if (theme === 'dark') {
+                themeIcon.textContent = '☀️';
+                themeText.textContent = 'Modo Claro';
+            } else {
+                themeIcon.textContent = '🌙';
+                themeText.textContent = 'Modo Escuro';
+            }
+        }
+
+        // Google Sheets Configuration - Using your published sheet
+        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCn6Cn7MSrzTVWKksHy9Y0wytX4cYjEmZbh-40MJYTsrohH-BaZY6dLC0Y-QdqBPyIj0iL8H2g_Qpe/pub?output=csv';
+
+        // Fetch and parse data
+        async function loadCalendar() {
+            const calendarDiv = document.getElementById('calendar');
+
+            try {
+                const response = await fetch(CSV_URL);
+                const csvText = await response.text();
+                const data = parseCSV(csvText);
+
+                if (data.length === 0) {
+                    calendarDiv.innerHTML = '<div class="error">Nenhum dado encontrado na planilha.</div>';
+                    return;
+                }
+
+                renderCalendar(data);
+            } catch (error) {
+                console.error('Error loading calendar:', error);
+                calendarDiv.innerHTML = `
+                    <div class="error">
+                        <strong>Erro ao carregar o calendário.</strong><br>
+                        Verifique se a planilha está publicada corretamente.<br>
+                        <small>Detalhes: ${error.message}</small>
+                    </div>
+                `;
+            }
+        }
+
+        function parseCSV(csv) {
+            const lines = csv.split('\n');
+            const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g, '').trim());
+            const data = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i].trim()) continue;
+
+                const values = parseCSVLine(lines[i]);
+                if (values.length === headers.length) {
+                    const row = {};
+                    headers.forEach((header, index) => {
+                        row[header] = values[index].replace(/^"|"$/g, '').trim();
+                    });
+                    data.push(row);
+                }
+            }
+
+            return data;
+        }
+
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current);
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            result.push(current);
+            return result;
+        }
+
+        function getTaskClass(taskName) {
+            const task = taskName.toLowerCase();
+            if (task.includes('dai')) return 'dai';
+            if (task.includes('d2c')) return 'd2c';
+            if (task.includes('revisao') || task.includes('revisão') || task.includes('diaria') || task.includes('diária')) return 'revisao';
+            return 'dai'; // default
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            const date = new Date(dateStr);
+            if (isNaN(date)) return dateStr;
+            return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        }
+
+        function renderCalendar(data) {
+            // Group by week
+            const weeks = {};
+
+            data.forEach(row => {
+                const weekNum = row.Semana || row.semana;
+                if (!weekNum) return;
+
+                if (!weeks[weekNum]) {
+                    weeks[weekNum] = {
+                        inicio: row.Inicio || row.inicio,
+                        fim: row.Fim || row.fim,
+                        tasks: []
+                    };
+                }
+
+                weeks[weekNum].tasks.push({
+                    tarefa: row.Tarefa || row.tarefa,
+                    experiente: row.Experiente || row.experiente,
+                    novato: row.Notavo || row.notavo || row.Novato || row.novato
+                });
+            });
+
+            // Sort weeks
+            const sortedWeeks = Object.keys(weeks).sort((a, b) => {
+                const numA = parseInt(a.replace(/\D/g, ''));
+                const numB = parseInt(b.replace(/\D/g, ''));
+                return numA - numB;
+            });
+
+            // Render
+            let html = '';
+            sortedWeeks.forEach(weekNum => {
+                const week = weeks[weekNum];
+                const inicio = formatDate(week.inicio);
+                const fim = formatDate(week.fim);
+
+                html += `
+                    <div class="week-section">
+                        <div class="week-header">Semana ${weekNum}</div>
+                        <div class="week-dates">${inicio} - ${fim}</div>
+                        <div class="tasks-grid">
+                `;
+
+                week.tasks.forEach(task => {
+                    const taskClass = getTaskClass(task.tarefa);
+                    html += `
+                        <div class="task-card ${taskClass}">
+                            <div class="task-title">${task.tarefa || 'Sem título'}</div>
+                            <div class="task-person experiente">
+                                <span class="person-label">👤 Experiente:</span>
+                                <span class="person-name">${task.experiente || '-'}</span>
+                            </div>
+                            <div class="task-person novato">
+                                <span class="person-label">🎓 Novato:</span>
+                                <span class="person-name">${task.novato || '-'}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('calendar').innerHTML = html;
+        }
+
+        // Load calendar on page load
+        loadCalendar();
+
+        // Reload every 5 minutes to get fresh data
+        setInterval(loadCalendar, 5 * 60 * 1000);
+    </script>
+</body>
+</html>
