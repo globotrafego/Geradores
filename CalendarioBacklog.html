@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calendário de Tarefas</title>
+    <title>Calendário Backlog</title>
     <style>
         :root {
             --bg-primary: #ffffff;
@@ -98,6 +98,17 @@
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 20px;
+        }
+
+        .debug {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
         }
 
         .legend {
@@ -326,7 +337,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>📅 Calendário de Tarefas</h1>
+            <h1>📅 Calendário Backlog</h1>
             <button class="theme-toggle" id="themeToggle">
                 <span id="themeIcon">🌙</span>
                 <span id="themeText">Modo Escuro</span>
@@ -400,6 +411,10 @@
                     return;
                 }
 
+                // Debug: log the first row to see what columns we have
+                console.log('First row of data:', data[0]);
+                console.log('Column names:', Object.keys(data[0]));
+
                 renderCalendar(data);
             } catch (error) {
                 console.error('Error loading calendar:', error);
@@ -461,6 +476,15 @@
             if (task.includes('d2c')) return 'd2c';
             if (task.includes('revisao') || task.includes('revisão') || task.includes('diaria') || task.includes('diária')) return 'revisao';
             return 'dai'; // default
+        }
+
+        function findColumnValue(row, possibleNames) {
+            for (let name of possibleNames) {
+                if (row[name] !== undefined && row[name] !== '') {
+                    return row[name];
+                }
+            }
+            return null;
         }
 
         function parseDate(dateStr) {
@@ -597,21 +621,22 @@
             const weeks = {};
 
             data.forEach(row => {
-                const weekNum = row.Semana || row.semana;
+                // Try different possible column names
+                const weekNum = findColumnValue(row, ['Semana', 'semana', 'SEMANA', 'Week', 'week']);
                 if (!weekNum) return;
 
                 if (!weeks[weekNum]) {
                     weeks[weekNum] = {
-                        inicio: row.Inicio || row.inicio,
-                        fim: row.Fim || row.fim,
+                        inicio: findColumnValue(row, ['Inicio', 'Início', 'inicio', 'início', 'INICIO', 'Start', 'start']),
+                        fim: findColumnValue(row, ['Fim', 'fim', 'FIM', 'End', 'end']),
                         tasks: []
                     };
                 }
 
                 weeks[weekNum].tasks.push({
-                    tarefa: row.Tarefa || row.tarefa,
-                    experiente: row.Experiente || row.experiente,
-                    novato: row.Notavo || row.notavo || row.Novato || row.novato
+                    tarefa: findColumnValue(row, ['Tarefa', 'tarefa', 'TAREFA', 'Task', 'task']),
+                    experiente: findColumnValue(row, ['Experiente', 'experiente', 'EXPERIENTE']),
+                    novato: findColumnValue(row, ['Notavo', 'notavo', 'NOTAVO', 'Novato', 'novato', 'NOVATO'])
                 });
             });
 
@@ -657,6 +682,8 @@
             renderOrder.forEach(({ weekNum, isCurrent, isPast }) => {
                 const week = weeks[weekNum];
 
+                console.log(`Week ${weekNum}:`, 'inicio=', week.inicio, 'fim=', week.fim);
+
                 // Format the dates or keep the original if they exist
                 const inicioFormatted = formatDate(week.inicio);
                 const fimFormatted = formatDate(week.fim);
@@ -670,6 +697,8 @@
                     dateDisplay = `${inicioFormatted} - ${fimFormatted}`;
                 } else if (week.inicio && week.fim) {
                     dateDisplay = `${week.inicio} - ${week.fim}`;
+                } else if (week.inicio || week.fim) {
+                    dateDisplay = `${week.inicio || ''} - ${week.fim || ''}`;
                 } else {
                     dateDisplay = 'Datas não disponíveis';
                 }
