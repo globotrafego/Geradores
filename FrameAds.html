@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Validador Frame Ads</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --border: #2e3350;
+    --text: #e8eaf6;
+    --text-muted: #8891b4;
+    --accent: #5c6bc0;
+    --accent-hover: #7986cb;
+    --success: #43a047;
+    --success-bg: #1b3a1e;
+    --error: #e53935;
+    --error-bg: #3a1b1b;
+    --radius: 12px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+    --transition: 0.2s ease;
+  }
+  [data-theme="light"] {
+    --bg: #f0f2f9;
+    --surface: #ffffff;
+    --surface2: #eef0f8;
+    --border: #d0d4e8;
+    --text: #1a1d2e;
+    --text-muted: #5a6080;
+    --accent: #3f51b5;
+    --accent-hover: #5c6bc0;
+    --success: #2e7d32;
+    --success-bg: #e8f5e9;
+    --error: #c62828;
+    --error-bg: #ffebee;
+    --shadow: 0 4px 24px rgba(0,0,0,0.1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    transition: background var(--transition), color var(--transition);
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 32px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow);
+  }
+
+  .header-title { display: flex; align-items: center; gap: 12px; }
+  .header-title svg { color: var(--accent); }
+
+  .theme-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    padding: 6px 14px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    transition: all var(--transition);
+    user-select: none;
+  }
+  .theme-toggle:hover { border-color: var(--accent); color: var(--text); }
+
+  main { max-width: 1100px; margin: 36px auto; padding: 0 24px 60px; }
+
+  .specs-bar { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 28px; }
+
+  .spec-pill {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    padding: 7px 16px;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+  .spec-pill span.label { color: var(--text); font-weight: 500; }
+
+  .drop-zone {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    padding: 48px 32px;
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--transition);
+    position: relative;
+  }
+  .drop-zone:hover, .drop-zone.dragover { border-color: var(--accent); background: var(--surface2); }
+  .drop-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .drop-icon { font-size: 2.5rem; margin-bottom: 12px; }
+  .drop-zone h2 { font-size: 1.05rem; font-weight: 600; margin-bottom: 6px; }
+  .drop-zone p { font-size: 0.85rem; color: var(--text-muted); }
+  .btn-select {
+    display: inline-block; margin-top: 16px;
+    background: var(--accent); color: #fff; border: none; border-radius: 8px;
+    padding: 10px 24px; font-size: 0.9rem; font-weight: 600; cursor: pointer;
+    pointer-events: none; transition: background var(--transition);
+  }
+  .drop-zone:hover .btn-select { background: var(--accent-hover); }
+
+  #results { margin-top: 32px; display: none; flex-direction: column; gap: 24px; }
+
+  .section-header {
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px;
+  }
+
+  .validation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+
+  .val-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px 18px;
+    display: flex; align-items: flex-start; gap: 12px;
+    transition: border-color var(--transition);
+  }
+  .val-card.ok  { border-left: 3px solid var(--success); }
+  .val-card.error { border-left: 3px solid var(--error); }
+  .val-icon { font-size: 1.3rem; line-height: 1; flex-shrink: 0; }
+  .val-info { flex: 1; }
+  .val-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
+  .val-value { font-size: 1rem; font-weight: 700; }
+  .val-card.ok .val-value { color: var(--success); }
+  .val-card.error .val-value { color: var(--error); }
+  .val-expected { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+
+  .status-banner {
+    border-radius: var(--radius); padding: 14px 20px;
+    display: flex; align-items: center; gap: 12px;
+    font-weight: 600; font-size: 0.95rem;
+  }
+  .status-banner.all-ok  { background: var(--success-bg); color: var(--success); border: 1px solid var(--success); }
+  .status-banner.has-error { background: var(--error-bg);   color: var(--error);   border: 1px solid var(--error); }
+
+  .preview-wrapper {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px; overflow: hidden;
+  }
+  .preview-container { position: relative; display: inline-block; max-width: 100%; line-height: 0; }
+  #preview-img { max-width: 100%; max-height: 540px; display: block; border-radius: 6px; }
+  #overlay-canvas { position: absolute; top: 0; left: 0; pointer-events: none; border-radius: 6px; }
+
+  .overlay-legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 16px; }
+  .legend-item { display: flex; align-items: center; gap: 7px; font-size: 0.82rem; color: var(--text-muted); }
+  .legend-swatch { width: 16px; height: 10px; border-radius: 3px; border: 1.5px solid rgba(255,255,255,0.2); }
+
+  .file-info-bar {
+    display: flex; align-items: center; gap: 16px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 16px; font-size: 0.83rem;
+    color: var(--text-muted); flex-wrap: wrap;
+  }
+  .file-info-bar strong { color: var(--text); }
+
+  .reset-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: transparent; border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 18px; font-size: 0.85rem;
+    color: var(--text-muted); cursor: pointer; transition: all var(--transition);
+  }
+  .reset-btn:hover { border-color: var(--accent); color: var(--text); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-title">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+      <polyline points="21 15 16 10 5 21"/>
+    </svg>
+    <div>
+      <div style="font-size:1.1rem;font-weight:700;">Validador Frame Ads</div>
+      <div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px;">Verificação de especificações técnicas de Frame Ads</div>
+    </div>
+  </div>
+  <div class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
+    <span id="themeIcon">☀️</span>
+    <span id="themeLabel">Modo Claro</span>
+  </div>
+</header>
+
+<main>
+  <div class="specs-bar">
+    <div class="spec-pill">📐 <span class="label">1920 × 1080 px</span></div>
+    <div class="spec-pill">⚖️ Máx. <span class="label">900 KB</span></div>
+    <div class="spec-pill">🖼️ <span class="label">PNG</span> ou <span class="label">JPG</span></div>
+  </div>
+
+  <div class="drop-zone" id="dropZone">
+    <input type="file" id="fileInput" accept=".png,.jpg,.jpeg,image/png,image/jpeg" onchange="handleFile(this.files[0])">
+    <div class="drop-icon">🖼️</div>
+    <h2>Arraste e solte sua imagem aqui</h2>
+    <p>ou clique para selecionar do seu computador</p>
+    <div class="btn-select">Selecionar Arquivo</div>
+  </div>
+
+  <div id="results">
+    <div>
+      <div class="section-header">Arquivo Selecionado</div>
+      <div class="file-info-bar" id="fileInfoBar"></div>
+    </div>
+    <div>
+      <div class="section-header">Resultado da Validação</div>
+      <div class="status-banner" id="statusBanner"></div>
+    </div>
+    <div>
+      <div class="section-header">Detalhes</div>
+      <div class="validation-grid" id="validationGrid"></div>
+    </div>
+    <div>
+      <div class="section-header">Pré-visualização com Overlay</div>
+      <div class="preview-wrapper">
+        <div class="preview-container" id="previewContainer">
+          <img id="preview-img" alt="Pré-visualização">
+          <canvas id="overlay-canvas"></canvas>
+        </div>
+        <div class="overlay-legend">
+          <div class="legend-item">
+            <div class="legend-swatch" style="background:rgba(255,255,255,0.28);border-color:rgba(255,255,255,0.7)"></div>
+            Área de Conteúdo — 1280×720 px
+          </div>
+          <div class="legend-item">
+            <div class="legend-swatch" style="background:rgba(30,120,255,0.45);border-color:#1e78ff"></div>
+            Área de Conteúdo (restante)
+          </div>
+          <div class="legend-item">
+            <div class="legend-swatch" style="background:rgba(220,30,30,0.45);border-color:#dc1e1e"></div>
+            Área Reservada — 480×360 px
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;">
+      <button class="reset-btn" onclick="resetValidator()">↩ Validar nova imagem</button>
+    </div>
+  </div>
+</main>
+
+<script>
+const REQUIRED = { width: 1920, height: 1080, maxKB: 900, types: ['image/png', 'image/jpeg'] };
+
+const dropZone = document.getElementById('dropZone');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault(); dropZone.classList.remove('dragover');
+  if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+});
+
+function handleFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => runValidation(file, img, e.target.result);
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function runValidation(file, img, dataUrl) {
+  const sizeKB   = file.size / 1024;
+  const typeOk   = REQUIRED.types.includes(file.type);
+  const widthOk  = img.width  === REQUIRED.width;
+  const heightOk = img.height === REQUIRED.height;
+  const sizeOk   = sizeKB    <= REQUIRED.maxKB;
+  const allOk    = typeOk && widthOk && heightOk && sizeOk;
+  const ext      = file.name.split('.').pop().toUpperCase();
+
+  document.getElementById('fileInfoBar').innerHTML =
+    `<strong>${file.name}</strong>
+     <span>·</span><span>${ext}</span>
+     <span>·</span><span>${sizeKB.toFixed(1)} KB</span>
+     <span>·</span><span>${img.width} × ${img.height} px</span>`;
+
+  const banner = document.getElementById('statusBanner');
+  banner.className = 'status-banner ' + (allOk ? 'all-ok' : 'has-error');
+  banner.innerHTML  = allOk
+    ? '✅ Imagem aprovada! Todos os parâmetros estão dentro do esperado.'
+    : '❌ Imagem reprovada. Um ou mais parâmetros estão fora das especificações.';
+
+  const cards = [
+    { label:'Largura',  value: img.width  + ' px',          ok: widthOk,  expected:'Esperado: 1920 px' },
+    { label:'Altura',   value: img.height + ' px',          ok: heightOk, expected:'Esperado: 1080 px' },
+    { label:'Peso',     value: sizeKB.toFixed(1) + ' KB',   ok: sizeOk,   expected:'Máximo: 900 KB'    },
+    { label:'Formato',  value: ext,                          ok: typeOk,   expected:'Aceito: PNG, JPG'  },
+  ];
+  const grid = document.getElementById('validationGrid');
+  grid.innerHTML = '';
+  cards.forEach(c => {
+    const d = document.createElement('div');
+    d.className = 'val-card ' + (c.ok ? 'ok' : 'error');
+    d.innerHTML = `<div class="val-icon">${c.ok ? '✅' : '❌'}</div>
+      <div class="val-info">
+        <div class="val-label">${c.label}</div>
+        <div class="val-value">${c.value}</div>
+        <div class="val-expected">${c.expected}</div>
+      </div>`;
+    grid.appendChild(d);
+  });
+
+  const previewImg = document.getElementById('preview-img');
+  previewImg.src = dataUrl;
+  previewImg.onload = () => drawOverlay(img.width, img.height);
+
+  document.getElementById('results').style.display = 'flex';
+  document.getElementById('dropZone').style.display = 'none';
+  document.getElementById('results').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+/* ─── helpers ─── */
+function labelBox(ctx, text, x, y, align, valign, bg, textColor) {
+  const pad = { x: 9, y: 6 };
+  const fs  = 13;
+  ctx.font  = `700 ${fs}px Segoe UI, system-ui, sans-serif`;
+  const tw  = ctx.measureText(text).width;
+  const bw  = tw + pad.x * 2;
+  const bh  = fs + pad.y * 2;
+
+  let bx = x, by = y;
+  if (align   === 'right')  bx = x - bw;
+  if (valign  === 'bottom') by = y - bh;
+
+  /* pill background */
+  const r = 5;
+  ctx.fillStyle = bg;
+  ctx.beginPath();
+  ctx.moveTo(bx + r, by);
+  ctx.lineTo(bx + bw - r, by);
+  ctx.quadraticCurveTo(bx + bw, by, bx + bw, by + r);
+  ctx.lineTo(bx + bw, by + bh - r);
+  ctx.quadraticCurveTo(bx + bw, by + bh, bx + bw - r, by + bh);
+  ctx.lineTo(bx + r, by + bh);
+  ctx.quadraticCurveTo(bx, by + bh, bx, by + bh - r);
+  ctx.lineTo(bx, by + r);
+  ctx.quadraticCurveTo(bx, by, bx + r, by);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.fillStyle   = textColor;
+  ctx.textBaseline = 'middle';
+  ctx.textAlign    = 'left';
+  ctx.fillText(text, bx + pad.x, by + bh / 2);
+}
+
+function drawOverlay(origW, origH) {
+  const img    = document.getElementById('preview-img');
+  const canvas = document.getElementById('overlay-canvas');
+  const dW     = img.offsetWidth;
+  const dH     = img.offsetHeight;
+  canvas.width  = dW;
+  canvas.height = dH;
+  canvas.style.width  = dW + 'px';
+  canvas.style.height = dH + 'px';
+
+  const sX = dW / origW;
+  const sY = dH / origH;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, dW, dH);
+
+  /* zone dimensions (scaled) */
+  const white = { x:0, y:0,           w: 1280*sX, h: 720*sY };
+  const red   = { x:0, y: dH-360*sY,  w: 480*sX,  h: 360*sY };
+
+  /* ── 1. Blue "Área de Conteúdo (restante)" – full canvas minus white rect ── */
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(0, 0, dW, dH);          /* outer */
+  ctx.rect(white.x, white.y, white.w, white.h); /* hole */
+  ctx.clip('evenodd');
+  ctx.fillStyle = 'rgba(30, 120, 255, 0.42)';
+  ctx.fillRect(0, 0, dW, dH);
+  ctx.restore();
+
+  /* blue border (full canvas edge) */
+  ctx.strokeStyle = '#1e78ff';
+  ctx.lineWidth   = 2;
+  ctx.setLineDash([]);
+  ctx.strokeRect(1, 1, dW - 2, dH - 2);
+
+  /* ── 2. White "Área de Conteúdo" ── */
+  ctx.fillStyle   = 'rgba(255, 255, 255, 0.18)';
+  ctx.fillRect(white.x, white.y, white.w, white.h);
+  ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+  ctx.lineWidth   = 2;
+  ctx.setLineDash([7, 4]);
+  ctx.strokeRect(white.x + 1, white.y + 1, white.w - 2, white.h - 2);
+  ctx.setLineDash([]);
+
+  /* ── 3. Red "Área Reservada" ── */
+  ctx.fillStyle   = 'rgba(220, 30, 30, 0.42)';
+  ctx.fillRect(red.x, red.y, red.w, red.h);
+  ctx.strokeStyle = '#dc1e1e';
+  ctx.lineWidth   = 2;
+  ctx.strokeRect(red.x + 1, red.y + 1, red.w - 2, red.h - 2);
+
+  /* ── Labels (pill badges) ── */
+  /* White zone — top-left corner */
+  labelBox(ctx,
+    'Área do Player  •  1280×720 px',
+    white.x + 10, white.y + 10,
+    'left', 'top',
+    'rgba(255,255,255,0.92)', '#111');
+
+  /* Blue zone — top-right corner */
+  labelBox(ctx,
+    'Área de Conteúdo',
+    dW - 10, 10,
+    'right', 'top',
+    'rgba(30,120,255,0.92)', '#fff');
+
+  /* Red zone — bottom-left corner, anchored to bottom */
+  labelBox(ctx,
+    'Área Reservada  •  480×360 px',
+    red.x + 10, red.y + red.h - 10,
+    'left', 'bottom',
+    'rgba(200,20,20,0.92)', '#fff');
+}
+
+window.addEventListener('resize', () => {
+  const img = document.getElementById('preview-img');
+  if (img.src && img.naturalWidth) drawOverlay(img.naturalWidth, img.naturalHeight);
+});
+
+function resetValidator() {
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('dropZone').style.display = 'block';
+  document.getElementById('fileInput').value = '';
+  const c = document.getElementById('overlay-canvas');
+  c.getContext('2d').clearRect(0, 0, c.width, c.height);
+  document.getElementById('preview-img').src = '';
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+function toggleTheme() {
+  const html  = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('themeIcon').textContent  = isDark ? '🌙' : '☀️';
+  document.getElementById('themeLabel').textContent = isDark ? 'Modo Escuro' : 'Modo Claro';
+  localStorage.setItem('theme', isDark ? 'light' : 'dark');
+}
+
+(function(){
+  const saved = localStorage.getItem('theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  if (saved === 'light') {
+    document.getElementById('themeIcon').textContent  = '🌙';
+    document.getElementById('themeLabel').textContent = 'Modo Escuro';
+  }
+})();
+</script>
+</body>
+</html>
