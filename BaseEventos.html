@@ -97,7 +97,8 @@
         }
 
         select,
-        input[type="file"] {
+        input[type="file"],
+        input[type="text"] {
             width: 100%;
             padding: 0.75rem 1rem;
             background: rgba(15, 23, 42, 0.6);
@@ -110,7 +111,8 @@
         }
 
         select:focus,
-        input[type="file"]:focus {
+        input[type="file"]:focus,
+        input[type="text"]:focus {
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
         }
@@ -242,6 +244,11 @@
         </div>
 
         <div class="form-group">
+            <label for="anuncianteInput">Anunciante</label>
+            <input type="text" id="anuncianteInput" placeholder="Ex: Marca XYZ" disabled>
+        </div>
+
+        <div class="form-group">
             <label for="sheetSelect">Planilha de Destino</label>
             <select id="sheetSelect" disabled>
                 <option value="">Carregando planilhas...</option>
@@ -271,6 +278,7 @@
 
         const sheetSelect = document.getElementById('sheetSelect');
         const excelFile = document.getElementById('excelFile');
+        const anuncianteInput = document.getElementById('anuncianteInput');
         const submitBtn = document.getElementById('submitBtn');
         const statusMessage = document.getElementById('statusMessage');
         const setupWarning = document.getElementById('setupWarning');
@@ -297,13 +305,15 @@
             try {
                 await fetchSheets();
                 excelFile.disabled = false;
+                anuncianteInput.disabled = false;
 
                 // Enable button only if file and sheet are selected
                 const checkInputs = () => {
-                    submitBtn.disabled = !excelFile.files.length || !sheetSelect.value;
+                    submitBtn.disabled = !excelFile.files.length || !sheetSelect.value || !anuncianteInput.value.trim();
                 };
                 excelFile.addEventListener('change', checkInputs);
                 sheetSelect.addEventListener('change', checkInputs);
+                anuncianteInput.addEventListener('input', checkInputs);
 
             } catch (error) {
                 setStatus("error", "Erro ao conectar com o Google Sheets. Verifique a URL do Web App e as permissões.");
@@ -334,14 +344,15 @@
         submitBtn.addEventListener('click', async () => {
             const file = excelFile.files[0];
             const sheetName = sheetSelect.value;
+            const anuncianteName = anuncianteInput.value.trim();
 
-            if (!file || !sheetName) return;
+            if (!file || !sheetName || !anuncianteName) return;
 
             setLoading(true);
             setStatus("info", "Lendo arquivo Excel...");
 
             try {
-                const mappedRows = await readAndMapExcel(file);
+                const mappedRows = await readAndMapExcel(file, anuncianteName);
 
                 if (mappedRows.length === 0) {
                     throw new Error("Nenhum dado encontrado no arquivo.");
@@ -367,6 +378,7 @@
                 if (result.success) {
                     setStatus("success", `Sucesso! ${result.rowsAdded} linhas adicionadas na aba '${sheetName}'.`);
                     excelFile.value = ""; // Reset file
+                    anuncianteInput.value = ""; // Reset input
                     submitBtn.disabled = true;
                 } else {
                     throw new Error(result.error || "Erro ao salvar no Google Sheets.");
@@ -379,7 +391,7 @@
             }
         });
 
-        function readAndMapExcel(file) {
+        function readAndMapExcel(file, anuncianteName) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
 
@@ -474,7 +486,7 @@
                             const valDataFim = getVal("DataFim");
 
                             const mappedRow = [
-                                "", // Anunciante
+                                anuncianteName, // Anunciante
                                 "", // Order
                                 valVertical, // Vertical
                                 valEditoria, // Editoria
@@ -523,13 +535,15 @@
                 submitBtn.disabled = true;
                 excelFile.disabled = true;
                 sheetSelect.disabled = true;
+                anuncianteInput.disabled = true;
             } else {
                 btnLoader.style.display = "none";
                 btnText.textContent = "Importar Dados";
                 // Only re-enable if inputs are valid
-                submitBtn.disabled = !(excelFile.files.length && sheetSelect.value);
+                submitBtn.disabled = !(excelFile.files.length && sheetSelect.value && anuncianteInput.value.trim());
                 excelFile.disabled = false;
                 sheetSelect.disabled = false;
+                anuncianteInput.disabled = false;
             }
         }
     </script>
