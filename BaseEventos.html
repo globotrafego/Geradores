@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Importar Excel para Google Sheets</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --success: #10b981;
+            --error: #ef4444;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image:
+                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.15) 0px, transparent 50%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .container {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 3rem;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .header h1 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #60a5fa, #34d399);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+        }
+
+        select,
+        input[type="file"] {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-main);
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        select:focus,
+        input[type="file"]:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        /* Customizing file input */
+        input[type="file"]::file-selector-button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            margin-right: 1rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        input[type="file"]::file-selector-button:hover {
+            background: var(--primary-hover);
+        }
+
+        button.submit-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+        }
+
+        button.submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
+        }
+
+        button.submit-btn:active {
+            transform: translateY(0);
+        }
+
+        button.submit-btn:disabled {
+            background: #475569;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .status {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            text-align: center;
+            display: none;
+        }
+
+        .status.info {
+            display: block;
+            background: rgba(59, 130, 246, 0.1);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .status.success {
+            display: block;
+            background: rgba(16, 185, 129, 0.1);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .status.error {
+            display: block;
+            background: rgba(239, 68, 68, 0.1);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .loader {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .setup-warning {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            color: #fbbf24;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            font-size: 0.875rem;
+            text-align: left;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>PROJ &rarr; BASE</h1>
+            <p>Importe dados para a Base de Projetos</p>
+        </div>
+
+        <div id="setupWarning" class="setup-warning">
+            <strong>⚠️ Atenção:</strong> Configure a WEB_APP_URL no código fonte deste arquivo HTML para continuar.
+        </div>
+
+        <div class="form-group">
+            <label for="sheetSelect">Planilha de Destino</label>
+            <select id="sheetSelect" disabled>
+                <option value="">Carregando planilhas...</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="excelFile">Arquivo Excel (.xlsx)</label>
+            <input type="file" id="excelFile" accept=".xlsx, .xls, .csv" disabled>
+        </div>
+
+        <button id="submitBtn" class="submit-btn" disabled>
+            <div class="loader" id="btnLoader"></div>
+            <span id="btnText">Importar Dados</span>
+        </button>
+
+        <div id="statusMessage" class="status"></div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 1. INSIRA A URL DO SEU WEB APP ABAIXO:
+        // ==========================================
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwGJFfkMLGe-k4h9Ii9vW3A8xLfR0Wn_CINinaJCDuipBBrfJX7aGH-qFILJx2QniKs/exec";
+
+        // ==========================================
+
+        const sheetSelect = document.getElementById('sheetSelect');
+        const excelFile = document.getElementById('excelFile');
+        const submitBtn = document.getElementById('submitBtn');
+        const statusMessage = document.getElementById('statusMessage');
+        const setupWarning = document.getElementById('setupWarning');
+        const btnLoader = document.getElementById('btnLoader');
+        const btnText = document.getElementById('btnText');
+
+        // Target column order for Google Sheets
+        const COLUMNS = [
+            "Anunciante", "Order", "Vertical", "Editoria", "Linha",
+            "Posicao", "DataInicio", "HoraInicio", "DataFim", "HoraFim",
+            "IDLinha", "Status", "Observacao"
+        ];
+
+        // Initialization
+        window.addEventListener('DOMContentLoaded', async () => {
+            if (WEB_APP_URL === "COLE_A_URL_DO_WEB_APP_AQUI" || !WEB_APP_URL) {
+                setupWarning.style.display = "block";
+                setStatus("error", "Por favor, configure o WEB_APP_URL no código.");
+                return;
+            } else {
+                setupWarning.style.display = "none";
+            }
+
+            try {
+                await fetchSheets();
+                excelFile.disabled = false;
+
+                // Enable button only if file and sheet are selected
+                const checkInputs = () => {
+                    submitBtn.disabled = !excelFile.files.length || !sheetSelect.value;
+                };
+                excelFile.addEventListener('change', checkInputs);
+                sheetSelect.addEventListener('change', checkInputs);
+
+            } catch (error) {
+                setStatus("error", "Erro ao conectar com o Google Sheets. Verifique a URL do Web App e as permissões.");
+                console.error(error);
+            }
+        });
+
+        async function fetchSheets() {
+            sheetSelect.innerHTML = '<option value="">Carregando...</option>';
+
+            const response = await fetch(WEB_APP_URL);
+            const data = await response.json();
+
+            if (data.success) {
+                sheetSelect.innerHTML = '<option value="">-- Selecione uma aba --</option>';
+                data.sheets.forEach(sheetName => {
+                    const option = document.createElement('option');
+                    option.value = sheetName;
+                    option.textContent = sheetName;
+                    sheetSelect.appendChild(option);
+                });
+                sheetSelect.disabled = false;
+            } else {
+                throw new Error(data.error || "Failed to load sheets");
+            }
+        }
+
+        submitBtn.addEventListener('click', async () => {
+            const file = excelFile.files[0];
+            const sheetName = sheetSelect.value;
+
+            if (!file || !sheetName) return;
+
+            setLoading(true);
+            setStatus("info", "Lendo arquivo Excel...");
+
+            try {
+                const mappedRows = await readAndMapExcel(file);
+
+                if (mappedRows.length === 0) {
+                    throw new Error("Nenhum dado encontrado no arquivo.");
+                }
+
+                setStatus("info", `Enviando ${mappedRows.length} linhas para o Google Sheets...`);
+
+                // Send to Apps Script
+                const payload = {
+                    sheetName: sheetName,
+                    rows: mappedRows
+                };
+
+                const response = await fetch(WEB_APP_URL, {
+                    method: "POST",
+                    // text/plain avoids CORS preflight options request
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    setStatus("success", `Sucesso! ${result.rowsAdded} linhas adicionadas na aba '${sheetName}'.`);
+                    excelFile.value = ""; // Reset file
+                    submitBtn.disabled = true;
+                } else {
+                    throw new Error(result.error || "Erro ao salvar no Google Sheets.");
+                }
+
+            } catch (error) {
+                setStatus("error", error.message);
+            } finally {
+                setLoading(false);
+            }
+        });
+
+        function readAndMapExcel(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+
+                reader.onload = (e) => {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+
+                        // Grab the first VISIBLE sheet from the Excel file
+                        let targetSheetName = null;
+
+                        for (let i = 0; i < workbook.SheetNames.length; i++) {
+                            const sheetName = workbook.SheetNames[i];
+                            const sheetMeta = workbook.Workbook && workbook.Workbook.Sheets ? workbook.Workbook.Sheets[i] : null;
+                            const isHidden = sheetMeta ? (sheetMeta.Hidden === 1 || sheetMeta.Hidden === 2) : false;
+
+                            if (!isHidden) {
+                                targetSheetName = sheetName;
+                                break;
+                            }
+                        }
+
+                        if (!targetSheetName) {
+                            targetSheetName = workbook.SheetNames[0]; // Fallback
+                        }
+
+                        const worksheet = workbook.Sheets[targetSheetName];
+
+                        // Convert to array of arrays to find the actual header row
+                        const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
+
+                        let headerRowIndex = -1;
+                        let colIndices = {};
+
+                        // Keywords to look for to identify the header row
+                        const possibleHeaders = {
+                            Vertical: ["Vertical"],
+                            Editoria: ["Editoria / Local de Entrega", "Editoria", "Local de Entrega"],
+                            Linha: ["Formato/Produto", "Formato", "Produto"],
+                            Posicao: ["Posição", "Posicao"],
+                            DataInicio: ["Início de Exibição", "Inicio de Exibicao"],
+                            DataFim: ["Fim de Exibição", "Fim de Exibicao"]
+                        };
+
+                        // 1. Find the header row
+                        for (let i = 0; i < rawData.length; i++) {
+                            const row = rawData[i];
+                            let matchCount = 0;
+                            let tempIndices = {};
+
+                            for (let j = 0; j < row.length; j++) {
+                                const cellValue = String(row[j]).trim().toLowerCase();
+                                if (!cellValue) continue;
+
+                                for (const [key, variations] of Object.entries(possibleHeaders)) {
+                                    if (variations.some(v => v.trim().toLowerCase() === cellValue)) {
+                                        tempIndices[key] = j;
+                                        matchCount++;
+                                    }
+                                }
+                            }
+
+                            // If we found at least 2 of our target columns, it's definitely the header row
+                            if (matchCount >= 2) {
+                                headerRowIndex = i;
+                                colIndices = tempIndices;
+                                break;
+                            }
+                        }
+
+                        if (headerRowIndex === -1) {
+                            reject(new Error("Não foi possível encontrar a linha de cabeçalho com as colunas (Vertical, Posição, etc) no Excel."));
+                            return;
+                        }
+
+                        // 2. Map the data rows (everything below the header row)
+                        const mappedRows = [];
+                        for (let i = headerRowIndex + 1; i < rawData.length; i++) {
+                            const row = rawData[i];
+
+                            // Helper to safely get cell by mapped index
+                            const getVal = (key) => {
+                                const idx = colIndices[key];
+                                return idx !== undefined && idx < row.length ? row[idx] : "";
+                            };
+
+                            const valVertical = getVal("Vertical");
+                            const valEditoria = getVal("Editoria");
+                            const valLinha = getVal("Linha");
+                            const valPosicao = getVal("Posicao");
+                            const valDataInicio = getVal("DataInicio");
+                            const valDataFim = getVal("DataFim");
+
+                            const mappedRow = [
+                                "", // Anunciante
+                                "", // Order
+                                valVertical, // Vertical
+                                valEditoria, // Editoria
+                                valLinha, // Linha
+                                valPosicao, // Posicao
+                                valDataInicio, // DataInicio
+                                "", // HoraInicio
+                                valDataFim, // DataFim
+                                "", // HoraFim
+                                "", // IDLinha
+                                "", // Status
+                                ""  // Observacao
+                            ];
+
+                            mappedRows.push(mappedRow);
+                        }
+
+                        // Filter out completely empty rows (where all mapped values are empty)
+                        const cleanRows = mappedRows.filter(row => row.some(cell => cell !== ""));
+
+                        if (cleanRows.length === 0) {
+                            reject(new Error("As colunas foram encontradas, mas não há dados abaixo delas."));
+                            return;
+                        }
+
+                        resolve(cleanRows);
+                    } catch (err) {
+                        reject(new Error("Falha ao analisar o arquivo Excel. Verifique o formato."));
+                    }
+                };
+
+                reader.onerror = () => reject(new Error("Falha ao ler o arquivo."));
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        function setStatus(type, text) {
+            statusMessage.className = `status ${type}`;
+            statusMessage.textContent = text;
+        }
+
+        function setLoading(isLoading) {
+            if (isLoading) {
+                btnLoader.style.display = "block";
+                btnText.textContent = "Processando...";
+                submitBtn.disabled = true;
+                excelFile.disabled = true;
+                sheetSelect.disabled = true;
+            } else {
+                btnLoader.style.display = "none";
+                btnText.textContent = "Importar Dados";
+                // Only re-enable if inputs are valid
+                submitBtn.disabled = !(excelFile.files.length && sheetSelect.value);
+                excelFile.disabled = false;
+                sheetSelect.disabled = false;
+            }
+        }
+    </script>
+</body>
+
+</html>
