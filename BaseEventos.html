@@ -485,6 +485,11 @@
                             const valDataInicio = getVal("DataInicio");
                             const valDataFim = getVal("DataFim");
 
+                            // Skip rows that don't have any data in the mapped columns
+                            if (!valVertical && !valEditoria && !valLinha && !valPosicao && !valDataInicio && !valDataFim) {
+                                continue;
+                            }
+
                             const mappedRow = [
                                 anuncianteName, // Anunciante
                                 "", // Order
@@ -504,15 +509,13 @@
                             mappedRows.push(mappedRow);
                         }
 
-                        // Filter out completely empty rows (where all mapped values are empty)
-                        const cleanRows = mappedRows.filter(row => row.some(cell => cell !== ""));
-
-                        if (cleanRows.length === 0) {
+                        // Check if we found any valid rows
+                        if (mappedRows.length === 0) {
                             reject(new Error("As colunas foram encontradas, mas não há dados abaixo delas."));
                             return;
                         }
 
-                        resolve(cleanRows);
+                        resolve(mappedRows);
                     } catch (err) {
                         reject(new Error("Falha ao analisar o arquivo Excel. Verifique o formato."));
                     }
