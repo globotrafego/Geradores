@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Validador de Imagem</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f0f2f8; --surface:#fff; --surface2:#f4f5fb;
+  --border:rgba(30,40,80,0.12); --text:#1a1d2e; --text-muted:#5a6080; --text-faint:#9ba3bf;
+  --accent:#3f51b5; --accent-h:#2c3a99;
+  --ok:#2e7d32; --ok-bg:#e8f5e9; --ok-b:#4caf50;
+  --err:#c62828; --err-bg:#ffebee; --err-b:#ef5350;
+  --info-bg:#e8eaf6; --info-b:#7986cb; --info-c:#283593;
+  --r:10px; --sh:0 1px 3px rgba(0,0,0,.07); --t:.18s ease;
+}
+[data-theme="dark"] {
+  --bg:#0e1018; --surface:#161921; --surface2:#1d2030;
+  --border:rgba(255,255,255,.08); --text:#e0e3f0; --text-muted:#8890b0; --text-faint:#4d5470;
+  --accent:#7986cb; --accent-h:#9fa8da;
+  --ok:#66bb6a; --ok-bg:#0d2a0e; --ok-b:#388e3c;
+  --err:#ef5350; --err-bg:#2a0d0d; --err-b:#c62828;
+  --info-bg:#1a1f3a; --info-b:#5c6bc0; --info-c:#9fa8da;
+  --sh:0 1px 3px rgba(0,0,0,.3);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',system-ui,sans-serif;font-size:.9375rem;background:var(--bg);color:var(--text);min-height:100dvh;transition:background var(--t),color var(--t)}
+
+header{position:sticky;top:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:56px;background:var(--surface);border-bottom:1px solid var(--border);box-shadow:var(--sh)}
+.hd-brand{display:flex;align-items:center;gap:10px}
+.hd-logo{width:28px;height:28px;color:var(--accent);flex-shrink:0}
+.hd-title{font-size:.95rem;font-weight:700;letter-spacing:-.01em}
+.hd-sub{font-size:.72rem;color:var(--text-muted);margin-top:1px}
+.theme-btn{display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 13px;font-size:.78rem;font-weight:500;color:var(--text-muted);cursor:pointer;transition:all var(--t)}
+.theme-btn:hover{border-color:var(--accent);color:var(--text)}
+
+main{max-width:1060px;margin:0 auto;padding:32px 22px 72px}
+
+.specs-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px}
+.pill{display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:5px 14px;font-size:.77rem;color:var(--text-muted)}
+.pill strong{color:var(--text);font-weight:600}
+
+.drop-zone{position:relative;border:2px dashed var(--border);border-radius:var(--r);background:var(--surface);padding:52px 32px;text-align:center;cursor:pointer;transition:all var(--t)}
+.drop-zone:hover,.drop-zone.over{border-color:var(--accent);background:var(--surface2)}
+.drop-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.drop-icon{font-size:2.4rem;margin-bottom:11px}
+.drop-zone h2{font-size:1rem;font-weight:600;margin-bottom:5px}
+.drop-zone p{font-size:.82rem;color:var(--text-muted)}
+.drop-cta{display:inline-block;margin-top:16px;background:var(--accent);color:#fff;border-radius:7px;padding:9px 22px;font-size:.85rem;font-weight:600;pointer-events:none;transition:background var(--t)}
+.drop-zone:hover .drop-cta{background:var(--accent-h)}
+
+.unknown{display:none;align-items:center;gap:10px;background:var(--err-bg);border:1px solid var(--err-b);border-radius:var(--r);padding:14px 18px;font-weight:600;font-size:.9rem;color:var(--err);margin-top:20px}
+.unknown.on{display:flex}
+
+#results{margin-top:28px;display:none;flex-direction:column;gap:22px}
+.sec{font-size:.68rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text-faint);margin-bottom:10px}
+.info-bar{display:flex;align-items:center;gap:10px;background:var(--info-bg);border:1px solid var(--info-b);border-radius:var(--r);padding:11px 16px;font-size:.85rem;font-weight:600;color:var(--info-c)}
+.file-bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 15px;font-size:.8rem;color:var(--text-muted)}
+.file-bar strong{color:var(--text);max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.status{border-radius:var(--r);padding:12px 18px;display:flex;align-items:center;gap:10px;font-weight:600;font-size:.9rem;border:1px solid}
+.status.ok{background:var(--ok-bg);color:var(--ok);border-color:var(--ok-b)}
+.status.err{background:var(--err-bg);color:var(--err);border-color:var(--err-b)}
+.vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:10px}
+.vcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;display:flex;align-items:flex-start;gap:11px}
+.vcard.ok{border-left:3px solid var(--ok-b)}.vcard.err{border-left:3px solid var(--err-b)}
+.vico{font-size:1.15rem;flex-shrink:0;line-height:1}
+.vlbl{font-size:.67rem;text-transform:uppercase;letter-spacing:.07em;color:var(--text-faint);margin-bottom:2px}
+.vval{font-size:.93rem;font-weight:700}
+.vcard.ok .vval{color:var(--ok)}.vcard.err .vval{color:var(--err)}
+.vexp{font-size:.7rem;color:var(--text-muted);margin-top:2px}
+
+/* inline-block + no object-fit = canvas always matches painted image exactly */
+.prev-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px;overflow:hidden}
+.prev-box{position:relative;display:inline-block;line-height:0;max-width:100%}
+#pimg{display:block;max-width:100%;max-height:540px;width:auto;height:auto;border-radius:6px}
+#pcvs{position:absolute;top:0;left:0;pointer-events:none;border-radius:6px}
+
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:14px}
+.leg{display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--text-muted)}
+.swatch{width:14px;height:9px;border-radius:3px}
+
+.reset-btn{display:inline-flex;align-items:center;gap:5px;background:transparent;border:1px solid var(--border);border-radius:7px;padding:7px 16px;font-size:.8rem;color:var(--text-muted);cursor:pointer;transition:all var(--t)}
+.reset-btn:hover{border-color:var(--accent);color:var(--text)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hd-brand">
+    <svg class="hd-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="2"/>
+      <circle cx="8.5" cy="8.5" r="1.5"/>
+      <polyline points="21 15 16 10 5 21"/>
+    </svg>
+    <div>
+      <div class="hd-title">Validador de Imagem</div>
+      <div class="hd-sub">Verificação de especificações técnicas</div>
+    </div>
+  </div>
+  <button class="theme-btn" onclick="toggleTheme()">
+    <span id="tIcon">☀️</span><span id="tLabel">Modo Claro</span>
+  </button>
+</header>
+
+<main>
+  <div class="specs-bar" id="pills">
+    <div class="pill">📋 Formatos aceitos: <strong>FrameAd</strong>, <strong>Touchpoint Desktop</strong>, <strong>Touchpoint Mobile</strong></div>
+  </div>
+
+  <div class="drop-zone" id="dz">
+    <input type="file" id="fi" accept=".png,.jpg,.jpeg,image/png,image/jpeg" onchange="handleFile(this.files[0])">
+    <div class="drop-icon">🖼️</div>
+    <h2>Arraste e solte sua imagem aqui</h2>
+    <p>O formato será identificado automaticamente pelas dimensões da imagem</p>
+    <div class="drop-cta">Selecionar Arquivo</div>
+  </div>
+
+  <div class="unknown" id="unk">⚠️ <span id="unkMsg"></span></div>
+
+  <div id="results">
+    <div class="info-bar">🎯 <span id="fmtLabel"></span></div>
+    <div><div class="sec">Arquivo Selecionado</div><div class="file-bar" id="fbar"></div></div>
+    <div><div class="sec">Resultado da Validação</div><div class="status" id="sbanner"></div></div>
+    <div><div class="sec">Detalhes</div><div class="vgrid" id="vgrid"></div></div>
+    <div>
+      <div class="sec">Pré-visualização com Overlay</div>
+      <div class="prev-wrap">
+        <div class="prev-box" id="pbox">
+          <img id="pimg" alt="Pré-visualização">
+          <canvas id="pcvs"></canvas>
+        </div>
+        <div class="legend" id="leg"></div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end">
+      <button class="reset-btn" onclick="reset()">↩ Validar nova imagem</button>
+    </div>
+  </div>
+</main>
+
+<script>
+const FORMATS = [
+  { key:'framead', name:'FrameAd',                      w:1920, h:1080, maxKB:900, overlay:'hero'           },
+  { key:'desktop', name:'Touchpoint Imagetico Desktop',  w:1920, h:100,  maxKB:400, overlay:'lr', safeW:740  },
+  { key:'mobile',  name:'Touchpoint Imagetico Mobile',   w:430,  h:140,  maxKB:200, overlay:'lr', safeW:280  },
+];
+const TYPES = ['image/png','image/jpeg'];
+
+function detect(w,h){ return FORMATS.find(f=>f.w===w&&f.h===h)||null; }
+
+const dz = document.getElementById('dz');
+dz.addEventListener('dragover', e=>{e.preventDefault();dz.classList.add('over')});
+dz.addEventListener('dragleave', ()=>dz.classList.remove('over'));
+dz.addEventListener('drop', e=>{e.preventDefault();dz.classList.remove('over');if(e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0])});
+
+function handleFile(file){
+  if(!file) return;
+  const r=new FileReader();
+  r.onload=e=>{const img=new Image();img.onload=()=>go(file,img,e.target.result);img.src=e.target.result};
+  r.readAsDataURL(file);
+}
+
+function go(file,img,url){
+  document.getElementById('unk').classList.remove('on');
+  const fmt=detect(img.width,img.height);
+  if(!fmt){
+    document.getElementById('unk').classList.add('on');
+    document.getElementById('unkMsg').textContent=
+      `Dimensões não reconhecidas: ${img.width}×${img.height} px. Formatos aceitos: FrameAd (1920×1080), Touchpoint Desktop (1920×100), Touchpoint Mobile (430×140).`;
+    return;
+  }
+
+  const kb  = file.size/1024;
+  const tOk = TYPES.includes(file.type);
+  const sOk = kb<=fmt.maxKB;
+  const ok  = tOk&&sOk;
+  const ext = file.name.split('.').pop().toUpperCase();
+
+  document.getElementById('fmtLabel').textContent=`Formato detectado: ${fmt.name} (${fmt.w}×${fmt.h} px)`;
+
+  document.getElementById('pills').innerHTML=`
+    <div class="pill">🎯 <strong>${fmt.name}</strong></div>
+    <div class="pill">📐 <strong>${fmt.w} × ${fmt.h} px</strong></div>
+    <div class="pill">⚖️ Máx. <strong>${fmt.maxKB} KB</strong></div>
+    <div class="pill">🖼️ <strong>PNG</strong> ou <strong>JPG</strong></div>
+    ${fmt.overlay==='lr'?`<div class="pill">🟢 Safe Area: <strong>${fmt.safeW} px</strong> (esquerda)</div>`:''}
+  `;
+
+  document.getElementById('fbar').innerHTML=
+    `<strong>${file.name}</strong><span>·</span><span>${ext}</span><span>·</span><span>${kb.toFixed(1)} KB</span><span>·</span><span>${img.width}×${img.height} px</span>`;
+
+  const sb=document.getElementById('sbanner');
+  sb.className='status '+(ok?'ok':'err');
+  sb.innerHTML=ok?'✅ Imagem aprovada! Todos os parâmetros estão dentro do esperado.':'❌ Imagem reprovada. Um ou mais parâmetros estão fora das especificações.';
+
+  const vg=document.getElementById('vgrid');
+  vg.innerHTML='';
+  [{lbl:'Largura',val:img.width+' px', ok:true, exp:'Esperado: '+fmt.w+' px'},
+   {lbl:'Altura', val:img.height+' px',ok:true, exp:'Esperado: '+fmt.h+' px'},
+   {lbl:'Peso',   val:kb.toFixed(1)+' KB',ok:sOk,exp:'Máximo: '+fmt.maxKB+' KB'},
+   {lbl:'Formato',val:ext,ok:tOk,exp:'Aceito: PNG, JPG'}
+  ].forEach(c=>{
+    const d=document.createElement('div');
+    d.className='vcard '+(c.ok?'ok':'err');
+    d.innerHTML=`<div class="vico">${c.ok?'✅':'❌'}</div><div><div class="vlbl">${c.lbl}</div><div class="vval">${c.val}</div><div class="vexp">${c.exp}</div></div>`;
+    vg.appendChild(d);
+  });
+
+  document.getElementById('results').style.display='flex';
+  dz.style.display='none';
+
+  const pimg=document.getElementById('pimg');
+  pimg.onload=()=>{ requestAnimationFrame(()=>requestAnimationFrame(()=>drawOverlay(fmt))); };
+  pimg.src=url;
+
+  document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function drawOverlay(fmt){
+  const pimg=document.getElementById('pimg');
+  const cvs=document.getElementById('pcvs');
+  const dW=pimg.offsetWidth, dH=pimg.offsetHeight;
+  if(!dW||!dH) return;
+  cvs.width=dW; cvs.height=dH;
+  cvs.style.width=dW+'px'; cvs.style.height=dH+'px';
+  const ctx=cvs.getContext('2d');
+  ctx.clearRect(0,0,dW,dH);
+  const sX=dW/fmt.w, sY=dH/fmt.h;
+  if(fmt.overlay==='hero') drawHero(ctx,dW,dH,sX,sY);
+  else                     drawLR(ctx,dW,dH,sX,fmt.safeW);
+}
+
+/* ── FrameAd ──────────────────────────────────────────────
+   Zones:
+   • WHITE  1280×720  anchored top-left     (player)
+   • RED     480×360  anchored bottom-left  (reserved)
+   • BLUE    everything else                (content)
+
+   Fix: draw blue only on the areas that are NOT white or red.
+   We use canvas clipping (evenodd) to exclude both rectangles
+   from the blue fill so there is zero colour bleed.
+─────────────────────────────────────────────────────────── */
+function drawHero(ctx,dW,dH,sX,sY){
+  const wR={ x:0, y:0,         w:1280*sX, h:720*sY };   // player  — top-left
+  const rR={ x:0, y:dH-360*sY, w:480*sX,  h:360*sY };   // reserve — bottom-left
+
+  // 1. Blue ONLY on the area outside both white and red rects
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(0,0,dW,dH);          // outer shape
+  ctx.rect(wR.x,wR.y,wR.w,wR.h); // punch out player
+  ctx.rect(rR.x,rR.y,rR.w,rR.h); // punch out reserved
+  ctx.clip('evenodd');
+  ctx.fillStyle='rgba(30,120,255,0.38)';
+  ctx.fillRect(0,0,dW,dH);
+  ctx.restore();
+
+  // 2. White — player area (pure, no blue underneath)
+  ctx.fillStyle='rgba(255,255,255,0.35)';
+  ctx.fillRect(wR.x,wR.y,wR.w,wR.h);
+
+  // 3. Red — reserved area (pure, no blue underneath)
+  ctx.fillStyle='rgba(220,30,30,0.45)';
+  ctx.fillRect(rR.x,rR.y,rR.w,rR.h);
+
+  // 4. Borders
+  ctx.setLineDash([]); ctx.lineWidth=2;
+  ctx.strokeStyle='rgba(30,120,255,0.9)';
+  ctx.strokeRect(1,1,dW-2,dH-2);
+
+  ctx.strokeStyle='rgba(255,255,255,0.85)'; ctx.setLineDash([7,4]);
+  ctx.strokeRect(wR.x+1,wR.y+1,wR.w-2,wR.h-2);
+  ctx.setLineDash([]);
+
+  ctx.strokeStyle='rgba(220,30,30,0.95)';
+  ctx.strokeRect(rR.x+1,rR.y+1,rR.w-2,rR.h-2);
+
+  // 5. Labels
+  pill(ctx,'Área do Player  •  1280×720 px',  wR.x+8,    wR.y+8,       'l','t','rgba(200,200,200,0.93)','#111');
+  pill(ctx,'Área de Conteúdo (restante)',       dW-8,      8,            'r','t','rgba(20,100,240,0.93)', '#fff');
+  pill(ctx,'Área Reservada  •  480×360 px',    rR.x+8,    rR.y+rR.h-8, 'l','b','rgba(180,15,15,0.95)',  '#fff');
+
+  document.getElementById('leg').innerHTML=`
+    <div class="leg"><div class="swatch" style="background:rgba(255,255,255,0.40);border:1.5px solid rgba(255,255,255,0.85)"></div>Área do Player — 1280×720 px</div>
+    <div class="leg"><div class="swatch" style="background:rgba(30,120,255,0.42);border:1.5px solid rgba(30,120,255,0.9)"></div>Área de Conteúdo (restante)</div>
+    <div class="leg"><div class="swatch" style="background:rgba(220,30,30,0.50);border:1.5px solid #dc1e1e"></div>Área Reservada — 480×360 px</div>`;
+}
+
+/* ── Touchpoint Desktop / Mobile ──────────────────────────
+   Fix: use getBoundingClientRect for accurate dimensions,
+   then offset canvas to sit exactly over the image element.
+   Labels anchored to bottom of each zone.
+─────────────────────────────────────────────────────────── */
+function drawLR(ctx,dW,dH,sX,safeWpx){
+  const sW = safeWpx * sX;  // scaled safe-area width
+
+  // Green — safe area (left)
+  ctx.fillStyle='rgba(40,180,90,0.30)';
+  ctx.fillRect(0,0,sW,dH);
+  ctx.strokeStyle='rgba(40,180,90,0.9)'; ctx.lineWidth=2; ctx.setLineDash([]);
+  ctx.strokeRect(1,1,sW-2,dH-2);
+
+  // Red — reserved area (right)
+  ctx.fillStyle='rgba(220,30,30,0.38)';
+  ctx.fillRect(sW,0,dW-sW,dH);
+  ctx.strokeStyle='rgba(220,30,30,0.9)'; ctx.lineWidth=2;
+  ctx.strokeRect(sW+1,1,dW-sW-2,dH-2);
+
+  // divider line
+  ctx.strokeStyle='rgba(255,255,255,0.75)'; ctx.lineWidth=1.5; ctx.setLineDash([5,3]);
+  ctx.beginPath(); ctx.moveTo(sW,0); ctx.lineTo(sW,dH); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Labels — anchored to bottom of each zone
+  const padB = 8;
+  pill(ctx, 'Safe Area  •  '+safeWpx+' px',  sW/2,      dH-padB, 'c','b', 'rgba(25,150,70,0.93)',  '#fff');
+  pill(ctx, 'Área Reservada',                 sW+(dW-sW)/2, dH-padB, 'c','b', 'rgba(180,15,15,0.95)', '#fff');
+
+  document.getElementById('leg').innerHTML=`
+    <div class="leg"><div class="swatch" style="background:rgba(40,180,90,0.35);border:1.5px solid rgba(40,180,90,0.9)"></div>Safe Area — ${safeWpx} px (esquerda)</div>
+    <div class="leg"><div class="swatch" style="background:rgba(220,30,30,0.42);border:1.5px solid rgba(220,30,30,0.9)"></div>Área Reservada (restante)</div>`;
+}
+
+/* ── pill label — hAnchor: l / r / c  |  vAnchor: t / b / c ── */
+function pill(ctx,text,x,y,h,v,bg,fg){
+  const px=9,py=5,fs=12;
+  ctx.font=`bold ${fs}px Inter,system-ui,sans-serif`;
+  const tw=ctx.measureText(text).width, bw=tw+px*2, bh=fs+py*2, r=4;
+  let bx = h==='r' ? x-bw : h==='c' ? x-bw/2 : x;
+  let by = v==='b' ? y-bh : v==='c' ? y-bh/2  : y;
+  ctx.fillStyle=bg;
+  ctx.beginPath();
+  ctx.moveTo(bx+r,by);ctx.lineTo(bx+bw-r,by);ctx.quadraticCurveTo(bx+bw,by,bx+bw,by+r);
+  ctx.lineTo(bx+bw,by+bh-r);ctx.quadraticCurveTo(bx+bw,by+bh,bx+bw-r,by+bh);
+  ctx.lineTo(bx+r,by+bh);ctx.quadraticCurveTo(bx,by+bh,bx,by+bh-r);
+  ctx.lineTo(bx,by+r);ctx.quadraticCurveTo(bx,by,bx+r,by);
+  ctx.closePath();ctx.fill();
+  ctx.fillStyle=fg;ctx.textBaseline='middle';ctx.textAlign='left';
+  ctx.fillText(text,bx+px,by+bh/2);
+}
+
+let rtimer;
+window.addEventListener('resize',()=>{
+  clearTimeout(rtimer);
+  rtimer=setTimeout(()=>{
+    const pi=document.getElementById('pimg');
+    if(!pi.src||!pi.naturalWidth) return;
+    const fmt=detect(pi.naturalWidth,pi.naturalHeight);
+    if(fmt) drawOverlay(fmt);
+  },120);
+});
+
+function reset(){
+  document.getElementById('results').style.display='none';
+  dz.style.display='block';
+  document.getElementById('unk').classList.remove('on');
+  document.getElementById('fi').value='';
+  document.getElementById('pimg').src='';
+  document.getElementById('pills').innerHTML=
+    `<div class="pill">📋 Formatos aceitos: <strong>FrameAd</strong>, <strong>Touchpoint Desktop</strong>, <strong>Touchpoint Mobile</strong></div>`;
+  const c=document.getElementById('pcvs');
+  c.getContext('2d').clearRect(0,0,c.width,c.height);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleTheme(){
+  const h=document.documentElement, d=h.getAttribute('data-theme')==='dark';
+  h.setAttribute('data-theme',d?'light':'dark');
+  document.getElementById('tIcon').textContent=d?'🌙':'☀️';
+  document.getElementById('tLabel').textContent=d?'Modo Escuro':'Modo Claro';
+  try{localStorage.setItem('theme',d?'light':'dark')}catch(e){}
+}
+(function(){
+  try{
+    const s=localStorage.getItem('theme');
+    if(s){
+      document.documentElement.setAttribute('data-theme',s);
+      if(s==='light'){document.getElementById('tIcon').textContent='🌙';document.getElementById('tLabel').textContent='Modo Escuro'}
+    }
+  }catch(e){}
+})();
+</script>
+</body>
+</html>
