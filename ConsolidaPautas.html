@@ -65,7 +65,7 @@
 <div class="container">
     <header>
         <h1>📊 Consolidador de Relatórios</h1>
-        <p>Selecione até 5 arquivos Excel (.xls / .xlsx) para gerar um único relatório consolidado com coluna Exibidora.</p>
+        <p>Selecione os arquivos Excel (.xls / .xlsx) das Exibidoras para gerar um único relatório consolidado com coluna Exibidora.</p>
     </header>
 
     <div class="card">
@@ -73,7 +73,7 @@
         <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
             <span class="di">📂</span>
             <p><strong>Clique para selecionar</strong> ou arraste os arquivos aqui</p>
-            <p class="hint">Aceita .xls e .xlsx · Máximo de 5 arquivos</p>
+            <p class="hint">Aceita .xls e .xlsx · Sem limite de arquivos</p>
         </div>
         <input type="file" id="fileInput" accept=".xlsx,.xls" multiple>
         <div id="fileList" style="margin-top:1rem;"></div>
@@ -125,7 +125,7 @@
 
     function addFiles(files) {
         files.filter(f => /\.(xlsx|xls)$/i.test(f.name)).forEach(file => {
-            if (selectedFiles.length < 5 && !selectedFiles.find(f => f.name === file.name))
+            if (!selectedFiles.find(f => f.name === file.name))
                 selectedFiles.push(file);
         });
         renderFileList();
