@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consolidador de Relatórios — Exibidoras</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; padding: 2rem 1rem; }
+        .container { max-width: 860px; margin: 0 auto; }
+        header { text-align: center; margin-bottom: 2rem; }
+        header h1 { font-size: 1.8rem; font-weight: 700; color: #f1f5f9; letter-spacing: -0.5px; }
+        header p  { color: #94a3b8; font-size: 0.9rem; margin-top: 0.4rem; }
+        .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.25rem; }
+        .card-title { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b; margin-bottom: 1rem; }
+        .drop-zone { border: 2px dashed #334155; border-radius: 10px; padding: 2.5rem 1rem; text-align: center; cursor: pointer; transition: all 0.25s; background: #0f172a; }
+        .drop-zone:hover, .drop-zone.drag-over { border-color: #3b82f6; background: #1e3a5f22; }
+        .drop-zone .di { font-size: 2.5rem; display: block; margin-bottom: 0.75rem; }
+        .drop-zone p { color: #94a3b8; font-size: 0.9rem; }
+        .drop-zone strong { color: #3b82f6; }
+        .drop-zone .hint { font-size: 0.78rem; color: #475569; margin-top: 0.4rem; }
+        #fileInput { display: none; }
+        .file-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.7rem 1rem; background: #0f172a; border: 1px solid #1e293b; border-radius: 8px; margin-bottom: 0.5rem; font-size: 0.875rem; }
+        .file-item.ok  { border-color: #22c55e44; }
+        .file-item.err { border-color: #ef444444; }
+        .fname { flex: 1; color: #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .exbadge { padding: 0.2rem 0.6rem; border-radius: 5px; font-size: 0.75rem; font-weight: 700; background: #1d4ed8; color: #bfdbfe; flex-shrink: 0; }
+        .sbadge { padding: 0.2rem 0.65rem; border-radius: 5px; font-size: 0.75rem; font-weight: 600; flex-shrink: 0; }
+        .sp { background: #78350f33; color: #fbbf24; }
+        .sok{ background: #14532d33; color: #4ade80; }
+        .ser{ background: #7f1d1d33; color: #f87171; }
+        .rm { background: none; border: none; cursor: pointer; color: #475569; font-size: 1rem; padding: 0.2rem; border-radius: 4px; transition: color 0.2s; flex-shrink: 0; }
+        .rm:hover { color: #ef4444; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+        .sc { background: #0f172a; border: 1px solid #1e293b; border-radius: 10px; padding: 1rem; text-align: center; }
+        .sv { font-size: 2rem; font-weight: 700; color: #3b82f6; line-height: 1; }
+        .sl { font-size: 0.75rem; color: #64748b; margin-top: 0.4rem; }
+        .logp { background: #0f172a; border: 1px solid #1e293b; border-radius: 8px; padding: 1rem; font-family: 'Consolas', monospace; font-size: 0.8rem; max-height: 260px; overflow-y: auto; line-height: 1.8; }
+        .logp::-webkit-scrollbar { width: 5px; }
+        .logp::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        .li { color: #94a3b8; } .ls { color: #4ade80; } .lw { color: #fbbf24; }
+        .le { color: #f87171; } .ld { color: #38bdf8; } .lp { color: #c084fc; }
+        /* Preview table */
+        .preview-wrap { overflow-x: auto; margin-top: 0.75rem; border-radius: 8px; border: 1px solid #334155; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+        thead tr { background: #0f172a; }
+        thead th { padding: 0.5rem 0.75rem; text-align: left; color: #94a3b8; font-weight: 600; white-space: nowrap; border-bottom: 1px solid #334155; }
+        thead th.exh { color: #c084fc; background: #1a0a2e; }
+        tbody tr:nth-child(even) { background: #0f172a33; }
+        tbody td { padding: 0.4rem 0.75rem; color: #cbd5e1; white-space: nowrap; max-width: 160px; overflow: hidden; text-overflow: ellipsis; }
+        tbody td.exd { color: #c084fc; font-weight: 600; }
+        .btn { display: flex; align-items: center; justify-content: center; gap: 0.5rem; width: 100%; padding: 0.85rem; border: none; border-radius: 10px; cursor: pointer; font-size: 0.95rem; font-weight: 600; transition: all 0.2s; margin-bottom: 0.75rem; }
+        .bp { background: #2563eb; color: white; }
+        .bp:hover:not(:disabled) { background: #1d4ed8; transform: translateY(-1px); }
+        .bp:disabled { background: #1e293b; color: #475569; cursor: not-allowed; }
+        .bs { background: #16a34a; color: white; }
+        .bs:hover { background: #15803d; transform: translateY(-1px); }
+        .hidden { display: none !important; }
+        .pb-wrap { height: 4px; background: #1e293b; border-radius: 2px; margin-top: 0.75rem; overflow: hidden; }
+        .pb { height: 100%; background: #3b82f6; border-radius: 2px; transition: width 0.4s; width: 0%; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>📊 Consolidador de Relatórios</h1>
+        <p>Selecione até 5 arquivos Excel (.xls / .xlsx) para gerar um único relatório consolidado com coluna Exibidora.</p>
+    </header>
+
+    <div class="card">
+        <div class="card-title">1 · Seleção de Arquivos</div>
+        <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+            <span class="di">📂</span>
+            <p><strong>Clique para selecionar</strong> ou arraste os arquivos aqui</p>
+            <p class="hint">Aceita .xls e .xlsx · Máximo de 5 arquivos</p>
+        </div>
+        <input type="file" id="fileInput" accept=".xlsx,.xls" multiple>
+        <div id="fileList" style="margin-top:1rem;"></div>
+    </div>
+
+    <div class="card hidden" id="statsCard">
+        <div class="card-title">Resultado</div>
+        <div class="stats-grid">
+            <div class="sc"><div class="sv" id="stT">0</div><div class="sl">Linhas Lidas</div></div>
+            <div class="sc"><div class="sv" id="stU">0</div><div class="sl">Linhas no Arquivo Final</div></div>
+            <div class="sc"><div class="sv" id="stD">0</div><div class="sl">CodMidias c/ Multi-Exibidora</div></div>
+        </div>
+    </div>
+
+    <div class="card hidden" id="logCard">
+        <div class="card-title">2 · Log</div>
+        <div class="logp" id="logPanel"></div>
+        <div class="pb-wrap hidden" id="pbWrap"><div class="pb" id="pb"></div></div>
+    </div>
+
+    <div class="card hidden" id="previewCard">
+        <div class="card-title">3 · Preview (primeiras 5 linhas) — coluna <span style="color:#c084fc">Exibidora</span> em destaque</div>
+        <div class="preview-wrap"><table id="previewTable"></table></div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">4 · Ações</div>
+        <button class="btn bp" id="consolidateBtn" disabled onclick="consolidate()">⚙️ Consolidar Arquivos</button>
+        <button class="btn bs hidden" id="downloadBtn" onclick="downloadResult()">⬇️ Baixar Arquivo Consolidado (.xlsx)</button>
+    </div>
+</div>
+
+<script>
+    let selectedFiles  = [];
+    let resultWorkbook = null;
+    let outputDataCache = null;
+
+    const dropZone       = document.getElementById('dropZone');
+    const fileInput      = document.getElementById('fileInput');
+    const fileListEl     = document.getElementById('fileList');
+    const consolidateBtn = document.getElementById('consolidateBtn');
+    const downloadBtn    = document.getElementById('downloadBtn');
+    const logPanel       = document.getElementById('logPanel');
+
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+    dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag-over'); addFiles(Array.from(e.dataTransfer.files)); });
+    fileInput.addEventListener('change', () => { addFiles(Array.from(fileInput.files)); fileInput.value = ''; });
+
+    function addFiles(files) {
+        files.filter(f => /\.(xlsx|xls)$/i.test(f.name)).forEach(file => {
+            if (selectedFiles.length < 5 && !selectedFiles.find(f => f.name === file.name))
+                selectedFiles.push(file);
+        });
+        renderFileList();
+        consolidateBtn.disabled = selectedFiles.length === 0;
+        downloadBtn.classList.add('hidden');
+        document.getElementById('previewCard').classList.add('hidden');
+        resultWorkbook = null;
+    }
+
+    function removeFile(i) {
+        selectedFiles.splice(i, 1); renderFileList();
+        consolidateBtn.disabled = selectedFiles.length === 0;
+        downloadBtn.classList.add('hidden');
+    }
+
+    function renderFileList() {
+        fileListEl.innerHTML = '';
+        selectedFiles.forEach((file, i) => {
+            const el = document.createElement('div');
+            el.className = 'file-item'; el.id = `fi${i}`;
+            el.innerHTML = `<span>📄</span><span class="fname" id="fn${i}">${file.name}</span>
+                <span class="sbadge sp" id="sb${i}">Aguardando</span>
+                <button class="rm" onclick="removeFile(${i})">✕</button>`;
+            fileListEl.appendChild(el);
+        });
+    }
+
+    function log(msg, type='i') {
+        document.getElementById('logCard').classList.remove('hidden');
+        const d = document.createElement('div');
+        d.className = `l${type}`;
+        d.textContent = `[${new Date().toLocaleTimeString('pt-BR')}]  ${msg}`;
+        logPanel.appendChild(d);
+        logPanel.scrollTop = logPanel.scrollHeight;
+    }
+
+    function readBuf(file) {
+        return new Promise((res,rej) => { const r=new FileReader(); r.onload=e=>res(e.target.result); r.onerror=rej; r.readAsArrayBuffer(file); });
+    }
+
+    // ─── Remove strings vazias do fim do array ───────────────────────────────
+    function trimTrailingEmpty(arr) {
+        let last = arr.length - 1;
+        while (last >= 0 && String(arr[last]).trim() === '') last--;
+        return arr.slice(0, last + 1);
+    }
+
+    // ─── Parser principal ────────────────────────────────────────────────────
+    async function parseExcel(file) {
+        const buf  = await readBuf(file);
+        const wb   = XLSX.read(buf, { type: 'array' });
+        const ws   = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: false });
+
+        // 1. Exibidora: varre primeiras 15 linhas
+        let exibidora = '', exRow = -1;
+        outer:
+        for (let ri = 0; ri < Math.min(15, rows.length); ri++) {
+            for (let ci = 0; ci < (rows[ri]||[]).length; ci++) {
+                const cell = String(rows[ri][ci]||'').trim();
+                const m = cell.match(/exibidora\s*:\s*([A-Z0-9]+)/i);
+                if (m) { exibidora = m[1].toUpperCase(); exRow = ri+1; break outer; }
+                if (/^exibidora\s*:?\s*$/i.test(cell)) {
+                    const nxt = String(rows[ri][ci+1]||'').trim().toUpperCase();
+                    if (nxt) { exibidora = nxt; exRow = ri+1; break outer; }
+                }
+            }
+        }
+
+        // 2. Linha de header: coluna A == "CodMidia"
+        let hIdx = -1;
+        for (let ri = 0; ri < Math.min(20, rows.length); ri++) {
+            if (String(rows[ri][0]||'').trim().toLowerCase() === 'codmidia') { hIdx = ri; break; }
+        }
+        if (hIdx === -1) throw new Error('Coluna "CodMidia" não encontrada');
+
+        // 3. Headers: remove colunas vazias do final
+        const headers = trimTrailingEmpty(rows[hIdx].map(h => String(h).trim()));
+        const nCols   = headers.length;   // número real de colunas de dados
+
+        // 4. Dados: linha após header, truncados ao mesmo nCols
+        const dataRows = rows.slice(hIdx + 1)
+            .map(r => r.slice(0, nCols).map(c => c ?? ''))   // trunca ao tamanho do header
+            .filter(r => String(r[0]||'').trim() !== '');     // exige CodMidia preenchido
+
+        return { exibidora, exRow, hIdx: hIdx+1, headers, nCols, dataRows };
+    }
+
+    // ─── Consolidação ────────────────────────────────────────────────────────
+    async function consolidate() {
+        if (!selectedFiles.length) return;
+        consolidateBtn.disabled = true;
+        downloadBtn.classList.add('hidden');
+        document.getElementById('previewCard').classList.add('hidden');
+        logPanel.innerHTML = '';
+        document.getElementById('statsCard').classList.add('hidden');
+        document.getElementById('pbWrap').classList.remove('hidden');
+        document.getElementById('pb').style.width = '0%';
+
+        log(`Iniciando consolidação de ${selectedFiles.length} arquivo(s)…`);
+
+        let allHeaders = null;
+        let nCols      = 0;
+        const dataMap  = new Map();   // CodMidia → { row: Array, exibidoras: Set }
+        let totalRows  = 0, dupCount = 0, errors = 0;
+
+        for (let i = 0; i < selectedFiles.length; i++) {
+            try {
+                log(`Lendo: ${selectedFiles[i].name}`);
+                const { exibidora, exRow, hIdx, headers, dataRows } = await parseExcel(selectedFiles[i]);
+
+                // Atualiza UI do arquivo
+                document.getElementById(`sb${i}`).textContent = exibidora || 'N/A';
+                document.getElementById(`sb${i}`).className   = 'sbadge sok';
+                document.getElementById(`fi${i}`).classList.add('ok');
+                if (exibidora)
+                    document.getElementById(`fn${i}`).insertAdjacentHTML('afterend',
+                        `<span class="exbadge">${exibidora}</span>`);
+
+                log(`  ↳ Exibidora detectada: "${exibidora || 'NÃO ENCONTRADA'}" (linha ${exRow})`, exibidora?'d':'w');
+                log(`  ↳ Header na linha ${hIdx} | Colunas de dados: ${headers.length} | Registros: ${dataRows.length}`, 'd');
+                log(`  ↳ Colunas: ${headers.join(' · ')}`, 'd');
+
+                if (!allHeaders) { allHeaders = [...headers]; nCols = headers.length; }
+                totalRows += dataRows.length;
+
+                for (const row of dataRows) {
+                    const cod = String(row[0]||'').trim();
+                    if (!cod) continue;
+                    if (dataMap.has(cod)) {
+                        const entry = dataMap.get(cod);
+                        const prev  = entry.exibidoras.size;
+                        if (exibidora) entry.exibidoras.add(exibidora);
+                        if (entry.exibidoras.size > prev) {
+                            dupCount++;
+                            log(`  ★ Duplicata: ${cod}  →  Exibidoras combinadas: ${[...entry.exibidoras].sort().join(', ')}`, 'p');
+                        }
+                    } else {
+                        dataMap.set(cod, { row: [...row], exibidoras: new Set(exibidora ? [exibidora] : []) });
+                    }
+                }
+            } catch(err) {
+                errors++;
+                log(`❌ Erro em ${selectedFiles[i].name}: ${err.message}`, 'e');
+                document.getElementById(`sb${i}`).textContent = 'Erro';
+                document.getElementById(`sb${i}`).className   = 'sbadge ser';
+                document.getElementById(`fi${i}`).classList.add('err');
+            }
+            document.getElementById('pb').style.width = `${((i+1)/selectedFiles.length)*100}%`;
+        }
+
+        if (dataMap.size === 0) {
+            log('Nenhum dado encontrado.', 'e'); consolidateBtn.disabled = false; return;
+        }
+
+        // ─── Monta array de saída ─────────────────────────────────────────
+        // HEADER: colunas originais + "Exibidora" ao final
+        const outHeaders = [...(allHeaders || []), 'Exibidora'];
+        const outRows    = [];   // apenas as linhas de dados (sem header aqui)
+
+        for (const { row, exibidoras } of dataMap.values()) {
+            const exStr = [...exibidoras].filter(Boolean).sort().join(', ');
+            // Garante exatamente nCols colunas de dados antes de Exibidora
+            const cells = [];
+            for (let c = 0; c < nCols; c++) cells.push(row[c] !== undefined ? row[c] : '');
+            cells.push(exStr);   // ← coluna Exibidora
+            outRows.push(cells);
+        }
+
+        // Log de verificação
+        log(`Colunas do arquivo gerado (${outHeaders.length}): ${outHeaders.join(' | ')}`, 's');
+        log(`Exemplo 1ª linha: ${outRows[0].join(' | ')}`, 'd');
+
+        // ─── Workbook ─────────────────────────────────────────────────────
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet([outHeaders, ...outRows]);
+
+        // Largura automática
+        ws['!cols'] = outHeaders.map((h, ci) => {
+            const maxLen = [h, ...outRows.map(r => String(r[ci]||''))].reduce((m, v) => Math.max(m, v.length), 0);
+            return { wch: Math.min(maxLen + 2, 60) };
+        });
+
+        XLSX.utils.book_append_sheet(wb, ws, 'Consolidado');
+        resultWorkbook = wb;
+        outputDataCache = { outHeaders, outRows };
+
+        // ─── Stats ────────────────────────────────────────────────────────
+        document.getElementById('stT').textContent = totalRows;
+        document.getElementById('stU').textContent = dataMap.size;
+        document.getElementById('stD').textContent = dupCount;
+        document.getElementById('statsCard').classList.remove('hidden');
+
+        // ─── Preview ──────────────────────────────────────────────────────
+        renderPreview(outHeaders, outRows);
+
+        const unique = dataMap.size;
+        log(`✔ Concluído — ${unique} linhas no arquivo final | ${dupCount} CodMidia(s) com multi-Exibidora | ${totalRows-unique} linha(s) removidas${errors?` | ${errors} erro(s)`:''}`, 's');
+
+        consolidateBtn.disabled = false;
+        downloadBtn.classList.remove('hidden');
+        document.getElementById('pbWrap').classList.add('hidden');
+    }
+
+    function renderPreview(headers, rows) {
+        const card  = document.getElementById('previewCard');
+        const table = document.getElementById('previewTable');
+        const exIdx = headers.length - 1;   // "Exibidora" é sempre a última
+
+        // thead
+        let th = '<thead><tr>';
+        headers.forEach((h, i) => {
+            th += `<th${i===exIdx?' class="exh"':''}>${h}</th>`;
+        });
+        th += '</tr></thead>';
+
+        // tbody (até 5 linhas)
+        let tb = '<tbody>';
+        rows.slice(0, 5).forEach(row => {
+            tb += '<tr>';
+            row.forEach((cell, i) => {
+                tb += `<td${i===exIdx?' class="exd"':''}>${cell}</td>`;
+            });
+            tb += '</tr>';
+        });
+        tb += '</tbody>';
+
+        table.innerHTML = th + tb;
+        card.classList.remove('hidden');
+    }
+
+    function downloadResult() {
+        if (!resultWorkbook) return;
+        const d = new Date().toLocaleDateString('pt-BR').replace(/\//g,'-');
+        XLSX.writeFile(resultWorkbook, `consolidado_exibidoras_${d}.xlsx`);
+    }
+</script>
+</body>
+</html>
