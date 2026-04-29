@@ -10,28 +10,26 @@
   <script defer src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
     :root {
-      --bg: #f8fafc;
-      --surface: #ffffff;
-      --border: #e2e8f0;
-      --text: #1e293b;
-      --text-muted: #64748b;
-      --primary: #0f172a;
-      --primary-hover: #334155;
-      --accent: #0ea5e9;
-      --radius: 8px;
+      --primary: #2563eb; --primary-hover: #1d4ed8;
+      --bg: #f8fafc; --surface: #ffffff;
+      --border: #e2e8f0; --text: #1e293b;
+      --text-muted: #64748b; --radius: 0.5rem;
     }
-    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); padding: 2rem; }
-    .shell { max-width: 1100px; margin: 0 auto; }
-    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
-    .field { display: flex; flex-direction: column; gap: 0.5rem; }
-    .field.span-2 { grid-column: span 2; }
-    .field.span-4 { grid-column: span 4; }
-    input, select, textarea { padding: 0.6rem; border: 1px solid var(--border); border-radius: var(--radius); font-size: 0.9rem; }
-    button { padding: 0.6rem 1.2rem; border-radius: var(--radius); border: none; cursor: pointer; font-weight: 500; }
-    .btn-primary { background: var(--primary); color: white; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; padding: 2rem; }
+    .shell { max-width: 1000px; margin: 0 auto; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+    .field { display: flex; flex-direction: column; gap: 0.4rem; }
+    .span-2 { grid-column: span 2; }
+    .span-4 { grid-column: span 4; }
+    label { font-weight: 600; font-size: 0.85rem; color: var(--text-muted); }
+    input, select, textarea { width: 100%; padding: 0.6rem; border: 1px solid var(--border); border-radius: var(--radius); font-size: 0.95rem; }
+    button { padding: 0.6rem 1rem; border-radius: var(--radius); cursor: pointer; border: 1px solid var(--border); font-weight: 600; }
+    .btn-primary { background: var(--primary); color: white; border: none; }
     .btn-primary:hover { background: var(--primary-hover); }
-    .section-head { margin-bottom: 1.5rem; border-bottom: 2px solid var(--bg); padding-bottom: 1rem; }
+    h2 { font-size: 1.1rem; margin-bottom: 1rem; color: var(--primary); border-bottom: 2px solid var(--bg); padding-bottom: 0.5rem; }
+    .computed { background: #f1f5f9; padding: 0.6rem; border-radius: var(--radius); font-weight: 600; font-size: 0.95rem; }
+    .hidden { display: none; }
 </style>
 </head>
 <body>
@@ -619,41 +617,7 @@
     }
     async function loadOptions() {
       try {
-        console.log('Fetching:', CSV_URL);
         const response = await fetch(CSV_URL, { cache: 'no-store' });
-        if (!response.ok) throw new Error('Status: ' + response.status);
-        const contentType = response.headers.get('content-type') || '';
-        const buffer = await response.arrayBuffer();
-        const bytes = new Uint8Array(buffer);
-        // Check if it's actually XLSX
-        const isXlsx = contentType.includes('spreadsheetml.sheet') || (bytes[0] === 0x50 && bytes[1] === 0x4B);
-        if (isXlsx) {
-          const workbook = XLSX.read(buffer, { type: 'array' });
-          const sheet = workbook.SheetNames[0];
-          const json = XLSX.utils.sheet_to_json(workbook.Sheets[sheet], { header: 1, blankrows: false });
-          state.rawRows = json.filter(row => row.some(cell => cleanValue(cell)));
-        } else {
-          // If not XLSX, try to treat as CSV
-          const text = new TextDecoder('utf-8').decode(buffer);
-          state.rawRows = parseCSV(text).filter(row => row.some(cell => cleanValue(cell)));
-        }
-        state.options = extractOptions(state.rawRows);
-        statusBox.textContent = 'Planilha carregada com sucesso!';
-        statusBox.className = 'status success';
-      } catch (error) {
-        console.error('Loader error:', error);
-        state.rawRows = fallbackData;
-        state.options = extractOptions(fallbackData);
-        statusBox.textContent = 'Erro de CORS ou conexão: ' + error.message + '. Usando fallback.';
-        statusBox.className = 'status error';
-      }
-      fillSelect(document.getElementById('affiliate'), state.options.afiliadas, 'Selecione');
-      fillSelect(document.getElementById('month'), state.options.meses, 'Selecione');
-      if (!lineItemsContainer.children.length) addLineItem(); else {
-        [...lineItemsContainer.querySelectorAll('[data-line-item]')].forEach(item => bindLineItem(item));
-      }
-      updateCampaignPreview();
-    });
         if (!response.ok) throw new Error('Falha ao buscar a planilha publicada.');
         const contentType = response.headers.get('content-type') || '';
         const buffer = await response.arrayBuffer();
