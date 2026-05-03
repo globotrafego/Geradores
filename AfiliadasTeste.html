@@ -990,92 +990,77 @@
             }
         }
         
-        const campDataObj = {
-            'Número de RP': document.getElementById('cg-rp').value,
-            'Afiliadas': document.getElementById('cg-afiliadas').value,
-            'Order ID': document.getElementById('cg-order-id').value,
-            'Cliente': document.getElementById('cg-cliente').value,
-            'Agência / Direto': document.getElementById('cg-agencia').value || 'Direto',
-            'Mês': document.getElementById('cg-mes').value,
-            'Ano': document.getElementById('cg-ano').value,
-            'Nome da Campanha': document.getElementById('cg-nome-campanha').value
-        };
+        const nomeCampanha = document.getElementById('cg-nome-campanha').value;
+        const cliente = document.getElementById('cg-cliente').value;
+        const afiliadas = document.getElementById('cg-afiliadas').value;
 
         const headers = [
-            'Nome da Linha', 'Número de RP', 'Afiliadas', 'Order ID', 'Cliente', 'Agência / Direto', 'Mês', 'Ano', 'Nome da Campanha',
-            'Propriedades', 'Tipo de Linha', 'Formatos', 'Posição Vídeo', 'Skip', 'Posição', 'Data de Início', 'Data Fim',
-            'Entrega Determinada', 'Valor Unitário (R$)', 'Total Tabela (R$)', 'Desconto (%)', 'Total Negociado (R$)',
-            'Site', 'Editoria / Programa', 'Geolocalização', 'Caso Under, programar o disponível?', 'Cidades',
+            'Nome da Linha', 'Propriedades', 'Tipo de Linha', 'Formatos',
+            'Posição Vídeo', 'Skip', 'Posição', 'Data de Início', 'Data Fim',
+            'Entrega Determinada', 'Valor Unitário (R$)', 'Total Tabela (R$)',
+            'Desconto (%)', 'Total Negociado (R$)', 'Site', 'Editoria / Programa',
+            'Geolocalização', 'Caso Under, programar o disponível?', 'Cidades',
             'Idade', 'Gênero', 'Potencial de Consumo', 'Interesse', 'Observações'
         ];
 
         let aoa = [];
-        // Row 1
-        aoa.push([campDataObj['Nome da Campanha'], campDataObj['Cliente']]);
-        // Row 2
+        // Row 1: Campaign info (A1=Nome da Campanha, B1=Cliente, C1=Afiliadas)
+        aoa.push([nomeCampanha, cliente, afiliadas]);
+        // Row 2: Blank
         aoa.push([]);
-        // Row 3
+        // Row 3: Headers
         aoa.push(headers);
 
         const container = document.getElementById('line-items-container');
         const items = container.querySelectorAll('.line-item');
         
-        if (items.length === 0) {
-            let rowDict = {...campDataObj};
-            let rowArr = headers.map(h => rowDict[h] || "");
+        items.forEach((item, index) => {
+            const id = index + 1;
+            const el = field => document.getElementById(`${field}-${id}`) ? document.getElementById(`${field}-${id}`).value : "";
+            
+            const formatRaw = getMultipleChoicesValue(`formatos-${id}`);
+            const isDAI = formatRaw.toUpperCase().includes("DAI");
+
+            const formatMapped = mapValues(formatRaw, mappings.formatos);
+            
+            const idadeMapped = mapValues(getMultipleChoicesValue(`idades-${id}`), isDAI ? mappings.idade_audience : mappings.idade_permutive);
+            const generoMapped = mapValues(getMultipleChoicesValue(`generos-${id}`), isDAI ? mappings.genero_audience : mappings.genero_permutive);
+            const potencialMapped = mapValues(getMultipleChoicesValue(`potencialConsumo-${id}`), isDAI ? mappings.potencial_audience : mappings.potencial_permutive);
+            const interesseMapped = mapValues(getMultipleChoicesValue(`interesses-${id}`), isDAI ? mappings.interesse_audience : mappings.interesse_permutive);
+
+            let rowArr = [
+                el('lineItemName'),
+                el('propriedade'),
+                el('tipoLinha'),
+                formatMapped,
+                el('posicaoVideo'),
+                el('skip'),
+                getMultipleChoicesValue(`posicao-${id}`),
+                el('dataInicio'),
+                el('dataFim'),
+                el('entregaDeterminada'),
+                el('valorUnitario'),
+                el('totalTabela'),
+                el('desconto'),
+                el('totalNegociado'),
+                getMultipleChoicesValue(`sites-${id}`),
+                el('editoria'),
+                getMultipleChoicesValue(`geolocalizacao-${id}`),
+                getMultipleChoicesValue(`programarDisponivel-${id}`),
+                el('cidades'),
+                idadeMapped,
+                generoMapped,
+                potencialMapped,
+                interesseMapped,
+                el('observacoes')
+            ];
             aoa.push(rowArr);
-        } else {
-            items.forEach((item, index) => {
-                const id = index + 1;
-                const el = field => document.getElementById(`${field}-${id}`) ? document.getElementById(`${field}-${id}`).value : "";
-                
-                const formatRaw = getMultipleChoicesValue(`formatos-${id}`);
-                const isDAI = formatRaw.toUpperCase().includes("DAI");
-
-                const formatMapped = mapValues(formatRaw, mappings.formatos);
-                
-                const idadeMapped = mapValues(getMultipleChoicesValue(`idades-${id}`), isDAI ? mappings.idade_audience : mappings.idade_permutive);
-                const generoMapped = mapValues(getMultipleChoicesValue(`generos-${id}`), isDAI ? mappings.genero_audience : mappings.genero_permutive);
-                const potencialMapped = mapValues(getMultipleChoicesValue(`potencialConsumo-${id}`), isDAI ? mappings.potencial_audience : mappings.potencial_permutive);
-                const interesseMapped = mapValues(getMultipleChoicesValue(`interesses-${id}`), isDAI ? mappings.interesse_audience : mappings.interesse_permutive);
-
-                let rowDict = {
-                    ...campDataObj,
-                    'Nome da Linha': el('lineItemName'),
-                    'Propriedades': el('propriedade'),
-                    'Tipo de Linha': el('tipoLinha'),
-                    'Formatos': formatMapped,
-                    'Posição Vídeo': el('posicaoVideo'),
-                    'Skip': el('skip'),
-                    'Posição': getMultipleChoicesValue(`posicao-${id}`),
-                    'Data de Início': el('dataInicio'),
-                    'Data Fim': el('dataFim'),
-                    'Entrega Determinada': el('entregaDeterminada'),
-                    'Valor Unitário (R$)': el('valorUnitario'),
-                    'Total Tabela (R$)': el('totalTabela'),
-                    'Desconto (%)': el('desconto'),
-                    'Total Negociado (R$)': el('totalNegociado'),
-                    'Site': getMultipleChoicesValue(`sites-${id}`),
-                    'Editoria / Programa': el('editoria'),
-                    'Geolocalização': getMultipleChoicesValue(`geolocalizacao-${id}`),
-                    'Caso Under, programar o disponível?': getMultipleChoicesValue(`programarDisponivel-${id}`),
-                    'Cidades': el('cidades'),
-                    'Idade': idadeMapped,
-                    'Gênero': generoMapped,
-                    'Potencial de Consumo': potencialMapped,
-                    'Interesse': interesseMapped,
-                    'Observações': el('observacoes')
-                };
-
-                let rowArr = headers.map(h => rowDict[h] || "");
-                aoa.push(rowArr);
-            });
-        }
+        });
 
         const worksheet = XLSX.utils.aoa_to_sheet(aoa);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Campanha");
-        XLSX.writeFile(workbook, `Campanha_${campDataObj['Nome da Campanha']}.xlsx`);
+        XLSX.writeFile(workbook, `Campanha_${nomeCampanha}.xlsx`);
     }
 </script>
 </body>
