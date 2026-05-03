@@ -1,74 +1,1082 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>Gerador de Campanha</title>
-<style>
-    :root { --primary: #007bff; --border: #ccc; }
-    body { font-family: sans-serif; padding: 20px; background: #f4f4f9; color: #333; }
-    .shell { max-width: 1000px; margin: auto; }
-    .card { background: white; border: 1px solid #ddd; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
-    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
-    .field { display: flex; flex-direction: column; }
-    input, select, textarea { padding: 8px; margin-top: 5px; border: 1px solid var(--border); border-radius: 4px; }
-    .btn { padding: 10px 15px; cursor: pointer; border-radius: 4px; border: 1px solid var(--border); }
-    .btn-primary { background: var(--primary); color: white; }
-    .line-item { border: 1px solid #eee; padding: 15px; margin-bottom: 10px; border-radius: 8px; }
-    .hidden { display: none; }
-    /* Multi-select styling to keep them clean */
-    .multi-select { border: 1px solid var(--border); border-radius: 4px; padding: 5px; background: #fff; max-height: 150px; overflow-y: auto; }
-</style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Afiliadas - Excel Export</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg-color: #f8fafc;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --card-border: rgba(255, 255, 255, 0.3);
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #cbd5e1;
+            --input-bg: #ffffff;
+            --input-border: #cbd5e1;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --shadow-color: rgba(15, 23, 42, 0.08);
+            --item-bg: rgba(241, 245, 249, 0.6);
+            --glass-blur: blur(12px);
+        }
+
+        body.dark-theme {
+            --primary: #818cf8;
+            --primary-hover: #6366f1;
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.75);
+            --card-border: rgba(255, 255, 255, 0.05);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --input-bg: #0f172a;
+            --input-border: #475569;
+            --danger: #f87171;
+            --danger-hover: #ef4444;
+            --shadow-color: rgba(0, 0, 0, 0.4);
+            --item-bg: rgba(15, 23, 42, 0.5);
+            --glass-blur: blur(16px);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.08), transparent 25%),
+                              radial-gradient(circle at 85% 30%, rgba(168, 85, 247, 0.08), transparent 25%);
+            color: var(--text-main);
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .header-title {
+            font-size: 2.75rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 4px 10px rgba(99, 102, 241, 0.1);
+        }
+
+        .theme-toggle {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 6px var(--shadow-color);
+            backdrop-filter: var(--glass-blur);
+            font-size: 1.25rem;
+            color: var(--text-main);
+        }
+        .theme-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px var(--shadow-color);
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px var(--shadow-color);
+            backdrop-filter: var(--glass-blur);
+            padding: 35px;
+            margin-bottom: 30px;
+        }
+        
+        #section-geral {
+            position: relative;
+            z-index: 10;
+        }
+        
+        #section-lines {
+            position: relative;
+            z-index: 5;
+        }
+        
+        .card h2 {
+            font-weight: 600;
+            font-size: 1.5rem;
+            margin-bottom: 25px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 24px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 10px;
+        }
+
+        label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        input[type="text"], input[type="number"], input[type="date"], select {
+            padding: 12px 14px;
+            border: 1px solid var(--input-border);
+            background-color: var(--input-bg);
+            color: var(--text-main);
+            border-radius: 10px;
+            font-size: 0.95rem;
+            width: 100%;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+        
+        input[readonly] {
+            background-color: var(--item-bg);
+            color: var(--text-muted);
+            cursor: not-allowed;
+            border-color: transparent;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            box-shadow: 0 4px 6px var(--shadow-color);
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px var(--shadow-color);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), #818cf8);
+            color: white;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--primary-hover), var(--primary));
+        }
+        
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: var(--danger-hover);
+        }
+
+        .line-item {
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 25px;
+            background: var(--item-bg);
+        }
+
+        .line-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+        }
+
+        .line-item-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .actions-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            align-items: center;
+        }
+
+        .choices[data-type*="select-one"] .choices__inner {
+            padding-bottom: 0px;
+        }
+        .choices__inner {
+            border-radius: 10px !important;
+            background-color: var(--input-bg) !important;
+            border: 1px solid var(--input-border) !important;
+            min-height: 46px;
+        }
+        .choices.is-focused .choices__inner {
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+        .choices__input {
+            color: var(--text-main) !important;
+            background-color: transparent !important;
+        }
+        .choices__list--dropdown {
+            background-color: var(--card-bg) !important;
+            border: 1px solid var(--border-color) !important;
+            backdrop-filter: var(--glass-blur);
+            border-radius: 10px;
+            margin-top: 5px;
+            box-shadow: 0 10px 25px var(--shadow-color);
+            z-index: 100;
+            overflow: hidden;
+        }
+        .choices__list--dropdown .choices__item {
+            color: var(--text-main) !important;
+            padding: 10px 16px;
+            font-size: 0.95rem;
+        }
+        .choices__list--dropdown .choices__item--selectable.is-highlighted {
+            background-color: rgba(99, 102, 241, 0.1) !important;
+            color: var(--primary) !important;
+        }
+        body.dark-theme .choices__list--dropdown .choices__item--selectable.is-highlighted {
+            background-color: rgba(129, 140, 248, 0.2) !important;
+            color: var(--primary) !important;
+        }
+        .choices__list--multiple .choices__item {
+            background-color: var(--primary) !important;
+            border: none !important;
+            border-radius: 6px !important;
+            color: white !important;
+            font-weight: 500;
+            padding: 4px 8px;
+        }
+        .choices__list--multiple .choices__item[data-deletable] {
+            padding-right: 25px;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        ::-webkit-calendar-picker-indicator {
+            filter: invert(0.5);
+        }
+        body.dark-theme ::-webkit-calendar-picker-indicator {
+            filter: invert(0.8);
+        }
+
+        /* Custom Dropdown Actions */
+        .custom-dropdown-actions {
+            display: flex;
+            padding: 10px;
+            gap: 10px;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--item-bg);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .action-btn {
+            flex: 1;
+            padding: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background-color: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+            transition: all 0.2s;
+        }
+        .action-btn:hover {
+            background-color: rgba(99, 102, 241, 0.2);
+        }
+        .action-btn.danger {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+        .action-btn.danger:hover {
+            background-color: rgba(239, 68, 68, 0.2);
+        }
+    </style>
 </head>
 <body>
-<div class="shell">
-    <div class="card">
-        <h2>Informações Gerais</h2>
-        <form id="campaignForm" class="grid">
-            <div class="field"><label>Número de RP</label><input type="number" id="rp" required></div>
-            <div class="field"><label>Afiliadas</label><select id="aff" required></select></div>
-            <div class="field"><label>Order ID</label><input type="number" id="oid" required></div>
-            <div class="field"><label>Cliente</label><input type="text" id="cli" required></div>
-            <div class="field"><label>Agencia</label><input type="text" id="age"></div>
-            <div class="field"><label>Mês/Ano</label><div style="display:flex;gap:5px"><select id="mes"></select><input type="number" id="ano"></div></div>
-        </form>
-    </div>
-    <div class="card">
-        <h2>Line Items</h2>
-        <div id="lines"></div>
-        <button class="btn" onclick="addLine()">+ Nova Linha</button>
-        <button class="btn btn-primary" onclick="downloadExcel()">Baixar Excel</button>
+
+<div id="loading-overlay" style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:var(--bg-color);">
+    <div style="text-align:center;">
+        <div style="width:48px;height:48px;border:4px solid var(--border-color);border-top-color:var(--primary);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px;"></div>
+        <p style="font-size:1.1rem;color:var(--text-muted);font-weight:500;">Carregando base de dados...</p>
     </div>
 </div>
-<script>
-    // Simplified logic to ensure stability
-    async function loadData() {
-        try {
-            const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjRYT6xv7g-svK5_ScKZitolkns29Bbls5xAcMs8NONGY-p5xFa9Yz3tRJIwuhWOm4_FEY6vV0Ig1Z/pub?output=xlsx';
-            const res = await fetch(url);
-            const buf = await res.arrayBuffer();
-            const wb = XLSX.read(buf, {type: 'array'});
-            const data = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header: 1});
-            // Populate selects with data[0] as header and column 0 for afiliadas
-            const select = document.getElementById('aff');
-            data.slice(1).forEach(r => { if(r[0]) select.innerHTML += `<option>${r[0]}</option>`; });
-        } catch(e) { console.error(e); }
-    }
-    function addLine() {
-        const div = document.createElement('div');
-        div.className = 'line-item';
-        div.innerHTML = `
-            <div class="grid">
-                <div class="field"><label>Propriedades</label><select></select></div>
-                <div class="field"><label>Formato</label><select></select></div>
-                <div class="field"><label>Data</label><input type="date"></div>
+<style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+
+<div class="container">
+    <div class="top-bar">
+        <h1 class="header-title">Gerador de Afiliadas</h1>
+        <button class="theme-toggle" id="theme-toggle-btn" aria-label="Toggle Dark Mode">
+            🌙
+        </button>
+    </div>
+
+    <div class="card" id="section-geral">
+        <h2>Informações Gerais da Campanha</h2>
+        <div class="grid">
+            <div class="form-group">
+                <label>Número de RP *</label>
+                <input type="number" id="cg-rp" required>
             </div>
-            <button onclick="this.parentElement.remove()">Remover</button>
-        `;
-        document.getElementById('lines').appendChild(div);
+            <div class="form-group">
+                <label>Afiliadas *</label>
+                <select id="cg-afiliadas" required>
+                    <option value="">Selecione...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Order ID *</label>
+                <input type="number" id="cg-order-id" required>
+            </div>
+            <div class="form-group">
+                <label>Cliente *</label>
+                <input type="text" id="cg-cliente" required>
+            </div>
+            <div class="form-group">
+                <label>Agência / Direto</label>
+                <input type="text" id="cg-agencia" placeholder="Direto (padrão)">
+            </div>
+            <div class="form-group">
+                <label>Mês *</label>
+                <select id="cg-mes" required>
+                    <option value="Jan">Janeiro</option>
+                    <option value="Feb">Fevereiro</option>
+                    <option value="Mar">Março</option>
+                    <option value="Apr">Abril</option>
+                    <option value="May">Maio</option>
+                    <option value="Jun">Junho</option>
+                    <option value="Jul">Julho</option>
+                    <option value="Aug">Agosto</option>
+                    <option value="Sep">Setembro</option>
+                    <option value="Oct">Outubro</option>
+                    <option value="Nov">Novembro</option>
+                    <option value="Dec">Dezembro</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Ano *</label>
+                <input type="number" id="cg-ano" value="2024" required>
+            </div>
+        </div>
+        <div class="form-group" style="margin-top:24px;">
+            <label>Nome da Campanha (Gerado Automático)</label>
+            <input type="text" id="cg-nome-campanha" readonly>
+        </div>
+    </div>
+
+    <div class="card" id="section-lines">
+        <div class="actions-bar" style="margin-top:0; margin-bottom:25px;">
+            <h2 style="border:none; margin:0; padding:0;">Line Items</h2>
+            <button class="btn btn-primary" onclick="addLineItem()">+ Adicionar Linha</button>
+        </div>
+        <div id="line-items-container"></div>
+    </div>
+    
+    <div class="actions-bar" style="margin-top:0; margin-bottom: 50px;">
+        <div></div>
+        <button class="btn btn-primary" style="font-size: 1.15rem; padding: 16px 40px;" onclick="exportToExcel()">📄 Gerar Excel</button>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+<script>
+    // Theme logic
+    const themeBtn = document.getElementById('theme-toggle-btn');
+    themeBtn.addEventListener('click', () => {
+        document.body.classList.toggle('dark-theme');
+        if (document.body.classList.contains('dark-theme')) {
+            themeBtn.textContent = '☀️';
+        } else {
+            themeBtn.textContent = '🌙';
+        }
+    });
+
+    const BASE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjRYT6xv7g-svK5_ScKZitolkns29Bbls5xAcMs8NONGY-p5xFa9Yz3tRJIwuhWOm4_FEY6vV0Ig1Z/pub?output=xlsx';
+
+    let dropdownData = {};
+    let mappings = {};
+    let lineItemCount = 0;
+    let choicesInstances = [];
+    let displayFormatos = [];
+    let videoFormatos = [];
+
+    // Helper: extract non-null values from a column in a sheet
+    function getColumn(rows, colIndex) {
+        return rows.slice(1).map(r => r[colIndex]).filter(v => v != null && v !== '');
     }
-    loadData();
+
+    // Helper: build a key→value map from two columns
+    function buildMap(rows, keyCol, valCol) {
+        const map = {};
+        rows.slice(1).forEach(r => {
+            if (r[keyCol] != null && r[keyCol] !== '' && r[valCol] != null) {
+                map[String(r[keyCol])] = String(r[valCol]);
+            }
+        });
+        return map;
+    }
+
+    async function loadBaseData() {
+        const resp = await fetch(BASE_SHEET_URL);
+        const buf = await resp.arrayBuffer();
+        const wb = XLSX.read(buf, { type: 'array' });
+
+        // --- Afiliada sheet (each column is an independent list) ---
+        const afRows = XLSX.utils.sheet_to_json(wb.Sheets['Afiliada'], { header: 1 });
+        dropdownData.afiliadas = getColumn(afRows, 0);        // Col A
+        dropdownData.meses = getColumn(afRows, 1);             // Col B (not used for dropdown but available)
+        dropdownData.propriedades = getColumn(afRows, 2);      // Col C
+        dropdownData.tipoDeLinha = getColumn(afRows, 3);       // Col D
+        dropdownData.posicaoVideo = getColumn(afRows, 4);      // Col E
+        dropdownData.skip = getColumn(afRows, 5);              // Col F
+        dropdownData.posicao = getColumn(afRows, 6);           // Col G
+        dropdownData.geolocalizacao = getColumn(afRows, 7);    // Col H
+        dropdownData.programarDisponivel = getColumn(afRows, 8); // Col I
+
+        // --- BaseFormatos sheet ---
+        const fmtRows = XLSX.utils.sheet_to_json(wb.Sheets['BaseFormatos'], { header: 1 });
+        const allFormatoNames = getColumn(fmtRows, 0);
+        dropdownData.formatos = allFormatoNames;
+        mappings.formatos = buildMap(fmtRows, 0, 1);
+
+        // Derive display vs video format lists
+        videoFormatos = allFormatoNames.filter(f => ['DAI', 'Video'].includes(f));
+        displayFormatos = allFormatoNames.filter(f => !['DAI', 'Video'].includes(f));
+
+        // --- BaseSegmentacoes sheet ---
+        const segRows = XLSX.utils.sheet_to_json(wb.Sheets['BaseSegmentacoes'], { header: 1 });
+        dropdownData.idades = getColumn(segRows, 0);           // Col A
+        mappings.idade_permutive = buildMap(segRows, 0, 1);    // Col A→B
+        mappings.idade_audience = buildMap(segRows, 0, 2);     // Col A→C
+        dropdownData.generos = getColumn(segRows, 3);          // Col D
+        mappings.genero_permutive = buildMap(segRows, 3, 4);   // Col D→E
+        mappings.genero_audience = buildMap(segRows, 3, 5);    // Col D→F
+        dropdownData.potencialConsumo = getColumn(segRows, 6); // Col G
+        mappings.potencial_permutive = buildMap(segRows, 6, 7);// Col G→H
+        mappings.potencial_audience = buildMap(segRows, 6, 8); // Col G→I
+        dropdownData.interesses = getColumn(segRows, 9);       // Col J
+        mappings.interesse_permutive = buildMap(segRows, 9, 10);// Col J→K
+        mappings.interesse_audience = buildMap(segRows, 9, 11); // Col J→L
+
+        // --- Site sheet ---
+        const siteRows = XLSX.utils.sheet_to_json(wb.Sheets['Site'], { header: 1 });
+        dropdownData.sites = getColumn(siteRows, 0);           // Col A
+
+        console.log('Base data loaded:', { dropdownData, mappings });
+    }
+
+    const fieldsWithAll = ['formatos', 'posicao', 'sites', 'geolocalizacao', 'idades', 'generos', 'potencialConsumo', 'interesses'];
+
+    const commonSearchOpts = {
+        searchEnabled: true,
+        searchResultLimit: 100,
+        searchFuzzy: false,
+        shouldSort: false,
+        fuseOptions: {
+            threshold: 0.1,
+            ignoreLocation: true
+        }
+    };
+
+    const formatChoices = (arr) => arr.map(item => ({value: item, label: item}));
+
+    function initDropdownOptions(selectElement, optionsArray, isMultiple = false) {
+        optionsArray.forEach(opt => {
+            const option = document.createElement('option');
+            option.value = opt;
+            option.textContent = opt;
+            selectElement.appendChild(option);
+        });
+    }
+
+    function updateCampaignName() {
+        const rp = document.getElementById('cg-rp').value || "[RP]";
+        const af = document.getElementById('cg-afiliadas').value || "[Afiliada]";
+        const order = document.getElementById('cg-order-id').value || "[Order ID]";
+        const cliente = document.getElementById('cg-cliente').value || "[Cliente]";
+        let agencia = document.getElementById('cg-agencia').value || "Direto";
+        const mes = document.getElementById('cg-mes').value;
+        const ano = document.getElementById('cg-ano').value.substring(2,4);
+        
+        const mesAno = mes + ano;
+        const result = `${rp}_${af}_${order}_${cliente}_${agencia}_${mesAno}_TVGLOBO`;
+        document.getElementById('cg-nome-campanha').value = result;
+    }
+
+    function initApp() {
+        initDropdownOptions(document.getElementById('cg-afiliadas'), dropdownData.afiliadas);
+        new Choices(document.getElementById('cg-afiliadas'), { ...commonSearchOpts, itemSelectText: '' });
+        new Choices(document.getElementById('cg-mes'), { searchEnabled: false, itemSelectText: '', shouldSort: false });
+        
+        document.getElementById('cg-ano').value = new Date().getFullYear();
+
+        ['cg-rp', 'cg-afiliadas', 'cg-order-id', 'cg-cliente', 'cg-agencia', 'cg-mes', 'cg-ano'].forEach(id => {
+            document.getElementById(id).addEventListener('input', updateCampaignName);
+            document.getElementById(id).addEventListener('change', updateCampaignName);
+        });
+        updateCampaignName();
+
+        // Add first line item
+        addLineItem();
+
+        // Hide loading overlay
+        const overlay = document.getElementById('loading-overlay');
+        if (overlay) overlay.style.display = 'none';
+    }
+
+    function selectAll(field, itemId) {
+        const choiceObj = choicesInstances.find(c => c.id === `${field}-${itemId}`);
+        if (choiceObj) {
+            let available = [];
+            if (field === 'formatos') {
+                const tipo = document.getElementById(`tipoLinha-${itemId}`).value;
+                if (tipo === 'DISPLAY') available = displayFormatos;
+                else if (tipo === 'VIDEO') available = videoFormatos;
+                else available = dropdownData.formatos;
+            } else if (field === 'idades') { available = dropdownData.idades; }
+            else if (field === 'generos') { available = dropdownData.generos; }
+            else if (field === 'potencialConsumo') { available = dropdownData.potencialConsumo; }
+            else if (field === 'interesses') { available = dropdownData.interesses; }
+            else if (field === 'sites') { available = dropdownData.sites; }
+            else if (field === 'geolocalizacao') { available = dropdownData.geolocalizacao; }
+            else if (field === 'posicao') { available = dropdownData.posicao; }
+            
+            choiceObj.instance.setChoiceByValue(available);
+            formatLineName(itemId);
+        }
+    }
+
+    function deselectAll(field, itemId) {
+        const choiceObj = choicesInstances.find(c => c.id === `${field}-${itemId}`);
+        if (choiceObj) {
+            choiceObj.instance.removeActiveItems();
+            formatLineName(itemId);
+        }
+    }
+
+    function formatPtBrDate(dateStr) {
+        if (!dateStr) return null;
+        const [year, month, day] = dateStr.split('-');
+        const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+        return `${day}${months[parseInt(month, 10) - 1]}${year.substring(2)}`;
+    }
+
+    function formatLineName(itemId) {
+        const el = id => document.getElementById(`${id}-${itemId}`);
+        if (!el('propriedade')) return;
+        
+        let prop = el('propriedade').value || "[Propriedade]";
+        const propUpper = prop.toUpperCase();
+        if (propUpper.includes("AVULSA")) prop = "MAVULSA";
+        else if (propUpper.includes("APOIO")) prop = "MAPOIO";
+        else if (propUpper.includes("DIVULGA")) prop = "MD";
+        
+        const tipoLinha = el('tipoLinha').value || "[Tipo de Linha]";
+        
+        let formato = "[Formato]";
+        const selectFormatos = el('formatos');
+        if (selectFormatos && selectFormatos.selectedOptions) {
+            const selected = Array.from(selectFormatos.selectedOptions).map(o => o.value);
+            if (selected.length > 0) {
+                if (selected.length <= 3) formato = selected.join(",");
+                else formato = "Diversos";
+            }
+        }
+        
+        let site = "[Site]";
+        const selectSites = el('sites');
+        if (selectSites && selectSites.selectedOptions) {
+            const selected = Array.from(selectSites.selectedOptions).map(o => o.value);
+            if (selected.length > 0) site = selected.join(",");
+        }
+        
+        let geo = "[Geolocalização]";
+        const selectGeo = el('geolocalizacao');
+        if (selectGeo && selectGeo.selectedOptions) {
+            const selected = Array.from(selectGeo.selectedOptions).map(o => {
+                const match = o.value.match(/\((.*?)\)/);
+                return match ? match[1] : o.value;
+            });
+            if (selected.length > 0) geo = selected.join(",");
+        }
+        
+        const dInicioRaw = el('dataInicio').value;
+        const dFimRaw = el('dataFim').value;
+        
+        const dInicio = formatPtBrDate(dInicioRaw) || "[Data Inicio]";
+        const dFim = formatPtBrDate(dFimRaw) || "[Data Fim]";
+        
+        let nameParts = [prop, tipoLinha, formato];
+        
+        if (tipoLinha === "VIDEO") {
+            const posVid = el('posicaoVideo').value;
+            if (posVid) nameParts.push(posVid);
+            
+            const hasDAI = selectFormatos && Array.from(selectFormatos.selectedOptions).some(o => o.value.toUpperCase() === "DAI");
+            const hasVideo = selectFormatos && Array.from(selectFormatos.selectedOptions).some(o => o.value.toUpperCase() === "VIDEO");
+            
+            if (!(hasDAI && !hasVideo)) {
+                const skipVal = el('skip').value;
+                if (skipVal) nameParts.push(skipVal);
+            }
+        }
+        
+        nameParts.push(site, geo, dInicio, dFim, itemId);
+        
+        const name = nameParts.filter(Boolean).join('_');
+        el('lineItemName').value = name;
+    }
+
+    function calculateTotals(itemId) {
+        const el = id => document.getElementById(`${id}-${itemId}`);
+        const entrega = parseFloat(el('entregaDeterminada').value) || 0;
+        const unitario = parseFloat(el('valorUnitario').value) || 0;
+        const desconto = parseFloat(el('desconto').value) || 0;
+        
+        const totalTabela = (entrega / 1000) * unitario;
+        el('totalTabela').value = totalTabela.toFixed(2);
+        
+        const totalNegociado = totalTabela - ((totalTabela * desconto) / 100);
+        el('totalNegociado').value = totalNegociado.toFixed(2);
+    }
+
+    function buildMultiGroup(label, id, itemId, isHidden = false) {
+        const hiddenClass = isHidden ? "hidden" : "";
+        return `
+            <div class="form-group ${hiddenClass}" id="fg-${id}-${itemId}">
+                <label>${label}</label>
+                <select id="${id}-${itemId}" multiple></select>
+            </div>
+        `;
+    }
+
+    function addLineItem() {
+        lineItemCount++;
+        const itemId = lineItemCount;
+        const container = document.getElementById('line-items-container');
+        
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'line-item';
+        itemDiv.id = `line-item-container-${itemId}`;
+        
+        itemDiv.innerHTML = `
+            <div class="line-item-header">
+                <span class="line-item-title">Linha ${itemId}</span>
+                <button class="btn btn-danger" onclick="removeLineItem(${itemId})">Remover Linha</button>
+            </div>
+            
+            <div class="form-group" style="margin-bottom:24px;">
+                <label>Nome da Linha (Gerado Automático)</label>
+                <input type="text" id="lineItemName-${itemId}" readonly>
+            </div>
+
+            <div class="grid">
+                <div class="form-group">
+                    <label>Propriedades</label>
+                    <select id="propriedade-${itemId}"><option value="">Selecione...</option></select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Tipo de Linha</label>
+                    <select id="tipoLinha-${itemId}"><option value="">Selecione...</option></select>
+                </div>
+
+                ${buildMultiGroup("Formatos", "formatos", itemId)}
+
+                <div class="form-group hidden" id="fg-posicaoVideo-${itemId}">
+                    <label>Posição Vídeo</label>
+                    <select id="posicaoVideo-${itemId}"><option value="">Selecione...</option></select>
+                </div>
+
+                <div class="form-group hidden" id="fg-skip-${itemId}">
+                    <label>Skip</label>
+                    <select id="skip-${itemId}"><option value="">Selecione...</option></select>
+                </div>
+
+                ${buildMultiGroup("Posição", "posicao", itemId, true)}
+
+                <div class="form-group">
+                    <label>Data de Início</label>
+                    <input type="date" id="dataInicio-${itemId}">
+                </div>
+
+                <div class="form-group">
+                    <label>Data Fim</label>
+                    <input type="date" id="dataFim-${itemId}">
+                </div>
+
+                <div class="form-group">
+                    <label>Entrega Determinada</label>
+                    <input type="number" id="entregaDeterminada-${itemId}" min="0">
+                </div>
+
+                <div class="form-group">
+                    <label>Valor Unitário (R$)</label>
+                    <input type="number" step="0.01" id="valorUnitario-${itemId}" min="0">
+                </div>
+                
+                <div class="form-group">
+                    <label>Total Tabela (R$)</label>
+                    <input type="number" id="totalTabela-${itemId}" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label>Desconto (%)</label>
+                    <input type="number" step="0.01" id="desconto-${itemId}" value="0" min="0" max="100">
+                </div>
+
+                <div class="form-group">
+                    <label>Total Negociado (R$)</label>
+                    <input type="number" id="totalNegociado-${itemId}" readonly>
+                </div>
+
+                ${buildMultiGroup("Site", "sites", itemId)}
+
+                <div class="form-group">
+                    <label>Editoria / Programa</label>
+                    <input type="text" id="editoria-${itemId}">
+                </div>
+
+                ${buildMultiGroup("Geolocalização", "geolocalizacao", itemId)}
+                
+                ${buildMultiGroup("Caso Under, programar o disponível?", "programarDisponivel", itemId)}
+
+                <div class="form-group">
+                    <label>Cidades</label>
+                    <input type="text" id="cidades-${itemId}">
+                </div>
+
+                ${buildMultiGroup("Idade", "idades", itemId)}
+                
+                ${buildMultiGroup("Gênero", "generos", itemId)}
+                
+                ${buildMultiGroup("Potencial de Consumo", "potencialConsumo", itemId)}
+                
+                ${buildMultiGroup("Interesse", "interesses", itemId)}
+
+                <div class="form-group">
+                    <label>Observações</label>
+                    <input type="text" id="observacoes-${itemId}">
+                </div>
+            </div>
+        `;
+        
+        container.appendChild(itemDiv);
+        const el = id => document.getElementById(`${id}-${itemId}`);
+        
+        initDropdownOptions(el('propriedade'), dropdownData.propriedades);
+        initDropdownOptions(el('tipoLinha'), dropdownData.tipoDeLinha);
+        initDropdownOptions(el('posicaoVideo'), dropdownData.posicaoVideo);
+        initDropdownOptions(el('skip'), dropdownData.skip);
+
+        new Choices(el('propriedade'), { ...commonSearchOpts, itemSelectText: '' });
+        new Choices(el('posicaoVideo'), { ...commonSearchOpts, itemSelectText: '' });
+        new Choices(el('skip'), { searchEnabled: false, itemSelectText: '' });
+
+        const choiceFormatos = new Choices(el('formatos'), { ...commonSearchOpts, removeItemButton: true, choices: formatChoices(dropdownData.formatos) });
+        choicesInstances.push({ id: `formatos-${itemId}`, instance: choiceFormatos });
+        
+        const multiSetup = [
+            {id: 'posicao', data: dropdownData.posicao},
+            {id: 'sites', data: dropdownData.sites},
+            {id: 'geolocalizacao', data: dropdownData.geolocalizacao},
+            {id: 'programarDisponivel', data: dropdownData.programarDisponivel},
+            {id: 'idades', data: dropdownData.idades},
+            {id: 'generos', data: dropdownData.generos},
+            {id: 'potencialConsumo', data: dropdownData.potencialConsumo},
+            {id: 'interesses', data: dropdownData.interesses}
+        ];
+
+        multiSetup.forEach(m => {
+            const choice = new Choices(el(m.id), {
+                ...commonSearchOpts,
+                removeItemButton: true,
+                choices: formatChoices(m.data)
+            });
+            choicesInstances.push({ id: `${m.id}-${itemId}`, instance: choice });
+            el(m.id).addEventListener('change', () => formatLineName(itemId));
+            
+            if (fieldsWithAll.includes(m.id)) {
+                el(m.id).addEventListener('showDropdown', function() {
+                    const dropdown = choice.containerOuter.element.querySelector('.choices__list--dropdown');
+                    if (dropdown && !dropdown.querySelector('.custom-dropdown-actions')) {
+                        const actionDiv = document.createElement('div');
+                        actionDiv.className = 'custom-dropdown-actions';
+                        actionDiv.innerHTML = `
+                            <button type="button" class="action-btn" onclick="selectAll('${m.id}', ${itemId})">✅ Selecionar Tudo</button>
+                            <button type="button" class="action-btn danger" onclick="deselectAll('${m.id}', ${itemId})">❌ Desmarcar Tudo</button>
+                        `;
+                        dropdown.insertBefore(actionDiv, dropdown.firstChild);
+                    }
+                });
+            }
+        });
+
+        // Format special setup
+        el('formatos').addEventListener('change', () => formatLineName(itemId));
+        el('formatos').addEventListener('showDropdown', function() {
+            const dropdown = choiceFormatos.containerOuter.element.querySelector('.choices__list--dropdown');
+            if (dropdown && !dropdown.querySelector('.custom-dropdown-actions')) {
+                const actionDiv = document.createElement('div');
+                actionDiv.className = 'custom-dropdown-actions';
+                actionDiv.innerHTML = `
+                    <button type="button" class="action-btn" onclick="selectAll('formatos', ${itemId})">✅ Selecionar Tudo</button>
+                    <button type="button" class="action-btn danger" onclick="deselectAll('formatos', ${itemId})">❌ Desmarcar Tudo</button>
+                `;
+                dropdown.insertBefore(actionDiv, dropdown.firstChild);
+            }
+        });
+
+        el('tipoLinha').addEventListener('change', function(e) {
+            const tipo = e.target.value;
+            const fgPosVideo = document.getElementById(`fg-posicaoVideo-${itemId}`);
+            const fgPosicao = document.getElementById(`fg-posicao-${itemId}`);
+            choiceFormatos.clearStore();
+            
+            let availableFormatos = [];
+            if (tipo === "DISPLAY") {
+                availableFormatos = displayFormatos;
+                fgPosVideo.classList.add('hidden');
+                fgPosicao.classList.remove('hidden');
+            } else if (tipo === "VIDEO") {
+                availableFormatos = videoFormatos;
+                fgPosVideo.classList.remove('hidden');
+                fgPosicao.classList.add('hidden');
+            } else {
+                availableFormatos = dropdownData.formatos;
+                fgPosVideo.classList.add('hidden');
+                fgPosicao.classList.add('hidden');
+            }
+            
+            choiceFormatos.setChoices(formatChoices(availableFormatos), 'value', 'label', true);
+            formatLineName(itemId);
+        });
+
+        el('posicaoVideo').addEventListener('change', function(e) {
+            const posicao = e.target.value;
+            const fgSkip = document.getElementById(`fg-skip-${itemId}`);
+            if (posicao === "Pre Roll") {
+                fgSkip.classList.remove('hidden');
+            } else {
+                fgSkip.classList.add('hidden');
+            }
+        });
+        
+        ['entregaDeterminada', 'valorUnitario', 'desconto'].forEach(id => {
+            el(id).addEventListener('input', () => calculateTotals(itemId));
+        });
+        
+        ['propriedade', 'posicaoVideo', 'skip', 'dataInicio', 'dataFim'].forEach(id => {
+            el(id).addEventListener('input', () => formatLineName(itemId));
+            el(id).addEventListener('change', () => formatLineName(itemId));
+        });
+        
+        formatLineName(itemId);
+    }
+
+    function removeLineItem(idToRemove) {
+        choicesInstances = choicesInstances.filter(c => {
+            if (c.id.endsWith(`-${idToRemove}`)) {
+                c.instance.destroy();
+                return false;
+            }
+            return true;
+        });
+        document.getElementById(`line-item-container-${idToRemove}`).remove();
+        reorderLines();
+    }
+
+    function reorderLines() {
+        const container = document.getElementById('line-items-container');
+        const items = container.querySelectorAll('.line-item');
+        lineItemCount = items.length;
+        
+        items.forEach((item, index) => {
+            const newId = index + 1;
+            const oldId = parseInt(item.id.replace('line-item-container-', ''));
+            item.querySelector('.line-item-title').textContent = `Linha ${newId}`;
+            item.querySelector('.btn-danger').setAttribute('onclick', `removeLineItem(${newId})`);
+            item.id = `line-item-container-${newId}`;
+            
+            const elementsWithIds = item.querySelectorAll('[id]');
+            elementsWithIds.forEach(el => {
+                el.id = el.id.replace(`-${oldId}`, `-${newId}`);
+            });
+            
+            choicesInstances.forEach(c => {
+                if(c.id.endsWith(`-${oldId}`)) {
+                    c.id = c.id.replace(`-${oldId}`, `-${newId}`);
+                }
+            });
+            
+            formatLineName(newId);
+        });
+    }
+
+    // Boot: load base data, then initialize
+    loadBaseData().then(() => {
+        initApp();
+    }).catch(err => {
+        console.error('Failed to load base data:', err);
+        alert('Erro ao carregar a base de dados. Verifique sua conexão e recarregue a página.');
+        const overlay = document.getElementById('loading-overlay');
+        if (overlay) overlay.querySelector('p').textContent = 'Erro ao carregar. Recarregue a página.';
+    });
+
+    function getMultipleChoicesValue(id) {
+        const select = document.getElementById(id);
+        if (!select || !select.selectedOptions) return "";
+        return Array.from(select.selectedOptions).map(o => o.value).join(", ");
+    }
+
+    function mapValues(valString, mapObj) {
+        if (!valString) return "";
+        return valString.split(",").map(v => {
+            let key = v.trim();
+            return mapObj[key] !== undefined ? mapObj[key] : key;
+        }).join(", ");
+    }
+
+    function exportToExcel() {
+        const requiredIds = ['cg-rp', 'cg-afiliadas', 'cg-order-id', 'cg-cliente', 'cg-mes', 'cg-ano'];
+        for(let id of requiredIds) {
+            if (!document.getElementById(id).value) {
+                alert("Preencha todos os campos obrigatórios da Campanha!");
+                return;
+            }
+        }
+        
+        const campDataObj = {
+            'Número de RP': document.getElementById('cg-rp').value,
+            'Afiliadas': document.getElementById('cg-afiliadas').value,
+            'Order ID': document.getElementById('cg-order-id').value,
+            'Cliente': document.getElementById('cg-cliente').value,
+            'Agência / Direto': document.getElementById('cg-agencia').value || 'Direto',
+            'Mês': document.getElementById('cg-mes').value,
+            'Ano': document.getElementById('cg-ano').value,
+            'Nome da Campanha': document.getElementById('cg-nome-campanha').value
+        };
+
+        const headers = [
+            'Nome da Linha', 'Número de RP', 'Afiliadas', 'Order ID', 'Cliente', 'Agência / Direto', 'Mês', 'Ano', 'Nome da Campanha',
+            'Propriedades', 'Tipo de Linha', 'Formatos', 'Posição Vídeo', 'Skip', 'Posição', 'Data de Início', 'Data Fim',
+            'Entrega Determinada', 'Valor Unitário (R$)', 'Total Tabela (R$)', 'Desconto (%)', 'Total Negociado (R$)',
+            'Site', 'Editoria / Programa', 'Geolocalização', 'Caso Under, programar o disponível?', 'Cidades',
+            'Idade', 'Gênero', 'Potencial de Consumo', 'Interesse', 'Observações'
+        ];
+
+        let aoa = [];
+        // Row 1
+        aoa.push([campDataObj['Nome da Campanha'], campDataObj['Cliente']]);
+        // Row 2
+        aoa.push([]);
+        // Row 3
+        aoa.push(headers);
+
+        const container = document.getElementById('line-items-container');
+        const items = container.querySelectorAll('.line-item');
+        
+        if (items.length === 0) {
+            let rowDict = {...campDataObj};
+            let rowArr = headers.map(h => rowDict[h] || "");
+            aoa.push(rowArr);
+        } else {
+            items.forEach((item, index) => {
+                const id = index + 1;
+                const el = field => document.getElementById(`${field}-${id}`) ? document.getElementById(`${field}-${id}`).value : "";
+                
+                const formatRaw = getMultipleChoicesValue(`formatos-${id}`);
+                const isDAI = formatRaw.toUpperCase().includes("DAI");
+
+                const formatMapped = mapValues(formatRaw, mappings.formatos);
+                
+                const idadeMapped = mapValues(getMultipleChoicesValue(`idades-${id}`), isDAI ? mappings.idade_audience : mappings.idade_permutive);
+                const generoMapped = mapValues(getMultipleChoicesValue(`generos-${id}`), isDAI ? mappings.genero_audience : mappings.genero_permutive);
+                const potencialMapped = mapValues(getMultipleChoicesValue(`potencialConsumo-${id}`), isDAI ? mappings.potencial_audience : mappings.potencial_permutive);
+                const interesseMapped = mapValues(getMultipleChoicesValue(`interesses-${id}`), isDAI ? mappings.interesse_audience : mappings.interesse_permutive);
+
+                let rowDict = {
+                    ...campDataObj,
+                    'Nome da Linha': el('lineItemName'),
+                    'Propriedades': el('propriedade'),
+                    'Tipo de Linha': el('tipoLinha'),
+                    'Formatos': formatMapped,
+                    'Posição Vídeo': el('posicaoVideo'),
+                    'Skip': el('skip'),
+                    'Posição': getMultipleChoicesValue(`posicao-${id}`),
+                    'Data de Início': el('dataInicio'),
+                    'Data Fim': el('dataFim'),
+                    'Entrega Determinada': el('entregaDeterminada'),
+                    'Valor Unitário (R$)': el('valorUnitario'),
+                    'Total Tabela (R$)': el('totalTabela'),
+                    'Desconto (%)': el('desconto'),
+                    'Total Negociado (R$)': el('totalNegociado'),
+                    'Site': getMultipleChoicesValue(`sites-${id}`),
+                    'Editoria / Programa': el('editoria'),
+                    'Geolocalização': getMultipleChoicesValue(`geolocalizacao-${id}`),
+                    'Caso Under, programar o disponível?': getMultipleChoicesValue(`programarDisponivel-${id}`),
+                    'Cidades': el('cidades'),
+                    'Idade': idadeMapped,
+                    'Gênero': generoMapped,
+                    'Potencial de Consumo': potencialMapped,
+                    'Interesse': interesseMapped,
+                    'Observações': el('observacoes')
+                };
+
+                let rowArr = headers.map(h => rowDict[h] || "");
+                aoa.push(rowArr);
+            });
+        }
+
+        const worksheet = XLSX.utils.aoa_to_sheet(aoa);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Campanha");
+        XLSX.writeFile(workbook, `Campanha_${campDataObj['Nome da Campanha']}.xlsx`);
+    }
 </script>
 </body>
 </html>
