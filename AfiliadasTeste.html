@@ -585,8 +585,10 @@
             choiceSitesObj.instance.clearStore();
             choiceSitesObj.instance.setChoices(formatChoices(daiSites), 'value', 'label', true);
         } else {
+            const allDaiSites = Object.values(daiSiteMappings).flat();
+            const nonDaiSites = dropdownData.sites.filter(site => !allDaiSites.includes(site));
             choiceSitesObj.instance.clearStore();
-            choiceSitesObj.instance.setChoices(formatChoices(dropdownData.sites), 'value', 'label', true);
+            choiceSitesObj.instance.setChoices(formatChoices(nonDaiSites), 'value', 'label', true);
         }
     }
 
@@ -874,9 +876,12 @@
         const choiceFormatos = new Choices(el('formatos'), { ...commonSearchOpts, removeItemButton: true, choices: formatChoices(dropdownData.formatos) });
         choicesInstances.push({ id: `formatos-${itemId}`, instance: choiceFormatos });
         
+        const allDaiSites = Object.values(daiSiteMappings).flat();
+        const nonDaiSites = dropdownData.sites.filter(site => !allDaiSites.includes(site));
+
         const multiSetup = [
             {id: 'posicao', data: dropdownData.posicao},
-            {id: 'sites', data: dropdownData.sites},
+            {id: 'sites', data: nonDaiSites},
             {id: 'geolocalizacao', data: dropdownData.geolocalizacao},
             {id: 'programarDisponivel', data: dropdownData.programarDisponivel},
             {id: 'idades', data: dropdownData.idades},
