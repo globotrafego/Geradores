@@ -814,8 +814,8 @@
         initDropdownOptions(el('skip'), dropdownData.skip);
 
         new Choices(el('propriedade'), { ...commonSearchOpts, itemSelectText: '' });
-        new Choices(el('posicaoVideo'), { ...commonSearchOpts, itemSelectText: '' });
-        new Choices(el('skip'), { searchEnabled: false, itemSelectText: '' });
+        const choicePosicaoVideo = new Choices(el('posicaoVideo'), { ...commonSearchOpts, itemSelectText: '' });
+        const choiceSkip = new Choices(el('skip'), { searchEnabled: false, itemSelectText: '' });
 
         const choiceFormatos = new Choices(el('formatos'), { ...commonSearchOpts, removeItemButton: true, choices: formatChoices(dropdownData.formatos) });
         choicesInstances.push({ id: `formatos-${itemId}`, instance: choiceFormatos });
@@ -913,19 +913,16 @@
             if (hasVideo && !hasDAI) {
                 // Show Posição Vídeo WITHOUT the DAI option
                 fgPosVideo.classList.remove('hidden');
-                // Filter out DAI from posicaoVideo options
-                const posVideoChoicesObj = posVideoSelect.closest('.choices');
-                if (posVideoChoicesObj) {
-                    // Reset to non-DAI options
-                    const nonDaiOptions = dropdownData.posicaoVideo.filter(p => p.toUpperCase() !== 'DAI');
-                    posVideoSelect.innerHTML = '<option value="">Selecione...</option>';
-                    nonDaiOptions.forEach(opt => {
-                        const option = document.createElement('option');
-                        option.value = opt;
-                        option.textContent = opt;
-                        posVideoSelect.appendChild(option);
-                    });
-                }
+                
+                // Filter out DAI from posicaoVideo options properly via Choices.js API
+                const nonDaiOptions = dropdownData.posicaoVideo.filter(p => p.toUpperCase() !== 'DAI');
+                choicePosicaoVideo.setChoices(
+                    [
+                        { value: '', label: 'Selecione...', selected: true, disabled: false },
+                        ...nonDaiOptions.map(opt => ({ value: opt, label: opt }))
+                    ],
+                    'value', 'label', true
+                );
             } else if (hasDAI) {
                 // Hide both Posição Vídeo and Skip for DAI
                 fgPosVideo.classList.add('hidden');
