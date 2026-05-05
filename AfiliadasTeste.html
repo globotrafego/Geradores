@@ -940,7 +940,7 @@
         el('posicaoVideo').addEventListener('change', function(e) {
             const posicao = e.target.value;
             const fgSkip = document.getElementById(`fg-skip-${itemId}`);
-            if (posicao === "Pre Roll") {
+            if (posicao) {
                 fgSkip.classList.remove('hidden');
             } else {
                 fgSkip.classList.add('hidden');
