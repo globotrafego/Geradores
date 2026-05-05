@@ -546,6 +546,49 @@
         const result = `${rp}_${af}_${order}_${cliente}_${agencia}_${mesAno}_TVGLOBO`;
         document.getElementById('cg-nome-campanha').value = result;
     }
+    const daiSiteMappings = {
+        "TV TEM": ["Globo_BAU (TV TEM Bauru)", "Globo_ITP (TV TEM Itapetininga)", "Globo_SJR (TV TEM São José do Rio Preto)", "Globo_SOR (TV TEM Sorocaba)"],
+        "EPTV": ["Globo_CAM (EPTV Campinas)", "Globo_RIB (EPTV Ribeirão)", "Globo_SCA (EPTV Central)", "Globo_VAR (EPTV Sul de Minas)"],
+        "NSC": ["Globo_BLU (NSC Blumenau)", "Globo_CHA (NSC Chapecó)", "Globo_CRI (NSC Criciúma)", "Globo_JOA (NSC Centro-Oeste)", "Globo_JOI (NSC Joinville)", "Globo_SC1 (NSC Florianópolis)"],
+        "RBS": ["Globo_PEL (RBS TV Pelotas)", "Globo_PFO (RBS TV Passo Fundo)", "Globo_RS1 (RBS TV Porto Alegre)"],
+        "RPCTV": ["Globo_CAV (RPC Cascavel)", "Globo_CUR (RPC Curitiba)", "Globo_FOZ (RPC Foz do Iguaçu)", "Globo_GAV (RPC Guarapuava)", "Globo_LON (RPC Londrina)", "Globo_MAR (RPC Maringá)", "Globo_PGR (RPC Ponta Grossa)", "Globo_PR3 (RPC Paranavaí)"],
+        "INTER TV RJ": ["Globo_CAB (Inter TV Alto Litoral)", "Globo_FLU (Inter TV Planície)", "Globo_FRI (Inter TV Serra+Mar)"],
+        "INTER TV MG": ["Globo_FAB (Inter TV dos Vales)", "Globo_MTC (Inter TV Grande Minas)"],
+        "INTER TV RN": ["Globo_NA2 (Inter TV Costa Branca)", "Globo_NAT (Inter TV Cabugi)"],
+        "TV INTEGRACAO": ["Globo_JF (TV Integração Juiz de Fora)", "Globo_UBE (TV Integração Uberlândia)"],
+        "TV LIBERAL": ["Globo_BEL (TV Liberal Belém)"],
+        "TV VERDES MARES": ["Globo_CE1 (TV Verdes Mares)"],
+        "TV ANHANGUERA": ["Globo_GO01 (TV Anhanguera Goiânia)"],
+        "TV MIRANTE": ["Globo_MA1 (TV Mirante São Luís)"],
+        "TV AMAZONICA AM": ["Globo_MAN (Rede Amazônica Manaus)"],
+        "TV DIARIO": ["Globo_MOC (TV Diário)"],
+        "TV MORENA": ["Globo_MS1 (TV Morena Campo Grande)"],
+        "TV RIO SUL": ["Globo_RES (TV Rio Sul)"],
+        "REDE BAHIA": ["Globo_SAL (TV Bahia)"],
+        "TV TRIBUNA": ["Globo_SAN (TV Tribuna)"],
+        "TV SERGIPE": ["Globo_SER (TV Sergipe)"],
+        "TV GAZETA ES": ["Globo_VIT (TV Gazeta)"]
+    };
+
+    function updateSitesForDAI(itemId) {
+        const choiceSitesObj = choicesInstances.find(c => c.id === `sites-${itemId}`);
+        if (!choiceSitesObj || !choiceSitesObj.instance) return;
+        
+        const formatSelect = document.getElementById(`formatos-${itemId}`);
+        if (!formatSelect) return;
+        
+        const hasDAI = Array.from(formatSelect.selectedOptions || []).map(o => o.value.toUpperCase()).includes('DAI');
+        
+        if (hasDAI) {
+            const afiliada = document.getElementById('cg-afiliadas').value;
+            const daiSites = daiSiteMappings[afiliada] || [];
+            choiceSitesObj.instance.clearStore();
+            choiceSitesObj.instance.setChoices(formatChoices(daiSites), 'value', 'label', true);
+        } else {
+            choiceSitesObj.instance.clearStore();
+            choiceSitesObj.instance.setChoices(formatChoices(dropdownData.sites), 'value', 'label', true);
+        }
+    }
 
     function initApp() {
         initDropdownOptions(document.getElementById('cg-afiliadas'), dropdownData.afiliadas);
@@ -554,9 +597,20 @@
         
         document.getElementById('cg-ano').value = new Date().getFullYear();
 
-        ['cg-rp', 'cg-afiliadas', 'cg-order-id', 'cg-cliente', 'cg-agencia', 'cg-mes', 'cg-ano'].forEach(id => {
+        ['cg-rp', 'cg-order-id', 'cg-cliente', 'cg-agencia', 'cg-mes', 'cg-ano'].forEach(id => {
             document.getElementById(id).addEventListener('input', updateCampaignName);
             document.getElementById(id).addEventListener('change', updateCampaignName);
+        });
+
+        const afSelect = document.getElementById('cg-afiliadas');
+        afSelect.addEventListener('input', updateCampaignName);
+        afSelect.addEventListener('change', () => {
+            updateCampaignName();
+            for (let i = 1; i <= lineItemCount; i++) {
+                if (document.getElementById(`line-item-${i}`)) {
+                    updateSitesForDAI(i);
+                }
+            }
         });
         updateCampaignName();
 
@@ -932,6 +986,7 @@
                 fgSkip.classList.add('hidden');
             }
             formatLineName(itemId);
+            updateSitesForDAI(itemId);
         });
 
         el('posicaoVideo').addEventListener('change', function(e) {
