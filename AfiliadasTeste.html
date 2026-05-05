@@ -446,7 +446,7 @@
 
     // Helper: extract non-null values from a column in a sheet
     function getColumn(rows, colIndex) {
-        return rows.slice(1).map(r => r[colIndex]).filter(v => v != null && v !== '');
+        return rows.slice(1).map(r => r[colIndex]).filter(v => v != null && v !== '').map(v => String(v).replace(/\u00AD/g, ''));
     }
 
     // Helper: build a key→value map from two columns
@@ -454,7 +454,7 @@
         const map = {};
         rows.slice(1).forEach(r => {
             if (r[keyCol] != null && r[keyCol] !== '' && r[valCol] != null) {
-                map[String(r[keyCol])] = String(r[valCol]);
+                map[String(r[keyCol]).replace(/\u00AD/g, '')] = String(r[valCol]).replace(/\u00AD/g, '');
             }
         });
         return map;
