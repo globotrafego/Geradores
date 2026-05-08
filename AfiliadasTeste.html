@@ -231,6 +231,12 @@
             color: var(--primary);
         }
 
+        .line-item-add-row {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
         .actions-bar {
             display: flex;
             justify-content: space-between;
@@ -773,12 +779,12 @@
             <div class="grid">
                 <div class="form-group">
                     <label>Propriedades</label>
-                    <select id="propriedade-${itemId}"><option value="">Selecione...</option></select>
+                    <select id="propriedade-${itemId}" required><option value="">Selecione...</option></select>
                 </div>
                 
                 <div class="form-group">
                     <label>Tipo de Linha</label>
-                    <select id="tipoLinha-${itemId}"><option value="">Selecione...</option></select>
+                    <select id="tipoLinha-${itemId}" required><option value="">Selecione...</option></select>
                 </div>
 
                 ${buildMultiGroup("Formatos", "formatos", itemId)}
@@ -797,22 +803,22 @@
 
                 <div class="form-group">
                     <label>Data de Início</label>
-                    <input type="date" id="dataInicio-${itemId}">
+                    <input type="date" id="dataInicio-${itemId}" required>
                 </div>
 
                 <div class="form-group">
                     <label>Data Fim</label>
-                    <input type="date" id="dataFim-${itemId}">
+                    <input type="date" id="dataFim-${itemId}" required>
                 </div>
 
                 <div class="form-group">
                     <label>Entrega Determinada</label>
-                    <input type="number" id="entregaDeterminada-${itemId}" min="0">
+                    <input type="number" id="entregaDeterminada-${itemId}" min="0" required>
                 </div>
 
                 <div class="form-group">
                     <label>Valor Unitário (R$)</label>
-                    <input type="number" step="0.01" id="valorUnitario-${itemId}" min="0">
+                    <input type="number" step="0.01" id="valorUnitario-${itemId}" min="0" required>
                 </div>
                 
                 <div class="form-group">
@@ -822,7 +828,7 @@
 
                 <div class="form-group">
                     <label>Desconto (%)</label>
-                    <input type="number" step="0.01" id="desconto-${itemId}" value="0" min="0" max="100">
+                    <input type="number" step="0.01" id="desconto-${itemId}" value="0" min="0" max="100" required>
                 </div>
 
                 <div class="form-group">
@@ -858,6 +864,10 @@
                     <label>Observações</label>
                     <input type="text" id="observacoes-${itemId}">
                 </div>
+            </div>
+
+            <div class="line-item-add-row">
+                <button type="button" class="btn btn-primary btn-add-line-item" onclick="addLineItem()">+ Adicionar Linha</button>
             </div>
         `;
         
@@ -1014,6 +1024,19 @@
         });
         
         formatLineName(itemId);
+        updateLineItemAddButtons();
+    }
+
+    function updateLineItemAddButtons() {
+        const container = document.getElementById('line-items-container');
+        const items = container.querySelectorAll('.line-item');
+
+        items.forEach((item, index) => {
+            const addButton = item.querySelector('.btn-add-line-item');
+            if (addButton) {
+                addButton.style.display = index === items.length - 1 ? 'inline-flex' : 'none';
+            }
+        });
     }
 
     function removeLineItem(idToRemove) {
@@ -1053,6 +1076,8 @@
             
             formatLineName(newId);
         });
+
+        updateLineItemAddButtons();
     }
 
     // Boot: load base data, then initialize
