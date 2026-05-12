@@ -262,7 +262,7 @@
 
     function formatBytes(bytes) {
       if (bytes === 0) return '0 Bytes';
-      const k = 1024, sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const k = 1000, sizes = ['Bytes', 'kB', 'MB', 'GB'];
       const i = Math.floor(Math.log(bytes) / Math.log(k));
       return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     }
@@ -323,7 +323,12 @@
         let dimensions = "Unknown";
         const wMatch = tagContent.match(/width\s*=\s*["']?(\d+)["']?/i);
         const hMatch = tagContent.match(/height\s*=\s*["']?(\d+)["']?/i);
-        if (wMatch && hMatch) dimensions = `${wMatch[1]}x${hMatch[1]}`;
+        if (wMatch && hMatch) {
+            dimensions = `${wMatch[1]}x${hMatch[1]}`;
+        } else {
+            const commonSizes = tagContent.match(/\b(300x250|728x90|160x600|300x600|320x50|970x250|300x50|320x480|300x100)\b/);
+            if (commonSizes) dimensions = commonSizes[1] + " (Parsed from text)";
+        }
 
         let clickUrl = "Not found";
         const hrefMatch = tagContent.match(/href\s*=\s*["']([^"']+)["']/i);
@@ -361,7 +366,7 @@
         `;
         previewContainer.appendChild(iframe);
 
-        // Wait 3.5 seconds for ad assets to load
+        // Wait 5 seconds for ad assets to fully load
         setTimeout(async () => {
           let totalBytes = 0;
           let requestCount = 0;
@@ -397,14 +402,19 @@
           }
 
           // Try to infer dimensions from rendered DOM if statically unknown
-          if (dimensions === "Unknown") {
+          if (dimensions === "Unknown" || dimensions.includes("Parsed from text")) {
             try {
-              const body = iframe.contentDocument.body;
-              if (body.children.length > 0) {
-                const el = body.children[0];
-                if (el.offsetWidth > 0 && el.offsetHeight > 0) {
-                  dimensions = `${el.offsetWidth}x${el.offsetHeight} (Inferred)`;
+              let maxWidth = 0;
+              let maxHeight = 0;
+              const elements = iframe.contentDocument.querySelectorAll('*');
+              elements.forEach(el => {
+                if (el.tagName !== 'HTML' && el.tagName !== 'BODY' && el.tagName !== 'SCRIPT' && el.tagName !== 'STYLE') {
+                  if (el.offsetWidth > maxWidth && el.offsetWidth < 1200) maxWidth = el.offsetWidth;
+                  if (el.offsetHeight > maxHeight && el.offsetHeight < 1200) maxHeight = el.offsetHeight;
                 }
+              });
+              if (maxWidth > 0 && maxHeight > 0) {
+                dimensions = `${maxWidth}x${maxHeight} (Inferred from DOM)`;
               }
             } catch(e) {}
           }
@@ -424,7 +434,7 @@
             status: isValid ? 'Valid' : 'Needs Review'
           });
 
-        }, 3500); // 3.5 seconds loading window
+        }, 5000); // 5 seconds loading window
       });
     }
   </script>
