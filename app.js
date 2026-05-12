@@ -198,20 +198,16 @@ function testAdTag(tagContent, filename, cardId, previewContainer) {
         iframe.style.minHeight = '250px';
     }
     
-    let injected = false;
-    iframe.onload = () => {
-      if (injected) return;
-      injected = true;
-      try {
-        const doc = iframe.contentDocument;
-        doc.open();
-        doc.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{margin:0;padding:0;overflow:hidden;}</style></head><body>${tagContent}</body></html>`);
-        doc.close();
-      } catch(e) { console.error("Error injecting tag", e); }
-    };
+    // Sanitize protocol-relative URLs to ensure they work locally
+    let sanitizedContent = tagContent.replace(/src=["']\/\//gi, 'src="https://');
+    sanitizedContent = sanitizedContent.replace(/href=["']\/\//gi, 'href="https://');
+
+    const htmlContent = `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{margin:0;padding:0;overflow:hidden;}</style></head><body>${sanitizedContent}</body></html>`;
+    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+    const blobUrl = URL.createObjectURL(blob);
     
-    // Load the sandbox trigger network events
-    iframe.src = 'about:blank?id=' + cardId;
+    // The hash #id= allows the Chrome Debugger to map the frameId to the cardId
+    iframe.src = blobUrl + '#id=' + cardId;
     previewContainer.appendChild(iframe);
 
     // Wait 5 seconds for ad assets to fully load
