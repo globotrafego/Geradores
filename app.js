@@ -206,9 +206,12 @@ function testAdTag(tagContent, filename, cardId, previewContainer) {
     const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
     const blobUrl = URL.createObjectURL(blob);
     
-    // Set the iframe name to the cardId so the Chrome Debugger can map the frameId
+    // Register the blob URL with the extension so it can track all network traffic
     iframe.name = cardId;
-    iframe.src = blobUrl;
+    window.postMessage({ type: 'REGISTER_BLOB', blobUrl: blobUrl, cardId: cardId }, '*');
+    
+    // Small delay to let the extension register before navigating
+    setTimeout(() => { iframe.src = blobUrl; }, 100);
     previewContainer.appendChild(iframe);
 
     // Wait 5 seconds for ad assets to fully load
