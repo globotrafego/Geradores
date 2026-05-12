@@ -206,8 +206,9 @@ function testAdTag(tagContent, filename, cardId, previewContainer) {
     const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
     const blobUrl = URL.createObjectURL(blob);
     
-    // The hash #id= allows the Chrome Debugger to map the frameId to the cardId
-    iframe.src = blobUrl + '#id=' + cardId;
+    // Set the iframe name to the cardId so the Chrome Debugger can map the frameId
+    iframe.name = cardId;
+    iframe.src = blobUrl;
     previewContainer.appendChild(iframe);
 
     // Wait 5 seconds for ad assets to fully load
