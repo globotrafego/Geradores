@@ -230,7 +230,10 @@
           const previewContainer = document.getElementById(cardId + '-preview');
           
           // Test the tag and show preview
-          testAdTag(content, file.name, previewContainer).then(result => {
+          testAdTag(content, file.name, previewContainer, (msg) => {
+            const badge = document.getElementById(`${cardId}-status`);
+            if (badge) badge.textContent = msg;
+          }).then(result => {
             allResults.push(result);
             resultsCount.textContent = allResults.length;
             updateCard(cardId, result);
@@ -279,8 +282,9 @@
 
       let weightDisplay = formatBytes(result.weight);
       let corsMsg = result.corsWarning 
-        ? `<div class="warning-text">*Some cross-origin assets hid their size due to CORS.</div>` 
+        ? `<div class="warning-text">*Some cross-origin assets hid their size. Proxied fallback was used, but weight may still be approximate.</div>` 
         : '';
+      let programmaticMsg = `<div class="warning-text" style="color:var(--text-muted)">Note: Ad tags often load different creatives on each render, so weight can vary per test.</div>`;
 
       body.innerHTML = `
         <div class="info-row"><span class="info-label">Dimensions</span><span class="info-value">${result.dimensions}</span></div>
@@ -293,6 +297,7 @@
           </span>
         </div>
         ${corsMsg}
+        ${programmaticMsg}
         <div class="macros-container">
           <div class="macros-title">IAB Macros Detected</div>
           ${macrosHtml}
@@ -300,7 +305,19 @@
       `;
     }
 
-    function testAdTag(tagContent, filename, previewContainer) {
+    async function fetchProxySize(url) {
+      try {
+        const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(url);
+        const res = await fetch(proxyUrl, { method: 'HEAD', cache: 'no-cache' });
+        if (res.ok) {
+          const cl = res.headers.get('content-length');
+          if (cl) return parseInt(cl, 10);
+        }
+      } catch(e) {}
+      return 0;
+    }
+
+    function testAdTag(tagContent, filename, previewContainer, updateStatus) {
       return new Promise((resolve) => {
         // 1. Static Parsing
         let dimensions = "Unknown";
@@ -345,10 +362,10 @@
         previewContainer.appendChild(iframe);
 
         // Wait 3.5 seconds for ad assets to load
-        setTimeout(() => {
+        setTimeout(async () => {
           let totalBytes = 0;
           let requestCount = 0;
-          let corsWarning = false;
+          let missingSizeUrls = [];
 
           try {
             const win = iframe.contentWindow;
@@ -356,19 +373,27 @@
               const entries = win.performance.getEntriesByType("resource");
               requestCount = entries.length;
               entries.forEach(entry => {
-                // Try transferSize first, fallback to decodedBodySize. 
-                // If 0, it means cross-origin restriction is in place without Timing-Allow-Origin
                 if (entry.transferSize > 0) {
                   totalBytes += entry.transferSize;
                 } else if (entry.decodedBodySize > 0) {
                   totalBytes += entry.decodedBodySize;
-                } else {
-                  corsWarning = true;
+                } else if (entry.name && entry.name.startsWith('http')) {
+                  missingSizeUrls.push(entry.name);
                 }
               });
             }
           } catch(e) {
             console.error("Error accessing iframe performance", e);
+          }
+
+          let corsWarning = missingSizeUrls.length > 0;
+
+          if (corsWarning && updateStatus) {
+             updateStatus(`Bypassing CORS for ${missingSizeUrls.length} assets...`);
+             // Fetch missing sizes in parallel
+             const sizePromises = missingSizeUrls.map(url => fetchProxySize(url));
+             const sizes = await Promise.all(sizePromises);
+             sizes.forEach(s => totalBytes += s);
           }
 
           // Try to infer dimensions from rendered DOM if statically unknown
