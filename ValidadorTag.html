@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ad Tag Validator</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --surface: rgba(30, 41, 59, 0.7);
+      --surface-border: rgba(255, 255, 255, 0.1);
+      --primary: #3b82f6;
+      --primary-hover: #60a5fa;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --glass-bg: rgba(15, 23, 42, 0.6);
+      --glass-border: rgba(255, 255, 255, 0.05);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-color);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.15) 0px, transparent 50%);
+      background-attachment: fixed;
+      color: var(--text-main);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    .app-container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+
+    .header { text-align: center; margin-bottom: 3rem; animation: fadeInDown 0.8s ease-out; }
+    .header h1 {
+      font-size: 2.5rem; font-weight: 800;
+      background: linear-gradient(to right, #60a5fa, #34d399);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+    .header p { color: var(--text-muted); font-size: 1.1rem; }
+
+    .dropzone {
+      background: var(--surface);
+      border: 2px dashed var(--surface-border);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border-radius: 1rem; padding: 4rem 2rem;
+      text-align: center; cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+      animation: fadeInUp 0.8s ease-out;
+    }
+
+    .dropzone.active, .dropzone:hover {
+      border-color: var(--primary);
+      background: rgba(59, 130, 246, 0.05);
+      transform: translateY(-2px);
+    }
+
+    .dropzone-icon {
+      width: 64px; height: 64px;
+      margin-bottom: 1rem; fill: none;
+      stroke: var(--primary); stroke-width: 2;
+      stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    .dropzone-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .dropzone-subtitle { color: var(--text-muted); font-size: 0.875rem; }
+
+    .results-container { margin-top: 3rem; display: none; }
+    
+    .results-header {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;
+    }
+    
+    .btn {
+      background: var(--surface); color: var(--text-main);
+      border: 1px solid var(--surface-border);
+      padding: 0.5rem 1rem; border-radius: 0.5rem;
+      font-weight: 500; cursor: pointer; transition: all 0.2s;
+    }
+    .btn:hover { background: rgba(255, 255, 255, 0.1); }
+    .btn-primary { background: var(--primary); border-color: var(--primary); }
+    .btn-primary:hover { background: var(--primary-hover); }
+
+    .grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem;
+    }
+
+    .card {
+      background: var(--glass-bg); border: 1px solid var(--glass-border);
+      backdrop-filter: blur(12px); border-radius: 1rem; padding: 1.5rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: flex; flex-direction: column;
+      position: relative;
+    }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2); }
+
+    .card-header {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 1rem; border-bottom: 1px solid var(--surface-border); padding-bottom: 1rem;
+    }
+    
+    .card-title { font-weight: 600; font-size: 1.1rem; word-break: break-all; }
+    
+    .status-badge {
+      padding: 0.25rem 0.75rem; border-radius: 9999px;
+      font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
+    }
+    .status-valid { background: rgba(16, 185, 129, 0.2); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .status-warning { background: rgba(245, 158, 11, 0.2); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); }
+    .status-loading { background: rgba(59, 130, 246, 0.2); color: var(--primary); border: 1px solid rgba(59, 130, 246, 0.3); }
+
+    .info-row { display: flex; justify-content: space-between; margin-bottom: 0.75rem; font-size: 0.9rem; }
+    .info-label { color: var(--text-muted); }
+    .info-value { font-weight: 500; max-width: 60%; text-align: right; word-break: break-all; }
+    
+    .macros-container { margin-top: 1rem; }
+    .macros-title { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase; }
+    .macro-badge {
+      display: inline-block; background: rgba(255, 255, 255, 0.1);
+      padding: 0.2rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-family: monospace;
+      margin-right: 0.5rem; margin-bottom: 0.5rem;
+    }
+
+    .warning-text { font-size: 0.8rem; color: var(--warning); margin-top: 0.5rem; }
+
+    @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <header class="header">
+      <h1>Ad Tag Validator</h1>
+      <p>Self-contained HTML. Validates dimensions, loaded weight, and IAB guidelines.</p>
+    </header>
+
+    <main>
+      <div class="dropzone" id="dropzone">
+        <svg class="dropzone-icon" viewBox="0 0 24 24">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="17 8 12 3 7 8"></polyline>
+          <line x1="12" y1="3" x2="12" y2="15"></line>
+        </svg>
+        <h3 class="dropzone-title">Drop ad tags here</h3>
+        <p class="dropzone-subtitle">or click to browse (.txt or .html files).</p>
+        <input type="file" id="fileInput" multiple accept=".txt,.html,text/plain,text/html" style="display: none;">
+      </div>
+
+      <div class="results-container" id="resultsContainer">
+        <div class="results-header">
+          <h2>Validation Results (<span id="resultsCount">0</span>)</h2>
+          <div style="display: flex; gap: 1rem;">
+            <button class="btn btn-primary" id="btnExport">Export CSV</button>
+            <button class="btn" id="btnClear">Clear</button>
+          </div>
+        </div>
+        <div class="grid" id="resultsGrid"></div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const resultsContainer = document.getElementById('resultsContainer');
+    const resultsGrid = document.getElementById('resultsGrid');
+    const resultsCount = document.getElementById('resultsCount');
+    const btnExport = document.getElementById('btnExport');
+    const btnClear = document.getElementById('btnClear');
+
+    let allResults = [];
+
+    // Drag and Drop Events
+    dropzone.addEventListener('click', () => fileInput.click());
+    dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('active'); });
+    dropzone.addEventListener('dragleave', (e) => { e.preventDefault(); dropzone.classList.remove('active'); });
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('active');
+      if (e.dataTransfer.files.length) processFiles(e.dataTransfer.files);
+    });
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length) processFiles(e.target.files);
+    });
+
+    btnClear.addEventListener('click', () => {
+      allResults = [];
+      resultsGrid.innerHTML = '';
+      resultsContainer.style.display = 'none';
+    });
+
+    btnExport.addEventListener('click', () => {
+      if (!allResults.length) return;
+      const headers = ['Filename', 'Status', 'Dimensions', 'Loaded Weight (Bytes)', 'Requests Count', 'Click URL', 'Macros'];
+      const csv = [headers.join(',')].concat(allResults.map(r => {
+        return [
+          `"${r.filename}"`,
+          r.status,
+          `"${r.dimensions}"`,
+          r.weight,
+          r.requestCount,
+          `"${r.clickUrl}"`,
+          `"${r.macros}"`
+        ].join(',');
+      })).join('\n');
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'ad_tags_validation.csv';
+      link.click();
+    });
+
+    async function processFiles(files) {
+      resultsContainer.style.display = 'block';
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (file.name.match(/\.(txt|html)$/i)) {
+          const content = await file.text();
+          const cardId = 'card-' + Math.random().toString(36).substr(2, 9);
+          createLoadingCard(file.name, cardId);
+          const previewContainer = document.getElementById(cardId + '-preview');
+          
+          // Test the tag and show preview
+          testAdTag(content, file.name, previewContainer).then(result => {
+            allResults.push(result);
+            resultsCount.textContent = allResults.length;
+            updateCard(cardId, result);
+          });
+        }
+      }
+    }
+
+    function createLoadingCard(filename, id) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.id = id;
+      card.innerHTML = `
+        <div class="card-header">
+          <span class="card-title">${filename}</span>
+          <span class="status-badge status-loading" id="${id}-status">Simulating Load...</span>
+        </div>
+        <div class="card-body" id="${id}-body">
+          <p style="color: var(--text-muted); font-size: 0.9rem;">Rendering tag to measure network requests and load weight...</p>
+        </div>
+        <div id="${id}-preview" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--surface-border); display: flex; justify-content: center; overflow: hidden; background: #fff; border-radius: 0.5rem; min-height: 50px;">
+        </div>
+      `;
+      resultsGrid.appendChild(card);
+    }
+
+    function formatBytes(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024, sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function updateCard(id, result) {
+      const statusBadge = document.getElementById(`${id}-status`);
+      const body = document.getElementById(`${id}-body`);
+      if (!statusBadge || !body) return;
+
+      const badgeClass = result.status === 'Valid' ? 'status-valid' : 'status-warning';
+      statusBadge.className = `status-badge ${badgeClass}`;
+      statusBadge.textContent = result.status;
+      
+      let macrosHtml = result.macros !== 'None' 
+        ? result.macros.split(', ').map(m => `<span class="macro-badge">${m}</span>`).join('')
+        : '<span style="font-size:0.8rem; color:var(--warning)">No standard macros detected</span>';
+
+      let weightDisplay = formatBytes(result.weight);
+      let corsMsg = result.corsWarning 
+        ? `<div class="warning-text">*Some cross-origin assets hid their size due to CORS.</div>` 
+        : '';
+
+      body.innerHTML = `
+        <div class="info-row"><span class="info-label">Dimensions</span><span class="info-value">${result.dimensions}</span></div>
+        <div class="info-row"><span class="info-label">Loaded Weight</span><span class="info-value">${weightDisplay}</span></div>
+        <div class="info-row"><span class="info-label">Network Requests</span><span class="info-value">${result.requestCount}</span></div>
+        <div class="info-row">
+          <span class="info-label">Click URL</span>
+          <span class="info-value">
+            ${result.clickUrl !== 'Not found' ? `<a href="${result.clickUrl}" target="_blank" style="color:var(--primary)">${result.clickUrl.substring(0,30)}...</a>` : 'Not found'}
+          </span>
+        </div>
+        ${corsMsg}
+        <div class="macros-container">
+          <div class="macros-title">IAB Macros Detected</div>
+          ${macrosHtml}
+        </div>
+      `;
+    }
+
+    function testAdTag(tagContent, filename, previewContainer) {
+      return new Promise((resolve) => {
+        // 1. Static Parsing
+        let dimensions = "Unknown";
+        const wMatch = tagContent.match(/width\s*=\s*["']?(\d+)["']?/i);
+        const hMatch = tagContent.match(/height\s*=\s*["']?(\d+)["']?/i);
+        if (wMatch && hMatch) dimensions = `${wMatch[1]}x${hMatch[1]}`;
+
+        let clickUrl = "Not found";
+        const hrefMatch = tagContent.match(/href\s*=\s*["']([^"']+)["']/i);
+        if (hrefMatch && !hrefMatch[1].toLowerCase().includes('javascript:')) {
+          clickUrl = hrefMatch[1];
+        } else {
+          const cMatch = tagContent.match(/(?:click|clickurl|cu)=([^&"']+)/i);
+          if (cMatch) {
+            try { clickUrl = decodeURIComponent(cMatch[1]); } catch(e) { clickUrl = cMatch[1]; }
+          }
+        }
+
+        const COMMON_MACROS = ['[timestamp]', '%%CACHEBUSTER%%', '{cachebuster}', '[click]', '%%CLICK_URL_UNESC%%', '%%SITE%%', '%%PLACEMENT%%'];
+        const foundMacros = COMMON_MACROS.filter(m => tagContent.toLowerCase().includes(m.toLowerCase()));
+
+        // 2. Dynamic Loading to measure weight
+        const iframe = document.createElement('iframe');
+        iframe.style.border = 'none';
+        iframe.style.backgroundColor = 'transparent';
+        if (wMatch && hMatch) {
+            iframe.style.width = wMatch[1] + 'px';
+            iframe.style.height = hMatch[1] + 'px';
+        } else {
+            iframe.style.width = '100%';
+            iframe.style.minHeight = '250px';
+        }
+        
+        // Enable performance API within the iframe
+        iframe.srcdoc = `
+          <!DOCTYPE html>
+          <html>
+            <head><meta charset="UTF-8"><style>body{margin:0;padding:0;overflow:hidden;}</style></head>
+            <body>${tagContent}</body>
+          </html>
+        `;
+        previewContainer.appendChild(iframe);
+
+        // Wait 3.5 seconds for ad assets to load
+        setTimeout(() => {
+          let totalBytes = 0;
+          let requestCount = 0;
+          let corsWarning = false;
+
+          try {
+            const win = iframe.contentWindow;
+            if (win && win.performance) {
+              const entries = win.performance.getEntriesByType("resource");
+              requestCount = entries.length;
+              entries.forEach(entry => {
+                // Try transferSize first, fallback to decodedBodySize. 
+                // If 0, it means cross-origin restriction is in place without Timing-Allow-Origin
+                if (entry.transferSize > 0) {
+                  totalBytes += entry.transferSize;
+                } else if (entry.decodedBodySize > 0) {
+                  totalBytes += entry.decodedBodySize;
+                } else {
+                  corsWarning = true;
+                }
+              });
+            }
+          } catch(e) {
+            console.error("Error accessing iframe performance", e);
+          }
+
+          // Try to infer dimensions from rendered DOM if statically unknown
+          if (dimensions === "Unknown") {
+            try {
+              const body = iframe.contentDocument.body;
+              if (body.children.length > 0) {
+                const el = body.children[0];
+                if (el.offsetWidth > 0 && el.offsetHeight > 0) {
+                  dimensions = `${el.offsetWidth}x${el.offsetHeight} (Inferred)`;
+                }
+              }
+            } catch(e) {}
+          }
+
+          // Leave iframe in preview container
+
+          const isValid = dimensions !== "Unknown" && (foundMacros.length > 0 || clickUrl !== "Not found");
+
+          resolve({
+            filename,
+            dimensions,
+            clickUrl,
+            macros: foundMacros.length ? foundMacros.join(', ') : 'None',
+            weight: totalBytes,
+            requestCount,
+            corsWarning,
+            status: isValid ? 'Valid' : 'Needs Review'
+          });
+
+        }, 3500); // 3.5 seconds loading window
+      });
+    }
+  </script>
+</body>
+</html>
