@@ -8,37 +8,22 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300..700&display=swap" rel="stylesheet">
   <style>
-    /* === DESIGN TOKENS === */
     :root, [data-theme="light"] {
-      --color-bg:             #f7f6f2;
-      --color-surface:        #f9f8f5;
-      --color-surface-2:      #fbfbf9;
-      --color-surface-offset: #f3f0ec;
-      --color-divider:        #dcd9d5;
-      --color-border:         #d4d1ca;
-      --color-text:           #28251d;
-      --color-text-muted:     #7a7974;
-      --color-text-faint:     #bab9b4;
-      --color-primary:        #01696f;
-      --color-primary-hover:  #0c4e54;
+      --color-bg: #f7f6f2; --color-surface: #f9f8f5; --color-surface-2: #fbfbf9;
+      --color-surface-offset: #f3f0ec; --color-divider: #dcd9d5; --color-border: #d4d1ca;
+      --color-text: #28251d; --color-text-muted: #7a7974; --color-text-faint: #bab9b4;
+      --color-primary: #01696f; --color-primary-hover: #0c4e54;
       --color-primary-highlight: #cedcd8;
-      --color-success:        #437a22;
-      --color-success-highlight: #d4dfcc;
-      --color-gold:           #d19900;
-      --color-gold-highlight: #e9e0c6;
-      --color-blue:           #006494;
-      --color-blue-highlight: #c6d8e4;
-      --color-error:          #a12c7b;
-      --radius-sm: 0.375rem;
-      --radius-md: 0.5rem;
-      --radius-lg: 0.75rem;
-      --radius-xl: 1rem;
-      --radius-full: 9999px;
+      --color-success: #437a22; --color-success-highlight: #d4dfcc;
+      --color-gold: #d19900; --color-gold-highlight: #e9e0c6;
+      --color-blue: #006494; --color-blue-highlight: #c6d8e4;
+      --color-error: #a12c7b;
+      --radius-sm: 0.375rem; --radius-md: 0.5rem; --radius-lg: 0.75rem;
+      --radius-xl: 1rem; --radius-full: 9999px;
       --shadow-sm: 0 1px 2px oklch(0.2 0.01 80 / 0.06);
       --shadow-md: 0 4px 12px oklch(0.2 0.01 80 / 0.08);
       --transition: 180ms cubic-bezier(0.16, 1, 0.3, 1);
-      --font-body: 'Inter', sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
+      --font-body: 'Inter', sans-serif; --font-mono: 'JetBrains Mono', monospace;
       --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
       --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
       --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
@@ -49,239 +34,106 @@
       --space-10: 2.5rem; --space-12: 3rem; --space-16: 4rem;
     }
     [data-theme="dark"] {
-      --color-bg:             #0d1117;
-      --color-surface:        #161b22;
-      --color-surface-2:      #1c2128;
-      --color-surface-offset: #21262d;
-      --color-divider:        #30363d;
-      --color-border:         #444c56;
-      --color-text:           #e6edf3;
-      --color-text-muted:     #8b949e;
-      --color-text-faint:     #484f58;
-      --color-primary:        #58a6ff;
-      --color-primary-hover:  #79b8ff;
+      --color-bg: #0d1117; --color-surface: #161b22; --color-surface-2: #1c2128;
+      --color-surface-offset: #21262d; --color-divider: #30363d; --color-border: #444c56;
+      --color-text: #e6edf3; --color-text-muted: #8b949e; --color-text-faint: #484f58;
+      --color-primary: #58a6ff; --color-primary-hover: #79b8ff;
       --color-primary-highlight: #1f3a5a;
-      --color-success:        #3fb950;
-      --color-success-highlight: #1b3124;
-      --color-gold:           #e3b341;
-      --color-gold-highlight: #2f2a1a;
-      --color-blue:           #58a6ff;
-      --color-blue-highlight: #1a2d42;
-      --color-error:          #f85149;
+      --color-success: #3fb950; --color-success-highlight: #1b3124;
+      --color-gold: #e3b341; --color-gold-highlight: #2f2a1a;
+      --color-blue: #58a6ff; --color-blue-highlight: #1a2d42;
+      --color-error: #f85149;
       --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.3);
       --shadow-md: 0 4px 12px oklch(0 0 0 / 0.4);
     }
 
-    /* === BASE === */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
-    body {
-      min-height: 100dvh;
-      font-family: var(--font-body);
-      font-size: var(--text-sm);
-      color: var(--color-text);
-      background: var(--color-bg);
-      line-height: 1.6;
-    }
+    body { min-height: 100dvh; font-family: var(--font-body); font-size: var(--text-sm);
+      color: var(--color-text); background: var(--color-bg); line-height: 1.6; }
     a { color: var(--color-primary); text-decoration: none; transition: color var(--transition); }
     a:hover { color: var(--color-primary-hover); }
     button { cursor: pointer; background: none; border: none; font: inherit; color: inherit; }
     :focus-visible { outline: 2px solid var(--color-primary); outline-offset: 3px; border-radius: var(--radius-sm); }
 
-    /* === LAYOUT === */
-    .container {
-      max-width: 900px;
-      margin-inline: auto;
-      padding-inline: var(--space-4);
-    }
+    .container { max-width: 900px; margin-inline: auto; padding-inline: var(--space-4); }
 
-    /* === HEADER === */
-    .header {
-      border-bottom: 1px solid var(--color-divider);
-      background: var(--color-surface);
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      backdrop-filter: blur(8px);
-    }
-    .header-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: var(--space-4);
-      padding-block: var(--space-3);
-    }
-    .header-brand {
-      display: flex;
-      align-items: center;
-      gap: var(--space-3);
-      font-weight: 600;
-      font-size: var(--text-base);
-      color: var(--color-text);
-    }
-    .header-brand svg { flex-shrink: 0; }
-
-    /* === THEME TOGGLE === */
-    .theme-toggle {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 36px;
-      height: 36px;
-      border-radius: var(--radius-md);
-      color: var(--color-text-muted);
-      transition: color var(--transition), background var(--transition);
-    }
+    .header { border-bottom: 1px solid var(--color-divider); background: var(--color-surface);
+      position: sticky; top: 0; z-index: 10; backdrop-filter: blur(8px); }
+    .header-inner { display: flex; align-items: center; justify-content: space-between;
+      gap: var(--space-4); padding-block: var(--space-3); }
+    .header-brand { display: flex; align-items: center; gap: var(--space-3);
+      font-weight: 600; font-size: var(--text-base); color: var(--color-text); }
+    .theme-toggle { display: flex; align-items: center; justify-content: center;
+      width: 36px; height: 36px; border-radius: var(--radius-md);
+      color: var(--color-text-muted); transition: color var(--transition), background var(--transition); }
     .theme-toggle:hover { background: var(--color-surface-offset); color: var(--color-text); }
 
-    /* === CONFIG BANNER === */
-    .config-banner {
-      background: color-mix(in oklch, var(--color-gold) 12%, var(--color-surface));
-      border: 1px solid color-mix(in oklch, var(--color-gold) 30%, transparent);
+    /* ── MODE BANNER ── */
+    .mode-banner {
+      background: color-mix(in oklch, var(--color-primary) 8%, var(--color-surface));
+      border: 1px solid color-mix(in oklch, var(--color-primary) 25%, transparent);
       border-radius: var(--radius-lg);
       padding: var(--space-4) var(--space-6);
-      margin-block: var(--space-6);
-      display: none;
+      margin-block: var(--space-6) var(--space-2);
+      font-size: var(--text-xs);
     }
-    .config-banner.visible { display: block; }
-    .config-banner h3 { font-size: var(--text-sm); font-weight: 600; color: var(--color-gold); margin-bottom: var(--space-2); }
-    .config-banner p { font-size: var(--text-xs); color: var(--color-text-muted); }
-    .config-banner code {
+    .mode-banner strong { color: var(--color-primary); display: block; margin-bottom: var(--space-1); font-size: var(--text-sm); }
+    .mode-banner p { color: var(--color-text-muted); }
+    .mode-banner code {
       font-family: var(--font-mono);
       background: var(--color-surface-offset);
       padding: 0.1em 0.4em;
       border-radius: var(--radius-sm);
       font-size: 0.9em;
+      color: var(--color-gold);
     }
 
-    /* === REPO INFO === */
-    .repo-header {
-      padding-block: var(--space-8) var(--space-6);
-    }
-    .repo-meta {
-      display: flex;
-      align-items: center;
-      gap: var(--space-2);
-      font-size: var(--text-xs);
-      color: var(--color-text-muted);
-      margin-bottom: var(--space-3);
-      flex-wrap: wrap;
-    }
-    .repo-title {
-      font-size: var(--text-xl);
-      font-weight: 700;
-      color: var(--color-text);
-      line-height: 1.2;
-      margin-bottom: var(--space-2);
-    }
-    .repo-desc {
-      font-size: var(--text-sm);
-      color: var(--color-text-muted);
-      margin-bottom: var(--space-4);
-      max-width: 60ch;
-    }
-    .repo-stats {
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--space-3);
-    }
-    .stat-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--space-1);
-      font-size: var(--text-xs);
-      color: var(--color-text-muted);
-      background: var(--color-surface-offset);
-      padding: var(--space-1) var(--space-3);
-      border-radius: var(--radius-full);
-      border: 1px solid var(--color-border);
-    }
+    /* ── REPO HEADER ── */
+    .repo-header { padding-block: var(--space-8) var(--space-6); }
+    .repo-meta { display: flex; align-items: center; gap: var(--space-2);
+      font-size: var(--text-xs); color: var(--color-text-muted); margin-bottom: var(--space-3); flex-wrap: wrap; }
+    .repo-title { font-size: var(--text-xl); font-weight: 700; color: var(--color-text);
+      line-height: 1.2; margin-bottom: var(--space-2); }
+    .repo-desc { font-size: var(--text-sm); color: var(--color-text-muted);
+      margin-bottom: var(--space-4); max-width: 60ch; }
+    .repo-stats { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+    .stat-badge { display: inline-flex; align-items: center; gap: var(--space-1);
+      font-size: var(--text-xs); color: var(--color-text-muted);
+      background: var(--color-surface-offset); padding: var(--space-1) var(--space-3);
+      border-radius: var(--radius-full); border: 1px solid var(--color-border); }
 
-    /* === TOOLBAR === */
-    .toolbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: var(--space-3);
-      padding-block: var(--space-3);
-      border-top: 1px solid var(--color-divider);
-      border-bottom: 1px solid var(--color-divider);
-      margin-bottom: var(--space-4);
-      flex-wrap: wrap;
-    }
-    .toolbar-left {
-      display: flex;
-      align-items: center;
-      gap: var(--space-2);
-      flex-wrap: wrap;
-    }
-    .search-box {
-      display: flex;
-      align-items: center;
-      gap: var(--space-2);
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-md);
-      padding: var(--space-2) var(--space-3);
-      transition: border-color var(--transition), box-shadow var(--transition);
-    }
-    .search-box:focus-within {
-      border-color: var(--color-primary);
-      box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-primary) 20%, transparent);
-    }
+    /* ── TOOLBAR ── */
+    .toolbar { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3);
+      padding-block: var(--space-3); border-top: 1px solid var(--color-divider);
+      border-bottom: 1px solid var(--color-divider); margin-bottom: var(--space-4); flex-wrap: wrap; }
+    .toolbar-left { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+    .search-box { display: flex; align-items: center; gap: var(--space-2);
+      background: var(--color-surface); border: 1px solid var(--color-border);
+      border-radius: var(--radius-md); padding: var(--space-2) var(--space-3);
+      transition: border-color var(--transition), box-shadow var(--transition); }
+    .search-box:focus-within { border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-primary) 20%, transparent); }
     .search-box svg { color: var(--color-text-faint); flex-shrink: 0; }
-    .search-box input {
-      background: none;
-      border: none;
-      outline: none;
-      font-size: var(--text-xs);
-      color: var(--color-text);
-      width: 200px;
-      font-family: var(--font-body);
-    }
+    .search-box input { background: none; border: none; outline: none; font-size: var(--text-xs);
+      color: var(--color-text); width: 200px; font-family: var(--font-body); }
     .search-box input::placeholder { color: var(--color-text-faint); }
-    .filter-btns {
-      display: flex;
-      gap: var(--space-1);
-    }
-    .filter-btn {
-      font-size: var(--text-xs);
-      padding: var(--space-1) var(--space-3);
-      border-radius: var(--radius-full);
-      border: 1px solid var(--color-border);
-      color: var(--color-text-muted);
-      background: var(--color-surface);
-      transition: all var(--transition);
-    }
+    .filter-btns { display: flex; gap: var(--space-1); }
+    .filter-btn { font-size: var(--text-xs); padding: var(--space-1) var(--space-3);
+      border-radius: var(--radius-full); border: 1px solid var(--color-border);
+      color: var(--color-text-muted); background: var(--color-surface);
+      transition: all var(--transition); }
     .filter-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
-    .filter-btn.active {
-      background: var(--color-primary-highlight);
-      border-color: var(--color-primary);
-      color: var(--color-primary);
-      font-weight: 500;
-    }
-    .item-count {
-      font-size: var(--text-xs);
-      color: var(--color-text-muted);
-      white-space: nowrap;
-    }
+    .filter-btn.active { background: var(--color-primary-highlight);
+      border-color: var(--color-primary); color: var(--color-primary); font-weight: 500; }
+    .item-count { font-size: var(--text-xs); color: var(--color-text-muted); white-space: nowrap; }
 
-    /* === FILE LIST === */
-    .file-list {
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-lg);
-      overflow: hidden;
-      background: var(--color-surface);
-    }
-    .file-item {
-      display: grid;
-      grid-template-columns: 20px 1fr auto auto;
-      align-items: center;
-      gap: var(--space-3);
-      padding: var(--space-3) var(--space-4);
-      border-bottom: 1px solid var(--color-divider);
-      transition: background var(--transition);
-    }
+    /* ── FILE LIST ── */
+    .file-list { border: 1px solid var(--color-border); border-radius: var(--radius-lg);
+      overflow: hidden; background: var(--color-surface); }
+    .file-item { display: grid; grid-template-columns: 20px 1fr auto auto;
+      align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid var(--color-divider); transition: background var(--transition); }
     .file-item:last-child { border-bottom: none; }
     .file-item:hover { background: var(--color-surface-offset); }
     .file-icon { color: var(--color-text-faint); display: flex; align-items: center; }
@@ -291,99 +143,57 @@
     .file-icon.css { color: var(--color-blue); }
     .file-icon.md { color: var(--color-text-muted); }
     .file-icon.img { color: var(--color-success); }
-    .file-name {
-      font-size: var(--text-xs);
-      font-family: var(--font-mono);
-      color: var(--color-primary);
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
+    .file-name { font-size: var(--text-xs); font-family: var(--font-mono);
+      color: var(--color-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .file-name:hover { text-decoration: underline; }
-    .file-size {
-      font-size: var(--text-xs);
-      color: var(--color-text-faint);
-      font-family: var(--font-mono);
-      text-align: right;
-      white-space: nowrap;
-    }
-    .file-type-badge {
-      font-size: 0.65rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      padding: 2px 6px;
-      border-radius: var(--radius-full);
-      font-weight: 500;
-      background: var(--color-surface-offset);
-      color: var(--color-text-faint);
-      border: 1px solid var(--color-divider);
-    }
+    .file-size { font-size: var(--text-xs); color: var(--color-text-faint);
+      font-family: var(--font-mono); text-align: right; white-space: nowrap; }
+    .file-type-badge { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 2px 6px; border-radius: var(--radius-full); font-weight: 500;
+      background: var(--color-surface-offset); color: var(--color-text-faint);
+      border: 1px solid var(--color-divider); }
 
-    /* === BREADCRUMB === */
-    .breadcrumb {
-      display: flex;
-      align-items: center;
-      gap: var(--space-1);
-      font-size: var(--text-xs);
-      font-family: var(--font-mono);
-      color: var(--color-text-muted);
-      padding-bottom: var(--space-3);
-      flex-wrap: wrap;
-    }
+    /* ── HIDDEN badge on items excluded by config ── */
+    .hidden-item { opacity: 0.35; }
+    .hidden-item .file-name { text-decoration: line-through; color: var(--color-text-faint); }
+
+    /* ── BREADCRUMB ── */
+    .breadcrumb { display: flex; align-items: center; gap: var(--space-1);
+      font-size: var(--text-xs); font-family: var(--font-mono);
+      color: var(--color-text-muted); padding-bottom: var(--space-3); flex-wrap: wrap; }
     .breadcrumb-item { color: var(--color-primary); cursor: pointer; }
     .breadcrumb-item:hover { text-decoration: underline; }
     .breadcrumb-sep { color: var(--color-text-faint); }
 
-    /* === LOADING & STATES === */
     @keyframes shimmer {
       0% { background-position: -200% 0; }
       100% { background-position: 200% 0; }
     }
-    .skeleton {
-      background: linear-gradient(90deg, var(--color-surface-offset) 25%, var(--color-divider) 50%, var(--color-surface-offset) 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.5s ease-in-out infinite;
-      border-radius: var(--radius-sm);
-    }
-    .skeleton-row {
-      height: 40px;
-      border-bottom: 1px solid var(--color-divider);
-    }
+    .skeleton { background: linear-gradient(90deg, var(--color-surface-offset) 25%,
+      var(--color-divider) 50%, var(--color-surface-offset) 75%);
+      background-size: 200% 100%; animation: shimmer 1.5s ease-in-out infinite;
+      border-radius: var(--radius-sm); }
+    .skeleton-row { height: 40px; border-bottom: 1px solid var(--color-divider); }
     .skeleton-row:last-child { border-bottom: none; }
 
-    .empty-state {
-      text-align: center;
-      padding: var(--space-16) var(--space-8);
-      color: var(--color-text-muted);
-    }
+    .empty-state { text-align: center; padding: var(--space-16) var(--space-8);
+      color: var(--color-text-muted); }
     .empty-state svg { margin-inline: auto; margin-bottom: var(--space-4); color: var(--color-text-faint); }
     .empty-state h3 { font-size: var(--text-base); color: var(--color-text); margin-bottom: var(--space-2); }
     .empty-state p { font-size: var(--text-xs); max-width: 36ch; margin-inline: auto; }
 
-    .error-state {
-      background: color-mix(in oklch, var(--color-error) 10%, var(--color-surface));
+    .error-state { background: color-mix(in oklch, var(--color-error) 10%, var(--color-surface));
       border: 1px solid color-mix(in oklch, var(--color-error) 30%, transparent);
-      border-radius: var(--radius-lg);
-      padding: var(--space-6);
-      margin-block: var(--space-4);
-      text-align: center;
-    }
+      border-radius: var(--radius-lg); padding: var(--space-6); margin-block: var(--space-4); text-align: center; }
     .error-state h3 { color: var(--color-error); margin-bottom: var(--space-2); font-size: var(--text-sm); }
     .error-state p { font-size: var(--text-xs); color: var(--color-text-muted); }
 
-    /* === FOOTER === */
-    .footer {
-      border-top: 1px solid var(--color-divider);
-      margin-top: var(--space-16);
-      padding-block: var(--space-6);
-      text-align: center;
-      font-size: var(--text-xs);
-      color: var(--color-text-faint);
-    }
+    .footer { border-top: 1px solid var(--color-divider); margin-top: var(--space-16);
+      padding-block: var(--space-6); text-align: center; font-size: var(--text-xs);
+      color: var(--color-text-faint); }
     .footer a { color: var(--color-text-muted); }
     .footer a:hover { color: var(--color-primary); }
 
-    /* === RESPONSIVE === */
     @media (max-width: 600px) {
       .search-box input { width: 130px; }
       .repo-title { font-size: var(--text-lg); }
@@ -394,11 +204,9 @@
 </head>
 <body>
 
-  <!-- HEADER -->
   <header class="header">
     <div class="container header-inner">
       <div class="header-brand">
-        <!-- GitHub Octocat SVG logo (inline) -->
         <svg width="28" height="28" viewBox="0 0 98 96" fill="currentColor" aria-label="GitHub" xmlns="http://www.w3.org/2000/svg">
           <path fill-rule="evenodd" clip-rule="evenodd" d="M48.854 0C21.839 0 0 22 0 49.217c0 21.756 13.993 40.172 33.405 46.69 2.427.49 3.316-1.059 3.316-2.362 0-1.141-.08-5.052-.08-9.127-13.59 2.934-16.42-5.867-16.42-5.867-2.184-5.704-5.42-7.17-5.42-7.17-4.448-3.015.324-3.015.324-3.015 4.934.326 7.523 5.052 7.523 5.052 4.367 7.496 11.404 5.378 14.235 4.074.404-3.178 1.699-5.378 3.074-6.6-10.839-1.141-22.243-5.378-22.243-24.283 0-5.378 1.94-9.778 5.014-13.2-.485-1.222-2.184-6.275.486-13.038 0 0 4.125-1.304 13.426 5.052a46.97 46.97 0 0 1 12.214-1.63c4.125 0 8.33.571 12.213 1.63 9.302-6.356 13.427-5.052 13.427-5.052 2.67 6.763.97 11.816.485 13.038 3.155 3.422 5.015 7.822 5.015 13.2 0 18.905-11.404 23.06-22.324 24.283 1.78 1.548 3.316 4.481 3.316 9.126 0 6.6-.08 11.897-.08 13.526 0 1.304.89 2.853 3.316 2.364 19.412-6.52 33.405-24.935 33.405-46.691C97.707 22 75.788 0 48.854 0z"/>
         </svg>
@@ -412,28 +220,17 @@
 
   <main class="container">
 
-    <!-- CONFIG BANNER (shows if not yet configured) -->
-    <div class="config-banner" id="configBanner">
-      <h3>⚙️ Configuration needed</h3>
-      <p>
-        Edit the <code>CONFIG</code> block at the top of this file's <code>&lt;script&gt;</code> section.
-        Set <code>owner</code> to your GitHub username and <code>repo</code> to the repository name.
-      </p>
-    </div>
+    <div class="mode-banner" id="modeBanner"></div>
 
-    <!-- REPO HEADER -->
-    <section class="repo-header" id="repoHeader">
-      <div class="repo-meta" id="repoMeta">
-        <span id="repoOwner">—</span>
-        <span>/</span>
-        <strong id="repoNameMeta">—</strong>
+    <section class="repo-header">
+      <div class="repo-meta">
+        <span id="repoOwner">—</span><span>/</span><strong id="repoNameMeta">—</strong>
       </div>
       <h1 class="repo-title" id="repoTitle">Loading…</h1>
       <p class="repo-desc" id="repoDesc"></p>
       <div class="repo-stats" id="repoStats"></div>
     </section>
 
-    <!-- TOOLBAR -->
     <div class="toolbar">
       <div class="toolbar-left">
         <div class="search-box">
@@ -451,12 +248,9 @@
       <span class="item-count" id="itemCount"></span>
     </div>
 
-    <!-- BREADCRUMB -->
     <nav class="breadcrumb" id="breadcrumb" aria-label="Path navigation"></nav>
 
-    <!-- FILE LIST -->
     <div class="file-list" id="fileList">
-      <!-- Skeleton loaders -->
       <div class="skeleton skeleton-row"></div>
       <div class="skeleton skeleton-row"></div>
       <div class="skeleton skeleton-row"></div>
@@ -476,23 +270,69 @@
 
   <script>
     /* =============================================
-       ⚙️  CONFIGURATION — Edit these two values
+       ⚙️  STEP 1 — Basic config
        ============================================= */
     const CONFIG = {
-      owner: 'globotrafego',   // ← your GitHub username
-      repo:  'Geradores',         // ← your repository name
-      branch: 'main',                  // default branch (main or master)
-      // token: 'ghp_xxx',             // optional: uncomment for private repos (PAT with repo:read scope)
+      owner:  'YOUR_GITHUB_USERNAME',  // ← your GitHub username
+      repo:   'YOUR_REPO_NAME',        // ← your repository name
+      branch: 'main',                  // default branch
+
+      /* ── VISIBILITY MODE ──────────────────────────────────────────
+         Choose ONE of the two modes below by setting `visibilityMode`
+         and filling in the matching list.
+
+         "allowlist"  → ONLY show the items listed in `show`
+         "blocklist"  → show everything EXCEPT items listed in `hide`
+      ──────────────────────────────────────────────────────────────── */
+      visibilityMode: 'blocklist',   // 'allowlist' | 'blocklist'
+
+      /* Used when visibilityMode === 'allowlist'
+         List exact file/folder names (or full paths) you WANT shown.
+         Glob-style wildcards: use '*' to mean "starts with" check below. */
+      show: [
+        'index.html',
+        'tools',          // folder name
+        'README.md',
+      ],
+
+      /* Used when visibilityMode === 'blocklist'
+         List exact file/folder names (or full paths) to HIDE. */
+      hide: [
+        '.github',
+        '.gitignore',
+        'LICENSE',
+        'node_modules',
+        'package.json',
+        'package-lock.json',
+        // add anything else you don't want visitors to see
+      ],
+
+      /* Optional: show hidden items greyed-out/strikethrough
+         instead of removing them from the list entirely.
+         true = dim them | false = remove completely */
+      showHiddenDimmed: false,
+
+      // token: 'ghp_xxx',  // uncomment for private repos
     };
     /* ============================================= */
 
-    /* — State — */
     let allItems = [];
     let currentPath = '';
     let currentFilter = 'all';
     let searchQuery = '';
 
-    /* — Helpers — */
+    /* ── Visibility check ── */
+    function isVisible(item) {
+      const name = item.name;
+      const path = item.path;
+      if (CONFIG.visibilityMode === 'allowlist') {
+        return CONFIG.show.some(pattern => name === pattern || path === pattern || path.startsWith(pattern + '/'));
+      }
+      // blocklist
+      return !CONFIG.hide.some(pattern => name === pattern || path === pattern || path.startsWith(pattern + '/'));
+    }
+
+    /* ── Helpers ── */
     const isConfigured = CONFIG.owner !== 'YOUR_GITHUB_USERNAME';
 
     function formatSize(bytes) {
@@ -501,45 +341,43 @@
       if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
       return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
     }
-
-    function getExtension(name) {
-      return name.split('.').pop().toLowerCase();
-    }
-
+    function getExtension(name) { return name.split('.').pop().toLowerCase(); }
     function getIconInfo(item) {
       if (item.type === 'dir') return { cls: 'folder', svg: '<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>' };
       const ext = getExtension(item.name);
-      const icons = {
-        html: { cls: 'html', svg: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>' },
-        js:   { cls: 'js',   svg: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>' },
-        ts:   { cls: 'js',   svg: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>' },
-        css:  { cls: 'css',  svg: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>' },
-        md:   { cls: 'md',   svg: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>' },
-        json: { cls: 'js',   svg: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>' },
-        png:  { cls: 'img',  svg: '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>' },
-        jpg:  { cls: 'img',  svg: '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>' },
-        jpeg: { cls: 'img',  svg: '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>' },
-        svg:  { cls: 'img',  svg: '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>' },
+      const map = {
+        html: 'html', htm: 'html', js: 'js', ts: 'js', json: 'js',
+        css: 'css', scss: 'css', md: 'md', txt: 'md',
+        png: 'img', jpg: 'img', jpeg: 'img', svg: 'img', gif: 'img', webp: 'img',
       };
-      return icons[ext] || { cls: '', svg: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>' };
+      return { cls: map[ext] || '', svg: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>' };
     }
-
     function buildFileUrl(item) {
-      const base = `https://github.com/${CONFIG.owner}/${CONFIG.repo}/blob/${CONFIG.branch}/`;
-      const rawBase = `https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/`;
-      const pagesBase = `https://${CONFIG.owner}.github.io/${CONFIG.repo}/`;
-      const path = item.path;
-
-      if (item.type === 'dir') {
-        return { href: '#', isInternal: true, path: item.path };
-      }
+      if (item.type === 'dir') return { href: '#', isInternal: true, path: item.path };
       const ext = getExtension(item.name);
-      const webTypes = ['html', 'htm'];
-      if (webTypes.includes(ext)) return { href: pagesBase + path, isExternal: true };
-      return { href: base + path, isExternal: true };
+      if (['html', 'htm'].includes(ext))
+        return { href: `https://${CONFIG.owner}.github.io/${CONFIG.repo}/${item.path}`, isExternal: true };
+      return { href: `https://github.com/${CONFIG.owner}/${CONFIG.repo}/blob/${CONFIG.branch}/${item.path}`, isExternal: true };
     }
 
-    /* — Render — */
+    /* ── Banner ── */
+    function renderBanner() {
+      const el = document.getElementById('modeBanner');
+      if (!isConfigured) {
+        el.innerHTML = `<strong>⚙️ Configuration needed</strong>
+          <p>Edit the <code>CONFIG</code> block in the script section. Set <code>owner</code> and <code>repo</code> to your values.</p>`;
+        return;
+      }
+      if (CONFIG.visibilityMode === 'allowlist') {
+        el.innerHTML = `<strong>✅ Allowlist mode active</strong>
+          <p>Only items explicitly listed in <code>CONFIG.show</code> are displayed. Everything else is hidden.</p>`;
+      } else {
+        el.innerHTML = `<strong>🚫 Blocklist mode active</strong>
+          <p>All files are shown except those listed in <code>CONFIG.hide</code>.</p>`;
+      }
+    }
+
+    /* ── Breadcrumb ── */
     function renderBreadcrumb(path) {
       const bc = document.getElementById('breadcrumb');
       const parts = path ? path.split('/') : [];
@@ -547,28 +385,37 @@
       let accumulated = '';
       parts.forEach((part, i) => {
         accumulated += (i > 0 ? '/' : '') + part;
-        const p = accumulated;
-        html += `<span class="breadcrumb-sep">/</span><span class="breadcrumb-item" data-nav-path="${p}">${part}</span>`;
+        html += `<span class="breadcrumb-sep">/</span><span class="breadcrumb-item" data-nav-path="${accumulated}">${part}</span>`;
       });
       bc.innerHTML = html;
-      bc.querySelectorAll('.breadcrumb-item').forEach(el => {
-        el.addEventListener('click', () => loadPath(el.dataset.navPath));
-      });
+      bc.querySelectorAll('.breadcrumb-item').forEach(el =>
+        el.addEventListener('click', () => loadPath(el.dataset.navPath)));
     }
 
+    /* ── Render items ── */
     function renderItems(items) {
       const list = document.getElementById('fileList');
       const q = searchQuery.toLowerCase();
 
-      let filtered = items.filter(item => {
-        const matchFilter = currentFilter === 'all' || (currentFilter === 'dir' && item.type === 'dir') || (currentFilter === 'file' && item.type === 'file');
+      // Apply visibility
+      const processed = items.map(item => ({ ...item, _visible: isVisible(item) }));
+
+      // Decide what to include in DOM
+      let toRender = processed.filter(item => {
+        if (!item._visible && !CONFIG.showHiddenDimmed) return false;
+        const matchFilter = currentFilter === 'all'
+          || (currentFilter === 'dir' && item.type === 'dir')
+          || (currentFilter === 'file' && item.type === 'file');
         const matchSearch = !q || item.name.toLowerCase().includes(q);
         return matchFilter && matchSearch;
       });
 
-      document.getElementById('itemCount').textContent = `${filtered.length} item${filtered.length !== 1 ? 's' : ''}`;
+      const visibleCount = toRender.filter(i => i._visible).length;
+      document.getElementById('itemCount').textContent =
+        `${visibleCount} item${visibleCount !== 1 ? 's' : ''}` +
+        (CONFIG.showHiddenDimmed ? ` (${toRender.length - visibleCount} hidden)` : '');
 
-      if (filtered.length === 0) {
+      if (toRender.length === 0) {
         list.innerHTML = `<div class="empty-state">
           <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
             <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
@@ -579,7 +426,7 @@
         return;
       }
 
-      const sorted = [...filtered].sort((a, b) => {
+      const sorted = [...toRender].sort((a, b) => {
         if (a.type === 'dir' && b.type !== 'dir') return -1;
         if (a.type !== 'dir' && b.type === 'dir') return 1;
         return a.name.localeCompare(b.name);
@@ -593,12 +440,11 @@
         const linkAttrs = isInternal
           ? `href="#" data-nav-path="${item.path}"`
           : `href="${url.href}" target="_blank" rel="noopener noreferrer"`;
+        const dimCls = (!item._visible && CONFIG.showHiddenDimmed) ? ' hidden-item' : '';
 
-        return `<div class="file-item">
+        return `<div class="file-item${dimCls}">
           <span class="file-icon ${icon.cls}">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              ${icon.svg}
-            </svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${icon.svg}</svg>
           </span>
           <a class="file-name" ${linkAttrs}>${item.name}</a>
           <span class="file-type-badge">${ext}</span>
@@ -608,27 +454,15 @@
 
       list.querySelectorAll('[data-nav-path]').forEach(el => {
         if (el.tagName === 'A') {
-          el.addEventListener('click', e => {
-            e.preventDefault();
-            loadPath(el.dataset.navPath);
-          });
+          el.addEventListener('click', e => { e.preventDefault(); loadPath(el.dataset.navPath); });
         }
       });
     }
 
-    /* — API — */
-    async function fetchRepoInfo() {
+    /* ── API ── */
+    async function apiFetch(url) {
       const headers = { 'Accept': 'application/vnd.github+json' };
       if (CONFIG.token) headers['Authorization'] = `Bearer ${CONFIG.token}`;
-      const res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}`, { headers });
-      if (!res.ok) throw new Error(`${res.status}: ${res.statusText}`);
-      return res.json();
-    }
-
-    async function fetchContents(path = '') {
-      const headers = { 'Accept': 'application/vnd.github+json' };
-      if (CONFIG.token) headers['Authorization'] = `Bearer ${CONFIG.token}`;
-      const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}?ref=${CONFIG.branch}`;
       const res = await fetch(url, { headers });
       if (!res.ok) throw new Error(`${res.status}: ${res.statusText}`);
       return res.json();
@@ -637,65 +471,53 @@
     async function loadPath(path = '') {
       currentPath = path;
       renderBreadcrumb(path);
-
       const list = document.getElementById('fileList');
       list.innerHTML = Array(5).fill('<div class="skeleton skeleton-row"></div>').join('');
-
       try {
-        const items = await fetchContents(path);
+        const items = await apiFetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}?ref=${CONFIG.branch}`);
         allItems = items;
         renderItems(items);
       } catch(err) {
         list.innerHTML = `<div class="error-state">
           <h3>Failed to load contents</h3>
-          <p>${err.message}. Check your CONFIG values, network, or API rate limits.</p>
+          <p>${err.message}. Check your CONFIG values or API rate limits.</p>
         </div>`;
       }
     }
 
     async function init() {
+      renderBanner();
       if (!isConfigured) {
-        document.getElementById('configBanner').classList.add('visible');
         document.getElementById('repoTitle').textContent = 'Configure this page';
         document.getElementById('fileList').innerHTML = '';
         document.getElementById('itemCount').textContent = '';
         return;
       }
-
       document.getElementById('ghLink').href = `https://github.com/${CONFIG.owner}/${CONFIG.repo}`;
       document.getElementById('repoOwner').textContent = CONFIG.owner;
       document.getElementById('repoNameMeta').textContent = CONFIG.repo;
       document.getElementById('repoNameDisplay').textContent = CONFIG.repo;
 
       try {
-        const info = await fetchRepoInfo();
+        const info = await apiFetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}`);
         document.getElementById('repoTitle').textContent = info.full_name;
         document.getElementById('repoDesc').textContent = info.description || '';
         document.getElementById('repoNameDisplay').textContent = info.name;
-
-        const stats = [
-          { icon: '<path d="M12 17.75l-6.172 3.245 1.179-6.873-4.993-4.867 6.9-1.002L12 2l3.086 6.253 6.9 1.002-4.993 4.867 1.179 6.873z"/>', label: info.stargazers_count + ' stars' },
-          { icon: '<path d="M7 5C7 3.343 8.343 2 10 2c1.657 0 3 1.343 3 3v3H7V5zM14 8V5c0-1.657 1.343-3 3-3s3 1.343 3 3v3h-6zM7 8h10v13H7V8z"/>', label: info.language || 'Multiple' },
-          { icon: '<circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="m6 9v6M15.5 6.5 8.5 15.5"/>', label: info.forks_count + ' forks' },
-        ];
-        document.getElementById('repoStats').innerHTML = stats.map(s => `
-          <span class="stat-badge">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none">${s.icon}</svg>
-            ${s.label}
-          </span>`).join('');
+        document.getElementById('repoStats').innerHTML = [
+          { label: info.stargazers_count + ' stars' },
+          { label: info.language || 'Multiple' },
+          { label: info.forks_count + ' forks' },
+        ].map(s => `<span class="stat-badge">${s.label}</span>`).join('');
       } catch(e) {
         document.getElementById('repoTitle').textContent = `${CONFIG.owner}/${CONFIG.repo}`;
       }
-
       await loadPath('');
     }
 
-    /* — Controls — */
     document.getElementById('searchInput').addEventListener('input', e => {
       searchQuery = e.target.value;
       renderItems(allItems);
     });
-
     document.querySelectorAll('.filter-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -705,7 +527,7 @@
       });
     });
 
-    /* — Theme toggle — */
+    /* ── Theme toggle ── */
     (function(){
       const t = document.querySelector('[data-theme-toggle]');
       const r = document.documentElement;
