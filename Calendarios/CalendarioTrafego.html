@@ -15,7 +15,7 @@
       --sp1:.25rem;--sp2:.5rem;--sp3:.75rem;--sp4:1rem;--sp5:1.25rem;--sp6:1.5rem;--sp8:2rem;--sp10:2.5rem;--sp12:3rem;
       --bg:#f7f6f2;--surf:#f9f8f5;--surf2:#fbfbf9;--soff:#edeae5;--soff2:#e6e4df;
       --border:#d4d1ca;--div:#dcd9d5;--text:#28251d;--muted:#7a7974;--faint:#bab9b4;--inv:#f9f8f4;
-      --primary:#01696f;--primary-h:#0c4e54;--primary-hl: #cedcd8;
+      --primary:#01696f;--primary-h:#0c4e54;--primary-hl:#cedcd8;
       --success:#437a22;--success-h:#2e5c10;--success-hl:#d4dfcc;
       --warn:#964219;--warn-hl:#ddcfc6;
       --blue:#006494;--blue-hl:#c6d8e4;
@@ -43,7 +43,6 @@
     .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important}}
 
-    /* LAYOUT */
     .app{max-width:1440px;margin:0 auto;padding:var(--sp4) var(--sp4) var(--sp12)}
     .topbar{display:flex;align-items:center;justify-content:space-between;gap:var(--sp4);padding:var(--sp4) 0 var(--sp6);flex-wrap:wrap}
     .brand{display:flex;align-items:center;gap:var(--sp3)}
@@ -51,14 +50,13 @@
     .brand-text h1{font-size:var(--text-xl);font-weight:700;line-height:1.1}
     .brand-text p{color:var(--muted);font-size:var(--text-sm)}
     .topbar-right{display:flex;align-items:center;gap:var(--sp2)}
-    .layout{display:grid;grid-template-columns:280px 1fr;gap:var(--sp4);align-items:start}
+    .layout{display:grid;grid-template-columns:290px 1fr;gap:var(--sp4);align-items:start}
     @media(max-width:1024px){.layout{grid-template-columns:1fr}}
     .sidebar{position:sticky;top:var(--sp4);display:grid;gap:var(--sp4)}
     @media(max-width:1024px){.sidebar{position:static}}
     .main-content{display:grid;gap:var(--sp4)}
     .panel{background:var(--surf);border:1px solid var(--border);border-radius:var(--rad-xl);box-shadow:var(--sh-sm)}
 
-    /* BUTTONS */
     .btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--sp2);min-height:44px;padding:0 var(--sp4);border-radius:var(--rad-md);border:1px solid transparent;font-size:var(--text-sm);font-weight:600;text-decoration:none;transition:background var(--trans),border-color var(--trans),color var(--trans),box-shadow var(--trans),transform var(--trans);white-space:nowrap}
     .btn:hover{transform:translateY(-1px)}
     .btn:active{transform:translateY(0)}
@@ -69,11 +67,10 @@
     .btn-secondary:hover{background:var(--soff)}
     .btn-ghost{background:transparent;border-color:var(--border)}
     .btn-ghost:hover{background:var(--soff)}
-    .btn-success{background:var(--success);color:var(--inv)}
-    .btn-success:hover{background:var(--success-h)}
+    .btn-warn{background:var(--warn);color:var(--inv)}
+    .btn-warn:hover{filter:brightness(.9)}
     .btn[disabled]{opacity:.45;pointer-events:none;transform:none}
 
-    /* SIDEBAR PANELS */
     .s-panel{padding:var(--sp5);display:grid;gap:var(--sp4)}
     .s-title{font-size:var(--text-base);font-weight:700;margin-bottom:var(--sp1)}
     .s-copy{color:var(--muted);font-size:var(--text-sm);line-height:1.5}
@@ -87,11 +84,9 @@
     .badge{display:inline-flex;align-items:center;gap:var(--sp1);padding:.3rem .65rem;border-radius:var(--rad-full);font-size:var(--text-xs);font-weight:700}
     .badge-primary{background:color-mix(in srgb,var(--primary) 12%,transparent);color:var(--primary)}
     .badge-success{background:var(--success-hl);color:var(--success)}
-    .badge-warn{background:var(--warn-hl);color:var(--warn)}
     .badge-blue{background:var(--blue-hl);color:var(--blue)}
-    .badge-purple{background:var(--purple-hl);color:var(--purple)}
+    .badge-warn{background:var(--warn-hl);color:var(--warn)}
 
-    /* CALENDAR */
     .cal-shell{padding:var(--sp5)}
     .cal-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--sp3);margin-bottom:var(--sp5)}
     .cal-title{font-size:var(--text-lg);font-weight:700;line-height:1.2}
@@ -108,15 +103,14 @@
     .day-num{font-size:var(--text-sm);font-weight:700;text-align:right;padding-right:var(--sp1)}
     .day-events{display:grid;gap:5px;align-content:start}
     .chip{width:100%;text-align:left;padding:.38rem .55rem;border-radius:var(--rad-md);font-size:.78rem;line-height:1.2;font-weight:500;cursor:pointer;border:1px solid transparent;transition:filter var(--trans),box-shadow var(--trans),transform var(--trans)}
-    .chip:hover{filter:brightness(0.93);transform:translateY(-1px);box-shadow:var(--sh-sm)}
-    .chip-plantan{background:color-mix(in srgb,var(--primary) 10%,var(--surf));border-color:color-mix(in srgb,var(--primary) 25%,var(--border));color:var(--text)}
-    .chip-ferias{background:color-mix(in srgb,var(--blue) 10%,var(--surf));border-color:color-mix(in srgb,var(--blue) 25%,var(--border));color:var(--text)}
+    .chip:hover{filter:brightness(.93);transform:translateY(-1px);box-shadow:var(--sh-sm)}
+    .chip-plantan{background:color-mix(in srgb,var(--primary) 10%,var(--surf));border-color:color-mix(in srgb,var(--primary) 25%,var(--border))}
+    .chip-ferias{background:color-mix(in srgb,var(--blue) 10%,var(--surf));border-color:color-mix(in srgb,var(--blue) 25%,var(--border))}
     .chip-selected{outline:2px solid var(--success);outline-offset:1px}
-    .chip-time{display:block;color:var(--muted);font-size:.7rem;margin-bottom:2px}
+    .chip-type{display:block;color:var(--muted);font-size:.7rem;margin-bottom:2px}
     .chip-more{font-size:.72rem;color:var(--muted);padding-left:.55rem}
     .cal-empty{padding:var(--sp10);text-align:center;color:var(--muted);font-size:var(--text-sm)}
 
-    /* DETAILS */
     .details-shell{padding:var(--sp5)}
     .details-header{display:flex;align-items:start;justify-content:space-between;gap:var(--sp4);flex-wrap:wrap;margin-bottom:var(--sp4)}
     .details-header h2{font-size:var(--text-lg);font-weight:700}
@@ -131,8 +125,12 @@
     .status-banner{background:var(--soff);border:1px solid var(--border);border-radius:var(--rad-lg);padding:var(--sp3) var(--sp4);font-size:var(--text-sm);color:var(--muted)}
     .status-banner strong{color:var(--text)}
     .load-status{text-align:center;padding:var(--sp3);font-size:var(--text-sm);color:var(--muted)}
-    .spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+    .spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
     @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* Notify button separator */
+    .btn-notify{background:color-mix(in srgb,var(--warn) 10%,var(--surf));border-color:color-mix(in srgb,var(--warn) 30%,var(--border));color:var(--warn);font-weight:700}
+    .btn-notify:hover{background:color-mix(in srgb,var(--warn) 18%,var(--surf))}
   </style>
 </head>
 <body>
@@ -155,13 +153,12 @@
       </div>
     </div>
     <div class="topbar-right">
-      <button id="reloadBtn" class="btn btn-secondary btn-sm" title="Recarregar dados">↻ Atualizar</button>
+      <button id="reloadBtn" class="btn btn-secondary btn-sm">↻ Atualizar</button>
       <button data-theme-toggle class="btn btn-ghost btn-sm" aria-label="Alternar tema">🌙</button>
     </div>
   </header>
 
   <div class="layout" id="main">
-    <!-- SIDEBAR -->
     <aside class="sidebar">
       <div class="panel s-panel">
         <div>
@@ -170,7 +167,7 @@
         </div>
         <div class="field">
           <label for="personFilter">Filtrar por pessoa</label>
-          <input id="personFilter" class="input" type="text" list="personList" placeholder="Nome do profissional…" autocomplete="off" />
+          <input id="personFilter" class="input" type="text" list="personList" placeholder="Nome do profissional…" autocomplete="off"/>
           <datalist id="personList"></datalist>
         </div>
         <div class="field">
@@ -194,11 +191,11 @@
       <div class="panel s-panel">
         <div>
           <p class="s-title">Modelo de e-mail</p>
-          <p class="s-copy">Texto padrão para envio pelo Outlook ao selecionar um evento.</p>
+          <p class="s-copy">Texto padrão enviado ao selecionar um evento e clicar em <em>Enviar e-mail</em>.</p>
         </div>
         <div class="field">
           <label for="emailSubject">Assunto</label>
-          <input id="emailSubject" class="input" type="text" value="Confirmação de {{tipo}} — {{pessoa}} — {{data}}" />
+          <input id="emailSubject" class="input" type="text" value="Confirmação de {{tipo}} — {{pessoa}} — {{data}}"/>
         </div>
         <div class="field">
           <label for="emailBody">Corpo</label>
@@ -210,17 +207,16 @@ Qualquer dúvida, fico à disposição.
 
 Atenciosamente,</textarea>
         </div>
-        <p class="helper">Placeholders: <code>{{pessoa}}</code> <code>{{tipo}}</code> <code>{{data}}</code> <code>{{dataFim}}</code></p>
+        <p class="helper">Placeholders: <code>{{pessoa}}</code> <code>{{tipo}}</code> <code>{{data}}</code> <code>{{dataFim}}</code> <code>{{telefone}}</code></p>
       </div>
     </aside>
 
-    <!-- MAIN -->
     <section class="main-content">
       <div class="panel cal-shell">
         <div class="cal-header">
           <div>
             <div class="cal-title" id="calTitle">Calendário</div>
-            <div class="legend" id="legend">
+            <div class="legend">
               <span class="legend-item"><span class="legend-dot" style="background:var(--primary)"></span>Plantão</span>
               <span class="legend-item"><span class="legend-dot" style="background:var(--blue)"></span>Férias</span>
               <span class="legend-item"><span class="legend-dot" style="background:var(--success)"></span>Selecionado</span>
@@ -241,16 +237,20 @@ Atenciosamente,</textarea>
         <div class="details-header">
           <div>
             <h2>Evento selecionado</h2>
-            <p class="s-copy">Selecione um evento no calendário para acionar as ações do Outlook.</p>
+            <p class="s-copy">Selecione um evento no calendário para acionar as ações abaixo.</p>
           </div>
           <div class="actions-row">
             <button id="outlookCalBtn" class="btn btn-primary" disabled>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
               Adicionar ao Outlook
             </button>
             <button id="outlookEmailBtn" class="btn btn-secondary" disabled>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
               Enviar e-mail
+            </button>
+            <button id="notifyTeamBtn" class="btn btn-notify" disabled>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              Notificar equipe
             </button>
           </div>
         </div>
@@ -274,17 +274,19 @@ Atenciosamente,</textarea>
 <script>
 const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTHAoiJoriJvtqMB5LTRolHYBi9hGmz_tZE5UrdsE_WT1HTqQlOOdoCYm_ATKPEZsTTD6629LmiuNRz/pub?output=csv';
 
+const NOTIFY_TO = 'filipe.forte@g.globo,rennan.tigre@g.globo,miguel.jr@g.globo,ptoscano@g.globo';
+
 const state = { events: [], filtered: [], selected: null, cursor: new Date(), view: 'month' };
 
 const $id = id => document.getElementById(id);
 const els = {
-  personFilter: $id('personFilter'), tipoFilter: $id('tipoFilter'), viewMode: $id('viewMode'),
-  reloadBtn: $id('reloadBtn'), prevBtn: $id('prevBtn'), nextBtn: $id('nextBtn'), todayBtn: $id('todayBtn'),
-  calTitle: $id('calTitle'), weekdayRow: $id('weekdayRow'), calGrid: $id('calGrid'), calEmpty: $id('calEmpty'),
-  detailContent: $id('detailContent'), statusBox: $id('statusBox'),
-  outlookCalBtn: $id('outlookCalBtn'), outlookEmailBtn: $id('outlookEmailBtn'),
-  emailSubject: $id('emailSubject'), emailBody: $id('emailBody'),
-  loadStatus: $id('loadStatus'), personList: $id('personList'), themeBtn: document.querySelector('[data-theme-toggle]')
+  personFilter:$id('personFilter'), tipoFilter:$id('tipoFilter'), viewMode:$id('viewMode'),
+  reloadBtn:$id('reloadBtn'), prevBtn:$id('prevBtn'), nextBtn:$id('nextBtn'), todayBtn:$id('todayBtn'),
+  calTitle:$id('calTitle'), weekdayRow:$id('weekdayRow'), calGrid:$id('calGrid'), calEmpty:$id('calEmpty'),
+  detailContent:$id('detailContent'), statusBox:$id('statusBox'),
+  outlookCalBtn:$id('outlookCalBtn'), outlookEmailBtn:$id('outlookEmailBtn'), notifyTeamBtn:$id('notifyTeamBtn'),
+  emailSubject:$id('emailSubject'), emailBody:$id('emailBody'),
+  loadStatus:$id('loadStatus'), personList:$id('personList'), themeBtn:document.querySelector('[data-theme-toggle]')
 };
 
 // --- THEME ---
@@ -313,9 +315,9 @@ function parseCsv(text) {
   }
   if (cell.length || row.length) { row.push(cell); rows.push(row); }
   if (!rows.length) return [];
+  // Normalize headers: lowercase, strip accents
   const headers = rows[0].map(h => h.trim().toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
-  // header map: trafego,email,tipo,inicio,fim
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g,''));
   return rows.slice(1).filter(r => r.some(c => c.trim())).map(r => {
     const o = {}; headers.forEach((h, i) => o[h] = (r[i]||'').trim()); return o;
   });
@@ -323,27 +325,29 @@ function parseCsv(text) {
 
 function parseDate(v) {
   if (!v) return null;
-  // formats: "5/2/2026", "2026-05-02", "2026-05-02 00:00:00"
-  const iso = v.replace(' ', 'T').replace(/T00:00:00$/, '');
-  // handle M/D/YYYY
-  const mdyMatch = iso.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-  if (mdyMatch) {
-    const [,mo,d,y] = mdyMatch;
+  // M/D/YY or M/D/YYYY
+  const mdy = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+  if (mdy) {
+    let [,mo,d,y] = mdy;
+    if (y.length === 2) y = '20' + y;
     return new Date(+y, +mo-1, +d);
   }
-  const d = new Date(iso);
-  return isNaN(d) ? null : new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const iso = v.replace(' ', 'T').replace(/T00:00:00$/, '');
+  const date = new Date(iso);
+  if (!isNaN(date)) return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  return null;
 }
 
 function normalizeRows(rows) {
   return rows.map((r, idx) => {
-    const trafego = r.trafego || r['tráfego'] || r['tr?fego'] || '';
+    const trafego = r.trafego || r['tr?fego'] || '';
     const email = r.email || '';
+    const telefone = r.telefone || '';
     const tipo = r.tipo || '';
-    const inicio = parseDate(r.inicio || r['início'] || r['in?cio'] || '');
+    const inicio = parseDate(r.inicio || r['in?cio'] || '');
     const fim = parseDate(r.fim || '');
     if (!inicio || !trafego) return null;
-    return { id: `ev-${idx}`, pessoa: trafego.trim(), email: email.trim(), tipo: tipo.trim(), inicio, fim: fim || inicio };
+    return { id:`ev-${idx}`, pessoa:trafego.trim(), email:email.trim(), telefone:telefone.trim(), tipo:tipo.trim(), inicio, fim:fim||inicio };
   }).filter(Boolean);
 }
 
@@ -359,7 +363,6 @@ async function loadData() {
     const text = await res.text();
     const rows = parseCsv(text);
     state.events = normalizeRows(rows);
-    // populate datalist
     const people = [...new Set(state.events.map(e => e.pessoa))].sort();
     els.personList.innerHTML = people.map(p => `<option value="${escHtml(p)}">`).join('');
     setLoadStatus(`✅ ${state.events.length} eventos carregados.`);
@@ -386,15 +389,11 @@ function applyFilters() {
 const DAYS = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
-function sameDay(a, b) { return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate(); }
-function dateInRange(d, start, end) {
-  const t = d.getTime();
-  return t >= start.getTime() && t <= end.getTime();
-}
+function sameDay(a, b) { return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate(); }
+function dateInRange(d, s, e) { const t=d.getTime(); return t>=s.getTime()&&t<=e.getTime(); }
 
 function renderCalendar() {
-  // weekdays header
-  els.weekdayRow.innerHTML = DAYS.map(d => `<div class="weekday">${d}</div>`).join('');
+  els.weekdayRow.innerHTML = DAYS.map(d=>`<div class="weekday">${d}</div>`).join('');
   els.calGrid.innerHTML = '';
   const today = new Date(); today.setHours(0,0,0,0);
   const cur = state.cursor;
@@ -402,12 +401,12 @@ function renderCalendar() {
   let start, end, label;
   if (state.view === 'month') {
     const first = new Date(cur.getFullYear(), cur.getMonth(), 1);
-    start = new Date(first); start.setDate(first.getDate() - first.getDay());
-    end = new Date(start); end.setDate(start.getDate() + 41);
+    start = new Date(first); start.setDate(first.getDate()-first.getDay());
+    end = new Date(start); end.setDate(start.getDate()+41);
     label = `${MONTHS[cur.getMonth()]} ${cur.getFullYear()}`;
   } else {
     start = new Date(cur); start.setHours(0,0,0,0);
-    end = new Date(start); end.setDate(start.getDate() + 6);
+    end = new Date(start); end.setDate(start.getDate()+6);
     label = `${fmt(start)} — ${fmt(end)}`;
   }
   els.calTitle.textContent = label;
@@ -416,12 +415,9 @@ function renderCalendar() {
   const c = new Date(start);
   while (c <= end) { days.push(new Date(c)); c.setDate(c.getDate()+1); }
 
-  // find events per day (multi-day events span multiple days)
   function eventsOnDay(day) {
-    return state.filtered.filter(ev => {
-      const s = ev.inicio, f = ev.fim;
-      return dateInRange(day, s, f);
-    }).sort((a,b) => a.tipo.localeCompare(b.tipo));
+    return state.filtered.filter(ev => dateInRange(day, ev.inicio, ev.fim))
+      .sort((a,b) => a.tipo.localeCompare(b.tipo));
   }
 
   const hasAny = days.some(d => eventsOnDay(d).length > 0);
@@ -429,27 +425,27 @@ function renderCalendar() {
 
   days.forEach(day => {
     const events = eventsOnDay(day);
-    const isOtherMonth = state.view === 'month' && day.getMonth() !== cur.getMonth();
+    const isOtherMonth = state.view==='month' && day.getMonth()!==cur.getMonth();
     const isToday = sameDay(day, today);
     const cell = document.createElement('div');
-    cell.className = 'day' + (isOtherMonth ? ' other-month' : '') + (isToday ? ' is-today' : '');
-    cell.innerHTML = `<div class="day-num">${day.getDate()}</div><div class="day-events" id="devs-${day.getTime()}"></div>`;
-    const evContainer = cell.querySelector(`#devs-${day.getTime()}`);
+    cell.className = 'day'+(isOtherMonth?' other-month':'')+(isToday?' is-today':'');
+    cell.innerHTML = `<div class="day-num">${day.getDate()}</div><div class="day-events"></div>`;
+    const evContainer = cell.querySelector('.day-events');
 
     const MAX = 3;
     events.slice(0, MAX).forEach(ev => {
       const btn = document.createElement('button');
-      const cls = ev.tipo === 'Férias' ? 'chip-ferias' : 'chip-plantan';
-      const sel = state.selected && state.selected.id === ev.id ? ' chip-selected' : '';
+      const cls = ev.tipo==='Férias' ? 'chip-ferias' : 'chip-plantan';
+      const sel = state.selected&&state.selected.id===ev.id ? ' chip-selected' : '';
       btn.className = `chip ${cls}${sel}`;
-      btn.innerHTML = `<span class="chip-time">${ev.tipo}</span>${escHtml(ev.pessoa)}`;
+      btn.innerHTML = `<span class="chip-type">${escHtml(ev.tipo)}</span>${escHtml(ev.pessoa)}`;
       btn.addEventListener('click', () => selectEvent(ev));
       evContainer.appendChild(btn);
     });
     if (events.length > MAX) {
       const more = document.createElement('div');
       more.className = 'chip-more';
-      more.textContent = `+${events.length - MAX} mais`;
+      more.textContent = `+${events.length-MAX} mais`;
       evContainer.appendChild(more);
     }
     if (!events.length) {
@@ -460,47 +456,61 @@ function renderCalendar() {
 }
 
 // --- DETAIL ---
-function fmt(date, includeYear = true) {
+function fmt(date, includeYear=true) {
   if (!date) return '—';
-  return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: includeYear ? 'numeric' : undefined });
+  return date.toLocaleDateString('pt-BR', {day:'2-digit',month:'short',year:includeYear?'numeric':undefined});
 }
 
-function escHtml(v) { return String(v||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function escHtml(v) { return String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 function selectEvent(ev) {
   state.selected = ev;
   els.outlookCalBtn.disabled = false;
   els.outlookEmailBtn.disabled = false;
-  const badgeCls = ev.tipo === 'Férias' ? 'badge-blue' : 'badge-primary';
+  // Notify button only enabled for Plantão
+  els.notifyTeamBtn.disabled = ev.tipo !== 'Plantão';
+  const badgeCls = ev.tipo==='Férias' ? 'badge-blue' : 'badge-primary';
   els.detailContent.innerHTML = `
     <div class="dl-row"><span class="dl-label">Pessoa</span><span>${escHtml(ev.pessoa)}</span></div>
     <div class="dl-row"><span class="dl-label">Tipo</span><span><span class="badge ${badgeCls}">${escHtml(ev.tipo)}</span></span></div>
     <div class="dl-row"><span class="dl-label">Início</span><span>${fmt(ev.inicio)}</span></div>
     <div class="dl-row"><span class="dl-label">Fim</span><span>${fmt(ev.fim)}</span></div>
-    <div class="dl-row"><span class="dl-label">E-mail</span><span>${ev.email ? escHtml(ev.email) : '<span style="color:var(--muted)">Não informado</span>'}</span></div>
+    <div class="dl-row"><span class="dl-label">E-mail</span><span>${ev.email?escHtml(ev.email):'<span style="color:var(--muted)">—</span>'}</span></div>
+    <div class="dl-row"><span class="dl-label">Telefone</span><span>${ev.telefone?escHtml(ev.telefone):'<span style="color:var(--muted)">—</span>'}</span></div>
   `;
-  els.statusBox.innerHTML = `<strong>Selecionado:</strong> ${escHtml(ev.tipo)} de ${escHtml(ev.pessoa)} em ${fmt(ev.inicio)}.`;
+  els.statusBox.innerHTML = `<strong>Selecionado:</strong> ${escHtml(ev.tipo)} de ${escHtml(ev.pessoa)} — ${fmt(ev.inicio)} a ${fmt(ev.fim)}.`;
   renderCalendar();
 }
 
-// --- OUTLOOK ACTIONS ---
+// --- OUTLOOK HELPERS ---
 function outlookDateFmt(d) {
-  const pad = n => String(n).padStart(2,'0');
-  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T00:00:00`;
+  const p = n=>String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T00:00:00`;
+}
+
+// FIX: use encodeURIComponent carefully so Outlook receives proper line breaks and spaces
+// Outlook web deeplink uses query params; body/subject must be percent-encoded.
+// We build the URL manually to avoid URLSearchParams replacing spaces with +.
+function buildOutlookUrl(base, params) {
+  const parts = Object.entries(params)
+    .filter(([,v]) => v !== undefined && v !== null && v !== '')
+    .map(([k,v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`);
+  return `${base}?${parts.join('&')}`;
 }
 
 function addToOutlook() {
   const ev = state.selected; if (!ev) return;
-  const endDay = new Date(ev.fim); endDay.setDate(endDay.getDate() + 1); // all-day exclusive end
-  const url = new URL('https://outlook.office.com/calendar/0/deeplink/compose');
-  url.searchParams.set('path', '/calendar/action/compose');
-  url.searchParams.set('rru', 'addevent');
-  url.searchParams.set('subject', `${ev.tipo} — ${ev.pessoa}`);
-  url.searchParams.set('startdt', outlookDateFmt(ev.inicio));
-  url.searchParams.set('enddt', outlookDateFmt(endDay));
-  url.searchParams.set('allday', 'true');
-  url.searchParams.set('body', `${ev.tipo} de ${ev.pessoa} de ${fmt(ev.inicio)} a ${fmt(ev.fim)}.`);
-  window.open(url.toString(), '_blank', 'noopener,noreferrer');
+  const endDay = new Date(ev.fim); endDay.setDate(endDay.getDate()+1);
+  const url = buildOutlookUrl('https://outlook.office.com/calendar/0/deeplink/compose', {
+    path: '/calendar/action/compose',
+    rru: 'addevent',
+    subject: `${ev.tipo} — ${ev.pessoa}`,
+    startdt: outlookDateFmt(ev.inicio),
+    enddt: outlookDateFmt(endDay),
+    allday: 'true',
+    body: `${ev.tipo} de ${ev.pessoa}\nPeríodo: ${fmt(ev.inicio)} a ${fmt(ev.fim)}${ev.telefone ? '\nTelefone: '+ev.telefone : ''}`
+  });
+  window.open(url, '_blank', 'noopener,noreferrer');
 }
 
 function applyTemplate(tpl, ev) {
@@ -508,28 +518,42 @@ function applyTemplate(tpl, ev) {
     .replace(/{{pessoa}}/g, ev.pessoa)
     .replace(/{{tipo}}/g, ev.tipo)
     .replace(/{{data}}/g, fmt(ev.inicio))
-    .replace(/{{dataFim}}/g, fmt(ev.fim));
+    .replace(/{{dataFim}}/g, fmt(ev.fim))
+    .replace(/{{telefone}}/g, ev.telefone || '—');
 }
 
 function sendEmail() {
   const ev = state.selected; if (!ev) return;
   const subject = applyTemplate(els.emailSubject.value, ev);
   const body = applyTemplate(els.emailBody.value, ev);
-  const url = new URL('https://outlook.office.com/mail/deeplink/compose');
-  if (ev.email) url.searchParams.set('to', ev.email);
-  url.searchParams.set('subject', subject);
-  url.searchParams.set('body', body);
-  window.open(url.toString(), '_blank', 'noopener,noreferrer');
+  const url = buildOutlookUrl('https://outlook.office.com/mail/deeplink/compose', {
+    to: ev.email || '',
+    subject,
+    body
+  });
+  window.open(url, '_blank', 'noopener,noreferrer');
 }
 
-// period nav
+function notifyTeam() {
+  const ev = state.selected; if (!ev || ev.tipo !== 'Plantão') return;
+  const subject = `Plantonista tráfego - ${fmt(ev.inicio)} e ${fmt(ev.fim)}`;
+  const body = `A pessoa plantonista deste final de semana será ${ev.pessoa}: ${ev.telefone || '(telefone não informado)'}`;
+  const url = buildOutlookUrl('https://outlook.office.com/mail/deeplink/compose', {
+    to: NOTIFY_TO,
+    subject,
+    body
+  });
+  window.open(url, '_blank', 'noopener,noreferrer');
+}
+
+// Period nav
 function shiftPeriod(step) {
-  if (state.view === 'month') state.cursor = new Date(state.cursor.getFullYear(), state.cursor.getMonth() + step, 1);
-  else { const c = new Date(state.cursor); c.setDate(c.getDate() + 7*step); state.cursor = c; }
+  if (state.view==='month') state.cursor = new Date(state.cursor.getFullYear(), state.cursor.getMonth()+step, 1);
+  else { const c=new Date(state.cursor); c.setDate(c.getDate()+7*step); state.cursor=c; }
   renderCalendar();
 }
 
-// --- EVENTS ---
+// --- WIRE UP ---
 els.reloadBtn.addEventListener('click', loadData);
 els.personFilter.addEventListener('input', applyFilters);
 els.tipoFilter.addEventListener('change', applyFilters);
@@ -539,8 +563,8 @@ els.nextBtn.addEventListener('click', () => shiftPeriod(1));
 els.todayBtn.addEventListener('click', () => { state.cursor = new Date(); renderCalendar(); });
 els.outlookCalBtn.addEventListener('click', addToOutlook);
 els.outlookEmailBtn.addEventListener('click', sendEmail);
+els.notifyTeamBtn.addEventListener('click', notifyTeam);
 
-// auto-load on start
 loadData();
 </script>
 </body>
