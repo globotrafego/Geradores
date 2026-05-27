@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reprodutor de Vídeo - Tráfego Digital Globo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1a237e;
+            --primary-light: #283593;
+            --primary-dark: #0d1642;
+            --accent: #00b4d8;
+            --accent-glow: #0096c7;
+            --text: #ffffff;
+            --text-secondary: #b0bec5;
+            --bg-main: #0a0e27;
+            --bg-card: #1a1f3a;
+            --bg-input: #242b4a;
+            --border: #2d3561;
+            --success: #00c853;
+            --error: #ff1744;
+            --shadow: rgba(0, 180, 216, 0.15);
+        }
+
+        [data-theme="light"] {
+            --primary: #1a237e;
+            --primary-light: #3949ab;
+            --primary-dark: #0d1642;
+            --accent: #0096c7;
+            --accent-glow: #00b4d8;
+            --text: #1a1f3a;
+            --text-secondary: #546e7a;
+            --bg-main: #f5f7fa;
+            --bg-card: #ffffff;
+            --bg-input: #f0f4f8;
+            --border: #e1e8ed;
+            --success: #00c853;
+            --error: #ff1744;
+            --shadow: rgba(26, 35, 126, 0.08);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-main);
+            color: var(--text);
+            min-height: 100vh;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px var(--shadow);
+        }
+
+        .navbar-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-glow) 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 15px var(--shadow);
+        }
+
+        .logo-text h1 {
+            font-size: 22px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--primary-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-text p {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 600;
+        }
+
+        .nav-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .theme-toggle {
+            background: var(--bg-input);
+            border: 2px solid var(--border);
+            border-radius: 50px;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            gap: 5px;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 20px var(--shadow);
+        }
+
+        .theme-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-btn.active {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-glow) 100%);
+            box-shadow: 0 4px 15px var(--shadow);
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 50px 40px;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .main-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 50px;
+            border: 1px solid var(--border);
+            box-shadow: 0 8px 30px var(--shadow);
+            width: 100%;
+            max-width: 1400px;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 35px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .card-icon {
+            width: 55px;
+            height: 55px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-glow) 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            box-shadow: 0 4px 15px var(--shadow);
+        }
+
+        .card-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 450px 1fr;
+            gap: 40px;
+            align-items: start;
+        }
+
+        .input-section {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .input-group {
+            margin-bottom: 0;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--text);
+            font-size: 14px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 16px 20px;
+            background: var(--bg-input);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            color: var(--text);
+            font-size: 15px;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: var(--bg-card);
+            box-shadow: 0 0 0 4px var(--shadow);
+        }
+
+        .input-group input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 18px 30px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-glow) 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 8px 25px var(--shadow);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px var(--shadow);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 16px 20px;
+            background: var(--bg-input);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .tab:hover {
+            border-color: var(--accent);
+            color: var(--text);
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-glow) 100%);
+            color: white;
+            border-color: var(--accent);
+            box-shadow: 0 4px 15px var(--shadow);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-input-label {
+            display: block;
+            padding: 50px 20px;
+            background: var(--bg-input);
+            border: 3px dashed var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            text-align: center;
+            color: var(--text-secondary);
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .file-input-label:hover {
+            border-color: var(--accent);
+            background: var(--bg-card);
+            color: var(--accent);
+        }
+
+        .file-input-label .icon {
+            font-size: 52px;
+            display: block;
+            margin-bottom: 15px;
+        }
+
+        .video-section {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%;
+            background: #000;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5);
+            display: none;
+        }
+
+        .video-container.active {
+            display: block;
+        }
+
+        .video-container iframe,
+        .video-container video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .video-container video {
+            object-fit: contain;
+        }
+
+        .video-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+            background: var(--bg-input);
+            border: 2px dashed var(--border);
+            border-radius: 15px;
+            color: var(--text-secondary);
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .video-placeholder.hidden {
+            display: none;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .info-card {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid var(--border);
+            box-shadow: 0 8px 25px var(--shadow);
+            transition: all 0.3s;
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 35px var(--shadow);
+        }
+
+        .info-card.weight {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .info-card.dimensions {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-glow) 100%);
+        }
+
+        .info-card.resolution {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .info-card.duration {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .info-card h3 {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .info-card p {
+            font-size: 26px;
+            font-weight: 800;
+            color: white;
+        }
+
+        .alert {
+            padding: 18px 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            display: none;
+            font-weight: 600;
+            border-left: 4px solid;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert.error {
+            background: rgba(255, 23, 68, 0.1);
+            color: var(--error);
+            border-color: var(--error);
+        }
+
+        .alert.success {
+            background: rgba(0, 200, 83, 0.1);
+            color: var(--success);
+            border-color: var(--success);
+        }
+
+        @media (max-width: 1200px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .input-section {
+                max-width: 600px;
+                margin: 0 auto;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar-content {
+                padding: 0 20px;
+            }
+
+            .container {
+                padding: 30px 20px;
+            }
+
+            .main-card {
+                padding: 30px;
+            }
+
+            .card-title {
+                font-size: 22px;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="logo">
+                <div class="logo-icon">🎬</div>
+                <div class="logo-text">
+                    <h1>Reprodutor de Vídeo</h1>
+                    <p>Tráfego Digital Globo</p>
+                </div>
+            </div>
+            <div class="nav-controls">
+                <div class="theme-toggle">
+                    <button class="theme-btn active" onclick="setTheme('dark')" id="darkBtn">🌙</button>
+                    <button class="theme-btn" onclick="setTheme('light')" id="lightBtn">☀️</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="main-card">
+            <div class="card-header">
+                <div class="card-icon">📦</div>
+                <div class="card-title">Informações da Peça</div>
+            </div>
+
+            <div class="alert" id="alert"></div>
+
+            <div class="content-grid">
+                <div class="input-section">
+                    <div class="tabs">
+                        <button class="tab active" onclick="switchTab('url')">🔗 Link</button>
+                        <button class="tab" onclick="switchTab('file')">📁 Arquivo</button>
+                    </div>
+
+                    <div id="tab-url" class="tab-content active">
+                        <div class="input-group">
+                            <label>Link do Vídeo</label>
+                            <input type="text" id="videoUrl" placeholder="Cole o link do YouTube, Vimeo ou vídeo direto">
+                        </div>
+                    </div>
+
+                    <div id="tab-file" class="tab-content">
+                        <div class="input-group">
+                            <div class="file-input-wrapper">
+                                <input type="file" id="videoFile" accept="video/*">
+                                <label for="videoFile" class="file-input-label" id="fileLabel">
+                                    <span class="icon">📤</span>
+                                    <span>Arraste ou clique para fazer upload</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn" onclick="loadVideo()">▶️ Carregar Vídeo</button>
+                </div>
+
+                <div class="video-section">
+                    <div class="video-placeholder" id="videoPlaceholder">
+                        🎬 Seu vídeo aparecerá aqui
+                    </div>
+                    <div class="video-container" id="videoContainer"></div>
+                    <div class="info-grid" id="infoCards"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTab = 'url';
+        let currentTheme = 'dark';
+
+        function setTheme(theme) {
+            currentTheme = theme;
+            document.documentElement.setAttribute('data-theme', theme);
+
+            document.getElementById('darkBtn').classList.remove('active');
+            document.getElementById('lightBtn').classList.remove('active');
+
+            if (theme === 'dark') {
+                document.getElementById('darkBtn').classList.add('active');
+            } else {
+                document.getElementById('lightBtn').classList.add('active');
+            }
+
+            localStorage.setItem('theme', theme);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            setTheme(savedTheme);
+        });
+
+        function switchTab(tab) {
+            currentTab = tab;
+
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
+        }
+
+        document.getElementById('videoFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const fileName = file.name;
+                const label = document.getElementById('fileLabel');
+                label.innerHTML = `<span class="icon">✅</span><span>${fileName}</span>`;
+            }
+        });
+
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = 'alert ' + type;
+            alert.style.display = 'block';
+
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            else if (bytes < 1048576) return (bytes / 1024).toFixed(2) + ' KB';
+            else if (bytes < 1073741824) return (bytes / 1048576).toFixed(2) + ' MB';
+            else return (bytes / 1073741824).toFixed(2) + ' GB';
+        }
+
+        function formatDuration(seconds) {
+            const hrs = Math.floor(seconds / 3600);
+            const mins = Math.floor((seconds % 3600) / 60);
+            const secs = Math.floor(seconds % 60);
+
+            if (hrs > 0) {
+                return `${hrs}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function extractVideoMetadata(videoElement, file) {
+            videoElement.addEventListener('loadedmetadata', function() {
+                const infoCards = document.getElementById('infoCards');
+                infoCards.innerHTML = '';
+
+                const width = this.videoWidth;
+                const height = this.videoHeight;
+                if (width && height) {
+                    infoCards.innerHTML += `
+                        <div class="info-card resolution">
+                            <h3>Resolução</h3>
+                            <p>${width} × ${height}</p>
+                        </div>
+                    `;
+                }
+
+                const duration = this.duration;
+                if (duration && !isNaN(duration)) {
+                    infoCards.innerHTML += `
+                        <div class="info-card duration">
+                            <h3>Duração</h3>
+                            <p>${formatDuration(duration)}</p>
+                        </div>
+                    `;
+                }
+
+                if (file && file.size) {
+                    infoCards.innerHTML += `
+                        <div class="info-card weight">
+                            <h3>Peso do Arquivo</h3>
+                            <p>${formatFileSize(file.size)}</p>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        function getYouTubeEmbedUrl(url) {
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? 'https://www.youtube.com/embed/' + match[2] : null;
+        }
+
+        function getVimeoEmbedUrl(url) {
+            const regExp = /vimeo\.com\/(\d+)/;
+            const match = url.match(regExp);
+            return match ? 'https://player.vimeo.com/video/' + match[1] : null;
+        }
+
+        function loadVideo() {
+            const videoContainer = document.getElementById('videoContainer');
+            const videoPlaceholder = document.getElementById('videoPlaceholder');
+            const infoCards = document.getElementById('infoCards');
+
+            videoContainer.innerHTML = '';
+            videoContainer.classList.remove('active');
+            infoCards.innerHTML = '';
+
+            if (currentTab === 'url') {
+                const videoUrl = document.getElementById('videoUrl').value.trim();
+
+                if (!videoUrl) {
+                    showAlert('❌ Por favor, insira um link de vídeo', 'error');
+                    return;
+                }
+
+                const youtubeEmbed = getYouTubeEmbedUrl(videoUrl);
+                if (youtubeEmbed) {
+                    videoContainer.innerHTML = `<iframe src="${youtubeEmbed}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+                    videoContainer.classList.add('active');
+                    videoPlaceholder.classList.add('hidden');
+                    showAlert('✅ Vídeo do YouTube carregado com sucesso!', 'success');
+
+                    infoCards.innerHTML = `
+                        <div class="info-card resolution">
+                            <h3>Fonte</h3>
+                            <p>YouTube</p>
+                        </div>
+                    `;
+                }
+                else if (videoUrl.includes('vimeo.com')) {
+                    const vimeoEmbed = getVimeoEmbedUrl(videoUrl);
+                    if (vimeoEmbed) {
+                        videoContainer.innerHTML = `<iframe src="${vimeoEmbed}" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
+                        videoContainer.classList.add('active');
+                        videoPlaceholder.classList.add('hidden');
+                        showAlert('✅ Vídeo do Vimeo carregado com sucesso!', 'success');
+
+                        infoCards.innerHTML = `
+                            <div class="info-card resolution">
+                                <h3>Fonte</h3>
+                                <p>Vimeo</p>
+                            </div>
+                        `;
+                    }
+                }
+                else if (videoUrl.match(/\.(mp4|webm|ogg|mov)$/i)) {
+                    const video = document.createElement('video');
+                    video.controls = true;
+                    video.controlsList = '';
+                    video.preload = 'metadata';
+                    video.src = videoUrl;
+                    videoContainer.appendChild(video);
+                    videoContainer.classList.add('active');
+                    videoPlaceholder.classList.add('hidden');
+                    showAlert('✅ Vídeo carregado com sucesso!', 'success');
+
+                    extractVideoMetadata(video, null);
+                }
+                else {
+                    showAlert('❌ Formato não reconhecido. Use YouTube, Vimeo ou link direto (.mp4)', 'error');
+                    return;
+                }
+            } 
+            else if (currentTab === 'file') {
+                const videoFile = document.getElementById('videoFile').files[0];
+
+                if (!videoFile) {
+                    showAlert('❌ Por favor, selecione um arquivo de vídeo', 'error');
+                    return;
+                }
+
+                const videoUrl = URL.createObjectURL(videoFile);
+                const video = document.createElement('video');
+                video.controls = true;
+                video.controlsList = '';
+                video.preload = 'metadata';
+                video.src = videoUrl;
+                videoContainer.appendChild(video);
+                videoContainer.classList.add('active');
+                videoPlaceholder.classList.add('hidden');
+                showAlert('✅ Arquivo carregado com sucesso!', 'success');
+
+                extractVideoMetadata(video, videoFile);
+            }
+        }
+
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                loadVideo();
+            }
+        });
+    </script>
+</body>
+</html>
