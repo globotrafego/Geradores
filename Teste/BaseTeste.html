@@ -279,8 +279,7 @@
         // ==========================================
         // 1. INSIRA A URL DO SEU WEB APP ABAIXO:
         // ==========================================
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwGJFfkMLGe-k4h9Ii9vW3A8xLfR0Wn_CINinaJCDuipBBrfJX7aGH-qFILJx2QniKs/exec";
-        //const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwlJ_XtoxYdyY37atW_ns5BtYeXRsGfEIxwMjH1B3ghqeDtro6hpGy3ZA6PRi-La0w2jw/exec";
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwzBi3X-TPrQOnyDYafjD0-C5HPgLr0OM2l2xqu8psP0ERr68i0hRAfeapDWRHA-XEr/exec";
 
         // ==========================================
 
@@ -320,20 +319,20 @@
                 const checkInputs = () => {
                     submitBtn.disabled = !excelFile.files.length || !sheetSelect.value || !anuncianteInput.value.trim() || !excelTabSelect.value;
                 };
-                
+
                 excelFile.addEventListener('change', async (e) => {
                     checkInputs();
-                    
+
                     const file = e.target.files[0];
                     if (!file) {
                         excelTabSelect.innerHTML = '<option value="">Selecione um arquivo primeiro...</option>';
                         excelTabSelect.disabled = true;
                         return;
                     }
-                    
+
                     excelTabSelect.innerHTML = '<option value="">Carregando abas...</option>';
                     excelTabSelect.disabled = true;
-                    
+
                     try {
                         const tabs = await getExcelTabs(file);
                         excelTabSelect.innerHTML = '<option value="">-- Selecione a aba do Excel --</option>';
@@ -349,7 +348,7 @@
                         setStatus("error", "Erro ao ler as abas do Excel: " + error.message);
                     }
                 });
-                
+
                 sheetSelect.addEventListener('change', checkInputs);
                 anuncianteInput.addEventListener('input', checkInputs);
                 excelTabSelect.addEventListener('change', checkInputs);
