@@ -397,6 +397,8 @@
                     throw new Error("Nenhum dado encontrado no arquivo.");
                 }
 
+                console.log("🚀 Payload sendo enviado para o Google Sheets:", mappedRows);
+
                 setStatus("info", `Enviando ${mappedRows.length} linhas para o Google Sheets...`);
 
                 // Send to Apps Script
@@ -502,6 +504,7 @@
                             if (matchCount >= 2) {
                                 headerRowIndex = i;
                                 colIndices = tempIndices;
+                                console.log("📊 Cabeçalhos detectados na linha:", i + 1, colIndices);
                                 break;
                             }
                         }
@@ -555,10 +558,12 @@
 
                         // Check if we found any valid rows
                         if (mappedRows.length === 0) {
-                            reject(new Error("As colunas foram encontradas, mas não há dados abaixo delas."));
+                            console.error("❌ Nenhuma linha válida foi mapeada. colIndices:", colIndices);
+                            reject(new Error("As colunas foram encontradas, mas não há dados abaixo delas ou estão vazios."));
                             return;
                         }
 
+                        console.log("✅ Linhas mapeadas com sucesso:", mappedRows);
                         resolve(mappedRows);
                     } catch (err) {
                         reject(new Error("Falha ao analisar o arquivo Excel. Verifique o formato."));
