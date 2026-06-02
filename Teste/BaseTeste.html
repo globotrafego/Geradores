@@ -301,9 +301,9 @@
 
         // Target column order for Google Sheets
         const COLUMNS = [
-            "Anunciante", "Order", "Vertical", "Editoria", "Linha",
-            "Posicao", "DataInicio", "HoraInicio", "DataFim", "HoraFim",
-            "IDLinha", "Status", "Observacao"
+            "Anunciante", "Order", "IDLinha", "Status", "Observacao",
+            "Vertical", "Editoria", "Linha", "Posicao", "DataInicio",
+            "HoraInicio", "DataFim", "HoraFim"
         ];
 
         // Initialization
@@ -546,18 +546,18 @@
 
                             const mappedRow = [
                                 anuncianteName, // Anunciante
-                                "", // Order
+                                "", // Empty
+                                "", // Empty
+                                "", // Empty
+                                "", // Empty
                                 valVertical, // Vertical
                                 valEditoria, // Editoria
                                 valLinha, // Linha
                                 valPosicao, // Posicao
                                 valDataInicio, // DataInicio
-                                "", // HoraInicio
+                                "", // Empty
                                 valDataFim, // DataFim
-                                "", // HoraFim
-                                "", // IDLinha
-                                "", // Status
-                                ""  // Observacao
+                                ""  // Empty
                             ];
 
                             mappedRows.push(mappedRow);
