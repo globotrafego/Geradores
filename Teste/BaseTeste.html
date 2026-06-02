@@ -279,7 +279,7 @@
         // ==========================================
         // 1. INSIRA A URL DO SEU WEB APP ABAIXO:
         // ==========================================
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwzBi3X-TPrQOnyDYafjD0-C5HPgLr0OM2l2xqu8psP0ERr68i0hRAfeapDWRHA-XEr/exec";
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxdEudDjoLuylXCUh8Nr8xU-SHOfI0Ri1f3aogN_CI7c10l8kgtbSPRfzD8aVbkMqv7/exec";
 
         // ==========================================
 
@@ -407,9 +407,8 @@
 
                 const response = await fetch(WEB_APP_URL, {
                     method: "POST",
-                    // text/plain avoids CORS preflight options request
-                    headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    body: JSON.stringify(payload)
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: "payload=" + encodeURIComponent(JSON.stringify(payload))
                 });
 
                 const result = await response.json();
