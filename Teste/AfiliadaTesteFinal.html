@@ -576,6 +576,66 @@
         "TV GAZETA ES": ["Globo_VIT (TV Gazeta)"]
     };
 
+    function setConditionalRequired(itemId, fieldId, isRequired) {
+        const field = document.getElementById(`${fieldId}-${itemId}`);
+        if (!field) return;
+        if (isRequired) field.setAttribute('required', 'required');
+        else field.removeAttribute('required');
+    }
+
+    function validateRequiredLineFields() {
+        const items = document.querySelectorAll('#line-items-container .line-item');
+        for (let index = 0; index < items.length; index++) {
+            const itemId = index + 1;
+            const checks = [
+                { id: `propriedade-${itemId}`, message: `Preencha o campo obrigatório Propriedades na Linha ${itemId}.` },
+                { id: `tipoLinha-${itemId}`, message: `Preencha o campo obrigatório Tipo de Linha na Linha ${itemId}.` },
+                { id: `formatos-${itemId}`, message: `Selecione ao menos um Formato na Linha ${itemId}.`, isMulti: true },
+                { id: `dataInicio-${itemId}`, message: `Preencha Data de Início na Linha ${itemId}.` },
+                { id: `dataFim-${itemId}`, message: `Preencha Data Fim na Linha ${itemId}.` },
+                { id: `entregaDeterminada-${itemId}`, message: `Preencha Entrega Determinada na Linha ${itemId}.` },
+                { id: `valorUnitario-${itemId}`, message: `Preencha Valor Unitário (R$) na Linha ${itemId}.` },
+                { id: `desconto-${itemId}`, message: `Preencha Desconto (%) na Linha ${itemId}.` },
+                { id: `sites-${itemId}`, message: `Selecione ao menos um Site na Linha ${itemId}.`, isMulti: true }
+            ];
+
+            for (const check of checks) {
+                const el = document.getElementById(check.id);
+                if (!el) continue;
+                const hasValue = check.isMulti ? el.selectedOptions.length > 0 : !!String(el.value).trim();
+                if (!hasValue) {
+                    alert(check.message);
+                    el.focus();
+                    return false;
+                }
+            }
+
+            const posVideoGroup = document.getElementById(`fg-posicaoVideo-${itemId}`);
+            const skipGroup = document.getElementById(`fg-skip-${itemId}`);
+            const posicaoGroup = document.getElementById(`fg-posicao-${itemId}`);
+            const posVideo = document.getElementById(`posicaoVideo-${itemId}`);
+            const skip = document.getElementById(`skip-${itemId}`);
+            const posicao = document.getElementById(`posicao-${itemId}`);
+
+            if (posVideoGroup && !posVideoGroup.classList.contains('hidden') && posVideo && !String(posVideo.value).trim()) {
+                alert(`Preencha Posição Vídeo na Linha ${itemId}.`);
+                posVideo.focus();
+                return false;
+            }
+            if (skipGroup && !skipGroup.classList.contains('hidden') && skip && !String(skip.value).trim()) {
+                alert(`Preencha Skip na Linha ${itemId}.`);
+                skip.focus();
+                return false;
+            }
+            if (posicaoGroup && !posicaoGroup.classList.contains('hidden') && posicao && posicao.selectedOptions.length === 0) {
+                alert(`Selecione ao menos uma Posição na Linha ${itemId}.`);
+                posicao.focus();
+                return false;
+            }
+        }
+        return true;
+    }
+
     function updateSitesForDAI(itemId) {
         const choiceSitesObj = choicesInstances.find(c => c.id === `sites-${itemId}`);
         if (!choiceSitesObj || !choiceSitesObj.instance) return;
@@ -746,12 +806,14 @@
         el('totalNegociado').value = totalNegociado.toFixed(2);
     }
 
-    function buildMultiGroup(label, id, itemId, isHidden = false) {
+    function buildMultiGroup(label, id, itemId, isHidden = false, isRequired = false) {
         const hiddenClass = isHidden ? "hidden" : "";
+        const requiredAttr = isRequired ? "required" : "";
+        const requiredMark = isRequired ? " *" : "";
         return `
             <div class="form-group ${hiddenClass}" id="fg-${id}-${itemId}">
-                <label>${label}</label>
-                <select id="${id}-${itemId}" multiple></select>
+                <label>${label}${requiredMark}</label>
+                <select id="${id}-${itemId}" multiple ${requiredAttr}></select>
             </div>
         `;
     }
@@ -778,46 +840,46 @@
 
             <div class="grid">
                 <div class="form-group">
-                    <label>Propriedades</label>
+                    <label>Propriedades *</label>
                     <select id="propriedade-${itemId}" required><option value="">Selecione...</option></select>
                 </div>
                 
                 <div class="form-group">
-                    <label>Tipo de Linha</label>
+                    <label>Tipo de Linha *</label>
                     <select id="tipoLinha-${itemId}" required><option value="">Selecione...</option></select>
                 </div>
 
-                ${buildMultiGroup("Formatos", "formatos", itemId)}
+                ${buildMultiGroup("Formatos", "formatos", itemId, false, true)}
 
                 <div class="form-group hidden" id="fg-posicaoVideo-${itemId}">
-                    <label>Posição Vídeo</label>
-                    <select id="posicaoVideo-${itemId}"><option value="">Selecione...</option></select>
+                    <label>Posição Vídeo *</label>
+                    <select id="posicaoVideo-${itemId}" required><option value="">Selecione...</option></select>
                 </div>
 
                 <div class="form-group hidden" id="fg-skip-${itemId}">
-                    <label>Skip</label>
-                    <select id="skip-${itemId}"><option value="">Selecione...</option></select>
+                    <label>Skip *</label>
+                    <select id="skip-${itemId}" required><option value="">Selecione...</option></select>
                 </div>
 
-                ${buildMultiGroup("Posição", "posicao", itemId, true)}
+                ${buildMultiGroup("Posição", "posicao", itemId, true, true)}
 
                 <div class="form-group">
-                    <label>Data de Início</label>
+                    <label>Data de Início *</label>
                     <input type="date" id="dataInicio-${itemId}" required>
                 </div>
 
                 <div class="form-group">
-                    <label>Data Fim</label>
+                    <label>Data Fim *</label>
                     <input type="date" id="dataFim-${itemId}" required>
                 </div>
 
                 <div class="form-group">
-                    <label>Entrega Determinada</label>
+                    <label>Entrega Determinada *</label>
                     <input type="number" id="entregaDeterminada-${itemId}" min="0" required>
                 </div>
 
                 <div class="form-group">
-                    <label>Valor Unitário (R$)</label>
+                    <label>Valor Unitário (R$) *</label>
                     <input type="number" step="0.01" id="valorUnitario-${itemId}" min="0" required>
                 </div>
                 
@@ -827,7 +889,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Desconto (%)</label>
+                    <label>Desconto (%) *</label>
                     <input type="number" step="0.01" id="desconto-${itemId}" value="0" min="0" max="100" required>
                 </div>
 
@@ -836,7 +898,7 @@
                     <input type="number" id="totalNegociado-${itemId}" readonly>
                 </div>
 
-                ${buildMultiGroup("Site", "sites", itemId)}
+                ${buildMultiGroup("Site", "sites", itemId, false, true)}
 
                 <div class="form-group">
                     <label>Editoria / Programa</label>
@@ -885,6 +947,8 @@
 
         const choiceFormatos = new Choices(el('formatos'), { ...commonSearchOpts, removeItemButton: true, choices: formatChoices(dropdownData.formatos) });
         choicesInstances.push({ id: `formatos-${itemId}`, instance: choiceFormatos });
+        setConditionalRequired(itemId, 'formatos', true);
+        setConditionalRequired(itemId, 'sites', true);
         
         const allDaiSites = Object.values(daiSiteMappings).flat();
         const nonDaiSites = dropdownData.sites.filter(site => !allDaiSites.includes(site));
@@ -903,7 +967,6 @@
         multiSetup.forEach(m => {
             const choice = new Choices(el(m.id), {
                 ...commonSearchOpts,
-                searchEnabled: m.id === 'interesses',
                 removeItemButton: true,
                 choices: formatChoices(m.data)
             });
@@ -953,17 +1016,37 @@
                 availableFormatos = displayFormatos;
                 fgPosVideo.classList.add('hidden');
                 fgSkip.classList.add('hidden');
+                setConditionalRequired(itemId, 'posicaoVideo', false);
+                setConditionalRequired(itemId, 'skip', false);
+                setConditionalRequired(itemId, 'posicaoVideo', false);
+                setConditionalRequired(itemId, 'skip', false);
                 fgPosicao.classList.remove('hidden');
+                setConditionalRequired(itemId, 'posicaoVideo', false);
+                setConditionalRequired(itemId, 'skip', false);
+                setConditionalRequired(itemId, 'posicao', true);
             } else if (tipo === "VIDEO") {
                 availableFormatos = videoFormatos;
                 fgPosVideo.classList.add('hidden');
                 fgSkip.classList.add('hidden');
+                setConditionalRequired(itemId, 'posicaoVideo', false);
+                setConditionalRequired(itemId, 'skip', false);
                 fgPosicao.classList.add('hidden');
+                setConditionalRequired(itemId, 'posicaoVideo', false);
+                setConditionalRequired(itemId, 'skip', false);
+                setConditionalRequired(itemId, 'posicao', false);
+                setConditionalRequired(itemId, 'posicaoVideo', false);
+                setConditionalRequired(itemId, 'skip', false);
+                setConditionalRequired(itemId, 'posicao', false);
             } else {
                 availableFormatos = dropdownData.formatos;
                 fgPosVideo.classList.add('hidden');
                 fgSkip.classList.add('hidden');
+                setConditionalRequired(itemId, 'posicaoVideo', false);
+                setConditionalRequired(itemId, 'skip', false);
                 fgPosicao.classList.add('hidden');
+                setConditionalRequired(itemId, 'posicaoVideo', false);
+                setConditionalRequired(itemId, 'skip', false);
+                setConditionalRequired(itemId, 'posicao', false);
             }
             
             choiceFormatos.setChoices(formatChoices(availableFormatos), 'value', 'label', true);
@@ -983,23 +1066,31 @@
             if (hasVideo && !hasDAI) {
                 // Show Posição Vídeo WITHOUT the DAI option
                 fgPosVideo.classList.remove('hidden');
+                setConditionalRequired(itemId, 'posicaoVideo', true);
+                setConditionalRequired(itemId, 'skip', false);
                 
-                // Filter out DAI from posicaoVideo options properly via Choices.js API
-                const nonDaiOptions = dropdownData.posicaoVideo.filter(p => p.toUpperCase() !== 'DAI');
+                // Filter out placeholder-like values and keep only spreadsheet options
+                const nonPlaceholderOptions = dropdownData.posicaoVideo.filter(p => {
+                    const normalized = String(p).trim().toLowerCase();
+                    return normalized && normalized !== 'selecione...' && normalized !== 'selecione';
+                });
+                choicePosicaoVideo.clearStore();
                 choicePosicaoVideo.setChoices(
-                    [
-                        { value: '', label: 'Selecione...', selected: true, disabled: false },
-                        ...nonDaiOptions.map(opt => ({ value: opt, label: opt }))
-                    ],
+                    nonPlaceholderOptions.map(opt => ({ value: opt, label: opt })),
                     'value', 'label', true
                 );
+                posVideoSelect.value = '';
             } else if (hasDAI) {
                 // Hide both Posição Vídeo and Skip for DAI
                 fgPosVideo.classList.add('hidden');
                 fgSkip.classList.add('hidden');
+                setConditionalRequired(itemId, 'posicaoVideo', false);
+                setConditionalRequired(itemId, 'skip', false);
             } else {
                 fgPosVideo.classList.add('hidden');
                 fgSkip.classList.add('hidden');
+                setConditionalRequired(itemId, 'posicaoVideo', false);
+                setConditionalRequired(itemId, 'skip', false);
             }
             formatLineName(itemId);
             updateSitesForDAI(itemId);
@@ -1010,8 +1101,10 @@
             const fgSkip = document.getElementById(`fg-skip-${itemId}`);
             if (posicao) {
                 fgSkip.classList.remove('hidden');
+                setConditionalRequired(itemId, 'skip', true);
             } else {
                 fgSkip.classList.add('hidden');
+                setConditionalRequired(itemId, 'skip', false);
             }
         });
         
@@ -1113,6 +1206,7 @@
                 return;
             }
         }
+        if (!validateRequiredLineFields()) return;
         
         const nomeCampanha = document.getElementById('cg-nome-campanha').value;
         const cliente = document.getElementById('cg-cliente').value;
