@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ohana Organiza — Organização de Espaços Moderna</title>
+  <meta name="description"
+    content="Ohana Organiza: serviço moderno de organização profissional que transforma espaços e rotinas com eficiência e estilo." />
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            coral: '#EF8972',
+            'coral-dark': '#D8735E',
+            'coral-glow': 'rgba(239, 137, 114, 0.15)',
+            cream: '#FAF9F6',
+            'cream-alt': '#F3F1ED',
+            charcoal: '#333130',
+            'charcoal-light': '#6B6866',
+          },
+          fontFamily: {
+            heading: ['Outfit', 'system-ui', 'sans-serif'],
+            body: ['Open Sans', 'system-ui', 'sans-serif'],
+          },
+          borderRadius: {
+            '2xl': '16px',
+            '3xl': '24px',
+          },
+        },
+      },
+    }
+  </script>
+
+  <!-- Leaflet CSS for map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500&family=Outfit:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
+
+  <style>
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* Scroll reveal */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .reveal-delay-1 {
+      transition-delay: 0.12s;
+    }
+
+    .reveal-delay-2 {
+      transition-delay: 0.24s;
+    }
+
+    .reveal-delay-3 {
+      transition-delay: 0.36s;
+    }
+
+    /* Card hover lift */
+    .card-lift {
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .card-lift:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 50px rgba(51, 49, 48, 0.08);
+    }
+
+    /* CTA pulse */
+    .btn-pulse {
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-pulse::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 60%);
+      transform: translateX(-100%);
+      transition: transform 0.5s ease;
+    }
+
+    .btn-pulse:hover::before {
+      transform: translateX(100%);
+    }
+
+    .btn-pulse:hover {
+      box-shadow: 0 12px 35px rgba(239, 137, 114, 0.4);
+      transform: translateY(-3px);
+    }
+
+    /* Image reveal */
+    .img-zoom {
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .img-zoom:hover {
+      transform: scale(1.04);
+    }
+
+    /* Badge bounce on hover */
+    .badge-float {
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-6px);
+      }
+    }
+
+    /* Nav underline */
+    .nav-link {
+      position: relative;
+    }
+
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: -3px;
+      left: 50%;
+      width: 0;
+      height: 2px;
+      background: #EF8972;
+      border-radius: 1px;
+      transition: all 0.3s ease;
+      transform: translateX(-50%);
+    }
+
+    .nav-link:hover::after {
+      width: 100%;
+    }
+
+    /* Gradient text */
+    .gradient-text {
+      background: linear-gradient(135deg, #EF8972, #D8735E);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Highlight cards */
+    .highlight-card {
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .highlight-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(239, 137, 114, 0) 0%, rgba(239, 137, 114, 0.06) 100%);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .highlight-card:hover::before {
+      opacity: 1;
+    }
+
+    .highlight-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 50px rgba(51, 49, 48, 0.1);
+    }
+
+    .highlight-card .card-arrow {
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      opacity: 0;
+      transform: translateX(-8px);
+    }
+
+    .highlight-card:hover .card-arrow {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    /* Highlight modal */
+    .highlight-modal-content {
+      transform: scale(0.95) translateY(20px);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    }
+
+    .highlight-modal.active .highlight-modal-content {
+      transform: scale(1) translateY(0);
+    }
+
+    /* Map container */
+    #highlight-map {
+      border-radius: 16px;
+      z-index: 0;
+    }
+
+    /* Category table */
+    .category-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(51, 49, 48, 0.06);
+    }
+
+    .category-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .category-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+
+<body class="bg-cream text-charcoal font-body antialiased">
+
+  <!-- ==================== NAVIGATION ==================== -->
+  <nav class="fixed top-0 left-0 right-0 z-50 bg-cream/85 backdrop-blur-lg border-b border-charcoal/5">
+    <div class="max-w-6xl mx-auto px-6 lg:px-8 flex items-center justify-between h-[72px]">
+      <!-- Logo -->
+      <a href="#inicio"
+        class="font-heading text-xl font-semibold tracking-tight text-charcoal hover:text-coral transition-colors duration-300">
+        Ohana<span class="text-coral">.</span>Organiza
+      </a>
+
+      <!-- Desktop Nav -->
+      <ul class="hidden md:flex items-center gap-8 text-sm font-medium text-charcoal-light">
+        <li><a href="#inicio" class="nav-link hover:text-charcoal transition-colors duration-300">Início</a></li>
+        <li><a href="#servicos" class="nav-link hover:text-charcoal transition-colors duration-300">Serviços</a></li>
+        <li><a href="#porque" class="nav-link hover:text-charcoal transition-colors duration-300">Saiba Mais</a>
+        </li>
+        <li>
+          <a href="#contato"
+            class="bg-coral text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-coral-dark transition-colors duration-300">
+            Contato
+          </a>
+        </li>
+      </ul>
+
+      <!-- Mobile Menu Button -->
+      <button id="mobile-toggle" class="md:hidden flex flex-col gap-[5px] p-2" aria-label="Menu">
+        <span class="block w-5 h-[2px] bg-charcoal rounded-full transition-all duration-300" id="bar1"></span>
+        <span class="block w-5 h-[2px] bg-charcoal rounded-full transition-all duration-300" id="bar2"></span>
+        <span class="block w-3.5 h-[2px] bg-charcoal rounded-full transition-all duration-300" id="bar3"></span>
+      </button>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu"
+      class="md:hidden max-h-0 overflow-hidden transition-all duration-500 bg-cream/95 backdrop-blur-lg">
+      <ul class="flex flex-col items-center gap-5 py-8 text-sm font-medium text-charcoal-light">
+        <li><a href="#inicio" class="hover:text-charcoal transition-colors" onclick="closeMobileMenu()">Início</a></li>
+        <li><a href="#servicos" class="hover:text-charcoal transition-colors" onclick="closeMobileMenu()">Serviços</a>
+        </li>
+        <li><a href="#porque" class="hover:text-charcoal transition-colors"
+            onclick="closeMobileMenu()">Saiba Mais</a></li>
+        <li><a href="#contato" class="bg-coral text-white px-5 py-2.5 rounded-xl"
+            onclick="closeMobileMenu()">Contato</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ==================== HERO SECTION ==================== -->
+  <section id="inicio" class="min-h-screen flex items-center pt-[72px]">
+    <div class="max-w-6xl mx-auto px-6 lg:px-8 w-full py-12 lg:py-0">
+      <div class="grid lg:grid-cols-12 gap-10 lg:gap-8 items-center">
+        <!-- Text (7 cols) -->
+        <div class="lg:col-span-6 xl:col-span-5">
+          <div
+            class="reveal inline-flex items-center gap-2 bg-coral-glow text-coral text-xs font-semibold tracking-wide uppercase px-4 py-2 rounded-full mb-8 badge-float">
+            <span class="w-2 h-2 bg-coral rounded-full"></span>
+            Organização Profissional
+          </div>
+          <h1
+            class="reveal reveal-delay-1 font-heading text-4xl sm:text-5xl lg:text-[3.5rem] font-bold leading-[1.12] text-charcoal mb-5">
+            Organize sua vida,<br />
+            <span class="gradient-text">simplifique sua rotina</span>
+          </h1>
+          <!--<p class="reveal reveal-delay-1 text-charcoal-light text-sm font-medium tracking-wide mb-2">[Inserir Tagline
+            Aqui]</p>-->
+          <p class="reveal reveal-delay-2 text-charcoal-light font-light text-base leading-relaxed mb-10 max-w-lg">
+            Serviço completo de organização de ambientes que transforma espaços caóticos em ambientes funcionais,
+            bonitos e que facilitam o seu dia a dia.
+          </p>
+          <div class="reveal reveal-delay-3 flex flex-wrap items-center gap-4">
+            <button onclick="openBioModal()"
+              class="inline-block bg-white border border-charcoal/10 text-charcoal px-8 py-4 rounded-2xl text-sm font-semibold tracking-wide hover:border-coral/30 hover:text-coral hover:bg-coral-glow hover:shadow-lg hover:shadow-coral/5 transition-all duration-300 hover:-translate-y-0.5">
+              Quem Somos
+            </button>
+            <a href="#servicos"
+              class="btn-pulse inline-block bg-coral text-white px-8 py-4 rounded-2xl text-sm font-semibold tracking-wide hover:bg-coral-dark">
+              Ver Serviços →
+            </a>
+            <!--<a href="#servicos"
+              class="inline-block text-charcoal-light text-sm font-medium hover:text-coral transition-colors duration-300 px-4 py-4">
+              Ver Serviços
+            </a>-->
+          </div>
+        </div>
+
+        <!-- Hero Image (5 cols, asymmetric) -->
+        <div class="lg:col-span-6 xl:col-span-7 reveal">
+          <div class="relative">
+            <div class="overflow-hidden rounded-3xl shadow-2xl shadow-charcoal/8">
+              <img src="images/hero.png" alt="Espaço moderno e organizado"
+                class="w-full h-[380px] lg:h-[520px] object-cover img-zoom" />
+            </div>
+            <!-- Floating accent shape -->
+            <div class="hidden lg:block absolute -bottom-6 -left-6 w-28 h-28 bg-coral/10 rounded-3xl -z-10"></div>
+            <div class="hidden lg:block absolute -top-4 -right-4 w-16 h-16 border-2 border-coral/20 rounded-2xl -z-10">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== SERVICES SECTION ==================== -->
+  <section id="servicos" class="py-24 lg:py-32 bg-cream-alt">
+    <div class="max-w-6xl mx-auto px-6 lg:px-8">
+      <!-- Section Header -->
+      <div class="text-center mb-16">
+        <div
+          class="reveal inline-flex items-center gap-2 bg-coral-glow text-coral text-xs font-semibold tracking-wide uppercase px-4 py-2 rounded-full mb-5">
+          O Que Fazemos
+        </div>
+        <h2 class="reveal reveal-delay-1 font-heading text-3xl sm:text-4xl font-bold text-charcoal">
+          Nossos Serviços
+        </h2>
+        <p class="reveal reveal-delay-2 text-charcoal-light font-light text-base mt-4 max-w-lg mx-auto">
+          Soluções completas para cada tipo de espaço e necessidade de organização.
+        </p>
+      </div>
+
+      <!-- 3 Service Cards -->
+      <div class="grid md:grid-cols-3 gap-6 lg:gap-8">
+        <!-- Card 1 -->
+        <div onclick="openModal('Mudanças')"
+          class="reveal card-lift bg-cream rounded-3xl p-8 lg:p-10 border border-charcoal/5 cursor-pointer group">
+          <!-- Icon Placeholder -->
+          <div
+            class="w-14 h-14 rounded-2xl bg-coral-glow border border-coral/20 flex items-center justify-center mb-6 group-hover:bg-coral/20 transition-colors duration-300">
+            <svg class="w-7 h-7 text-coral" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
+              </path>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.27 6.96L12 12.01l8.73-5.05"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 22.08V12"></path>
+            </svg>
+          </div>
+          <h3 class="font-heading text-lg font-semibold text-charcoal mb-3">Mudanças</h3>
+          <p class="text-charcoal-light font-light text-sm leading-relaxed">
+            Transformamos sua mudança em um processo leve. Selecionamos, embalamos e organizamos seus itens no novo
+            endereço, além de destinar o que ficou para trás, sempre com a sua aprovação.
+          </p>
+          <div class="mt-6 flex items-center justify-between">
+            <button onclick="event.stopPropagation(); openDetailsModal('mudancas')"
+              class="text-charcoal text-sm font-semibold hover:text-coral transition-colors border-b border-transparent hover:border-coral pb-0.5">Saiba
+              mais</button>
+            <span
+              class="text-coral text-sm font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300">Solicitar
+              orçamento →</span>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div onclick="openModal('Acontecimentos')"
+          class="reveal reveal-delay-1 card-lift bg-cream rounded-3xl p-8 lg:p-10 border border-charcoal/5 cursor-pointer group">
+          <div
+            class="w-14 h-14 rounded-2xl bg-coral-glow border border-coral/20 flex items-center justify-center mb-6 group-hover:bg-coral/20 transition-colors duration-300">
+            <svg class="w-7 h-7 text-coral" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+            </svg>
+          </div>
+          <h3 class="font-heading text-lg font-semibold text-charcoal mb-3">Acontecimentos</h3>
+          <p class="text-charcoal-light font-light text-sm leading-relaxed">
+            Preparamos seu lar para as grandes mudanças da vida, como casamentos, filhos ou pets. Organizamos e
+            adaptamos a casa com conforto para abraçar perfeitamente essa nova realidade.
+          </p>
+          <div class="mt-6 flex items-center justify-between">
+            <button onclick="event.stopPropagation(); openDetailsModal('acontecimentos')"
+              class="text-charcoal text-sm font-semibold hover:text-coral transition-colors border-b border-transparent hover:border-coral pb-0.5">Saiba
+              mais</button>
+            <span
+              class="text-coral text-sm font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300">Solicitar
+              orçamento →</span>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div onclick="openModal('Ciclos')"
+          class="reveal reveal-delay-2 card-lift bg-cream rounded-3xl p-8 lg:p-10 border border-charcoal/5 cursor-pointer group">
+          <div
+            class="w-14 h-14 rounded-2xl bg-coral-glow border border-coral/20 flex items-center justify-center mb-6 group-hover:bg-coral/20 transition-colors duration-300">
+            <svg class="w-7 h-7 text-coral" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+            </svg>
+          </div>
+          <h3 class="font-heading text-lg font-semibold text-charcoal mb-3">Ciclos</h3>
+          <p class="text-charcoal-light font-light text-sm leading-relaxed">
+            Com carinho e respeito, ajudamos famílias a organizar os pertences de quem partiu. Separamos lembranças e
+            destinamos objetos, considerando sempre o tempo e as decisões do seu coração.
+          </p>
+          <div class="mt-6 flex items-center justify-between">
+            <button onclick="event.stopPropagation(); openDetailsModal('ciclos')"
+              class="text-charcoal text-sm font-semibold hover:text-coral transition-colors border-b border-transparent hover:border-coral pb-0.5">Saiba
+              mais</button>
+            <span
+              class="text-coral text-sm font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300">Solicitar
+              orçamento →</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- WhatsApp CTA -->
+      <div class="mt-16 text-center reveal reveal-delay-3">
+        <p class="text-charcoal-light font-light text-sm mb-4">Ou se preferir, entre em contato via WhatsApp:</p>
+        <a href="https://web.whatsapp.com/send?phone=5511998818919&text=Aloha!%20Queria%20mais%20informa%C3%A7%C3%B5es%20sobre%20o%20servi%C3%A7o%20de%20organiza%C3%A7%C3%A3o%20Ohana"
+          target="_blank" rel="noopener noreferrer"
+          class="inline-flex items-center gap-2 bg-white text-charcoal px-8 py-4 rounded-2xl border border-charcoal/5 text-sm font-semibold tracking-wide hover:border-coral/30 hover:text-coral hover:bg-coral-glow hover:shadow-xl hover:shadow-coral/5 transition-all duration-300 hover:-translate-y-1">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path
+              d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+          </svg>
+          Chamar no WhatsApp
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== POR QUE ORGANIZAR SECTION ==================== -->
+  <section id="porque" class="py-24 lg:py-32">
+    <div class="max-w-6xl mx-auto px-6 lg:px-8">
+      <!-- Section Header -->
+      <div class="text-center mb-16">
+        <div
+          class="reveal inline-flex items-center gap-2 bg-coral-glow text-coral text-xs font-semibold tracking-wide uppercase px-4 py-2 rounded-full mb-5">
+          Saiba Mais
+        </div>
+        <h2 class="reveal reveal-delay-1 font-heading text-3xl sm:text-4xl font-bold text-charcoal">
+          Por que a <span class="gradient-text">Ohana Organiza</span>?
+        </h2>
+        <p class="reveal reveal-delay-2 text-charcoal-light font-light text-base mt-4 max-w-lg mx-auto">
+          Entenda como trabalhamos, nossos valores e onde atuamos.
+        </p>
+      </div>
+
+      <!-- 4 Highlight Cards -->
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6">
+        <!-- Card 1: Como Funciona -->
+        <div onclick="openHighlightModal('como-funciona')" class="reveal highlight-card bg-cream rounded-3xl p-7 lg:p-8 border border-charcoal/5 group">
+          <div class="w-12 h-12 rounded-2xl bg-coral-glow border border-coral/20 flex items-center justify-center mb-5 group-hover:bg-coral/20 transition-colors duration-300">
+            <svg class="w-6 h-6 text-coral" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 010-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </div>
+          <h3 class="font-heading text-base font-semibold text-charcoal mb-2">Como Funciona</h3>
+          <p class="text-charcoal-light font-light text-sm leading-relaxed">Do primeiro contato à entrega: conheça cada etapa do nosso processo de organização.</p>
+          <div class="mt-4 flex items-center gap-1 text-coral text-sm font-semibold">
+            <span>Ver detalhes</span>
+            <svg class="w-4 h-4 card-arrow" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+          </div>
+        </div>
+
+        <!-- Card 2: Acompanhamento -->
+        <div onclick="openHighlightModal('acompanhamento')" class="reveal reveal-delay-1 highlight-card bg-cream rounded-3xl p-7 lg:p-8 border border-charcoal/5 group">
+          <div class="w-12 h-12 rounded-2xl bg-coral-glow border border-coral/20 flex items-center justify-center mb-5 group-hover:bg-coral/20 transition-colors duration-300">
+            <svg class="w-6 h-6 text-coral" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 01-.825-.242m9.345-8.334a2.126 2.126 0 00-.476-.095 48.64 48.64 0 00-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0011.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
+            </svg>
+          </div>
+          <h3 class="font-heading text-base font-semibold text-charcoal mb-2">Acompanhamento</h3>
+          <p class="text-charcoal-light font-light text-sm leading-relaxed">Comunicação transparente durante todo o projeto, no seu ritmo e conforto.</p>
+          <div class="mt-4 flex items-center gap-1 text-coral text-sm font-semibold">
+            <span>Ver detalhes</span>
+            <svg class="w-4 h-4 card-arrow" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+          </div>
+        </div>
+
+        <!-- Card 3: Valores -->
+        <div onclick="openHighlightModal('valores')" class="reveal reveal-delay-2 highlight-card bg-cream rounded-3xl p-7 lg:p-8 border border-charcoal/5 group">
+          <div class="w-12 h-12 rounded-2xl bg-coral-glow border border-coral/20 flex items-center justify-center mb-5 group-hover:bg-coral/20 transition-colors duration-300">
+            <svg class="w-6 h-6 text-coral" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
+            </svg>
+          </div>
+          <h3 class="font-heading text-base font-semibold text-charcoal mb-2">Valores</h3>
+          <p class="text-charcoal-light font-light text-sm leading-relaxed">Orçamentos individuais e transparentes. Entenda como funciona o investimento.</p>
+          <div class="mt-4 flex items-center gap-1 text-coral text-sm font-semibold">
+            <span>Ver detalhes</span>
+            <svg class="w-4 h-4 card-arrow" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+          </div>
+        </div>
+
+        <!-- Card 4: Área de Atuação -->
+        <div onclick="openHighlightModal('area')" class="reveal reveal-delay-3 highlight-card bg-cream rounded-3xl p-7 lg:p-8 border border-charcoal/5 group">
+          <div class="w-12 h-12 rounded-2xl bg-coral-glow border border-coral/20 flex items-center justify-center mb-5 group-hover:bg-coral/20 transition-colors duration-300">
+            <svg class="w-6 h-6 text-coral" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+            </svg>
+          </div>
+          <h3 class="font-heading text-base font-semibold text-charcoal mb-2">Área de Atuação</h3>
+          <p class="text-charcoal-light font-light text-sm leading-relaxed">Veja os bairros de São Paulo onde atendemos atualmente.</p>
+          <div class="mt-4 flex items-center gap-1 text-coral text-sm font-semibold">
+            <span>Ver detalhes</span>
+            <svg class="w-4 h-4 card-arrow" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer id="contato" class="bg-charcoal text-cream py-14 lg:py-18">
+    <div class="max-w-6xl mx-auto px-6 lg:px-8">
+      <div class="grid md:grid-cols-3 gap-10 lg:gap-14 mb-14">
+        <!-- Brand -->
+        <div>
+          <p class="font-heading text-xl font-semibold mb-3">Ohana<span class="text-coral">.</span>Organiza</p>
+          <p class="text-cream/50 font-light text-sm leading-relaxed max-w-xs">
+            Serviço moderno de organização profissional que transforma espaços e rotinas.
+          </p>
+        </div>
+
+        <!-- Links -->
+        <div>
+          <p class="text-xs font-semibold tracking-wider uppercase text-cream/40 mb-5">Links</p>
+          <ul class="space-y-2.5 text-sm font-light">
+            <li><a href="#inicio" class="text-cream/60 hover:text-coral transition-colors duration-300">Início</a></li>
+            <li><a href="#servicos" class="text-cream/60 hover:text-coral transition-colors duration-300">Serviços</a>
+            </li>
+            <li><a href="#porque"
+                class="text-cream/60 hover:text-coral transition-colors duration-300">Saiba Mais</a></li>
+            <li><a href="#contato" class="text-cream/60 hover:text-coral transition-colors duration-300">Contato</a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Social + Contact -->
+        <div>
+          <p class="text-xs font-semibold tracking-wider uppercase text-cream/40 mb-5">Conecte-se</p>
+          <div class="flex items-center gap-3 mb-6">
+            <!-- Instagram -->
+            <a href="#"
+              class="w-10 h-10 bg-cream/8 hover:bg-coral rounded-xl flex items-center justify-center text-cream/50 hover:text-white transition-all duration-300"
+              aria-label="Instagram">
+              <svg class="w-[18px] h-[18px]" fill="currentColor" viewBox="0 0 24 24">
+                <path
+                  d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
+              </svg>
+            </a>
+            <!-- WhatsApp -->
+            <a href="#"
+              class="w-10 h-10 bg-cream/8 hover:bg-coral rounded-xl flex items-center justify-center text-cream/50 hover:text-white transition-all duration-300"
+              aria-label="WhatsApp">
+              <svg class="w-[18px] h-[18px]" fill="currentColor" viewBox="0 0 24 24">
+                <path
+                  d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+              </svg>
+            </a>
+            <!-- Facebook -->
+            <a href="#"
+              class="w-10 h-10 bg-cream/8 hover:bg-coral rounded-xl flex items-center justify-center text-cream/50 hover:text-white transition-all duration-300"
+              aria-label="Facebook">
+              <svg class="w-[18px] h-[18px]" fill="currentColor" viewBox="0 0 24 24">
+                <path
+                  d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+              </svg>
+            </a>
+            <!-- TikTok -->
+            <a href="#"
+              class="w-10 h-10 bg-cream/8 hover:bg-coral rounded-xl flex items-center justify-center text-cream/50 hover:text-white transition-all duration-300"
+              aria-label="TikTok">
+              <svg class="w-[18px] h-[18px]" fill="currentColor" viewBox="0 0 24 24">
+                <path
+                  d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 00-.79-.05A6.34 6.34 0 003.15 15.2a6.34 6.34 0 0010.86 4.46V13.2a8.16 8.16 0 005.58 2.19V12a4.85 4.85 0 01-3.77-1.54V6.69h3.77z" />
+              </svg>
+            </a>
+          </div>
+          <p class="text-cream/40 font-light text-sm">contato@ohanaorganiza.com</p>
+        </div>
+      </div>
+
+      <!-- Bottom Bar -->
+      <div class="border-t border-cream/8 pt-8 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <p class="text-cream/30 text-xs font-light">
+          © 2026 Ohana Organiza. Todos os direitos reservados.
+        </p>
+        <p class="text-cream/20 text-xs font-light">
+          Espaços organizados, vidas simplificadas ✨
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ==================== BIO MODAL ==================== -->
+  <div id="bio-modal"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 pointer-events-none opacity-0 transition-opacity duration-300">
+    <div class="absolute inset-0 bg-charcoal/40 backdrop-blur-sm" onclick="closeBioModal()"></div>
+    <div id="bio-modal-content"
+      class="relative bg-white rounded-[2rem] w-full max-w-3xl max-h-[90vh] flex flex-col scale-95 transition-transform duration-300 shadow-2xl overflow-hidden">
+      <!-- Close button -->
+      <button onclick="closeBioModal()"
+        class="absolute top-6 right-6 text-white hover:text-white bg-charcoal/20 hover:bg-coral backdrop-blur-sm w-10 h-10 rounded-full flex items-center justify-center transition-colors z-10">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      <!-- Image header -->
+      <div class="w-full h-32 sm:h-48 relative shrink-0">
+        <img id="bio-modal-image" src="images/bio_lili.png" alt="Grafismo"
+          class="w-full h-full object-cover transition-opacity duration-300">
+        <div class="absolute inset-0 bg-gradient-to-t from-charcoal/40 to-transparent"></div>
+      </div>
+
+      <div class="p-8 sm:p-10 pt-6 pb-0 shrink-0">
+        <h2 class="font-heading text-3xl sm:text-4xl font-bold text-charcoal mb-6">A Ohana</h2>
+        <!-- Tabs -->
+        <div class="flex flex-wrap gap-2 border-b border-charcoal/10" id="bio-tabs">
+          <button onclick="switchBioTab('lili')" id="tab-lili"
+            class="bio-tab px-6 py-3 text-sm font-semibold text-coral border-b-2 border-coral transition-colors">Lili, a
+            filha</button>
+          <button onclick="switchBioTab('lene')" id="tab-lene"
+            class="bio-tab px-6 py-3 text-sm font-medium text-charcoal-light hover:text-charcoal border-b-2 border-transparent hover:border-charcoal/30 transition-colors">Lene,
+            a mãe</button>
+          <button onclick="switchBioTab('ohana')" id="tab-ohana"
+            class="bio-tab px-6 py-3 text-sm font-medium text-charcoal-light hover:text-charcoal border-b-2 border-transparent hover:border-charcoal/30 transition-colors">A
+            Ohana Organiza</button>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="px-8 sm:px-10 pt-0 pb-8 sm:pb-10 overflow-y-auto grow">
+        <div id="bio-content-lili" class="bio-panel text-charcoal-light font-light text-base leading-relaxed space-y-4">
+          <p>Formada em moda pelo Ied e apaixonada por decoração desde sempre.</p>
+          <p>Empreendedora desde que não encontrei meu lugar no mercado tradicional comecei um e-commerce com duas
+            amigas quando pouco se falava sobre vendas online, levávamos moda pro Brasil inteiro.</p>
+          <p>Depois veio minha paixão por consultoria de imagem e criei sozinha uma empresa de personal shopper, que se
+            chamava Compras com Estilo. Fui muito feliz e ajudei muitas pessoas a fazerem compras com sabedoria.</p>
+          <p>Resolvi encerrar pra seguir um sonho ainda maior, o da maternidade. Tive a sorte de poder escolher ficar em
+            casa e me dediquei exclusivamente à minha filha por 6 anos.</p>
+          <p>Agora estou de volta com um negócio que faz mais sentido pra mim e me permite continuar presente na vida da
+            minha filha.</p>
+          <p>Eu sou a de humanas, criativa, que ama cores e novidades e sempre quero tentar algo fora do tradicional.
+          </p>
+        </div>
+
+        <div id="bio-content-lene"
+          class="bio-panel hidden text-charcoal-light font-light text-base leading-relaxed space-y-4">
+          <p>Trabalho numa grande empresa de varejo desde que a Lili era bem pequena. Atuei em muitas áreas e hoje faço
+            parte de TI e tributário.</p>
+          <p>Louca por organização desde sempre, bem no estilo Monica Geller e Danny Tanner.</p>
+          <p>Amo meu trabalho, mas ultimamente senti necessidade de tentar algo diferente.</p>
+          <p>Vejo a Lili começar e recomeçar desde que saiu da faculdade e agora quero me aventurar junto com ela.</p>
+          <p>Eu sou a de exatas, a organizada, que sabe de impostos e planilhas. Deixar tudo arrumado me dá uma paz no
+            coração.</p>
+        </div>
+
+        <div id="bio-content-ohana"
+          class="bio-panel hidden text-charcoal-light font-light text-base leading-relaxed space-y-4">
+          <blockquote class="border-l-4 border-coral/30 pl-4 italic text-charcoal my-6 font-serif">
+            "Ohana quer dizer família. Família quer dizer nunca abandonar ou esquecer."
+            <footer class="text-sm text-charcoal-light mt-2 not-italic">— Lilo e Stitch, Walt Disney</footer>
+          </blockquote>
+          <p>Uma paixão que temos em comum é Disney, inclusive fizemos uma tatuagem juntas que simboliza nosso amor uma
+            pela outra e por esse universo mágico.</p>
+          <p>Quando pensamos em lançar um negócio juntas, sabíamos que a Disney entraria como inspiração de alguma forma
+            e nada mais simbólico do que o nome Ohana, já que nosso negócio é a nossa família organizando o lar de
+            outras famílias.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== DETAILS MODAL ==================== -->
+  <div id="details-modal"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 pointer-events-none opacity-0 transition-opacity duration-300">
+    <div class="absolute inset-0 bg-charcoal/40 backdrop-blur-sm" onclick="closeDetailsModal()"></div>
+    <div id="details-modal-content"
+      class="relative bg-white rounded-[2rem] w-full max-w-2xl max-h-[90vh] overflow-y-auto scale-95 transition-transform duration-300 shadow-2xl">
+      <!-- Close button -->
+      <button onclick="closeDetailsModal()"
+        class="absolute top-6 right-6 text-charcoal/40 hover:text-coral hover:bg-coral-glow w-10 h-10 rounded-full flex items-center justify-center transition-colors z-10">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      <!-- Image header -->
+      <div class="w-full h-48 sm:h-64 relative">
+        <img id="details-modal-image" src="" alt="Serviço" class="w-full h-full object-cover">
+        <div class="absolute inset-0 bg-gradient-to-t from-charcoal/80 to-transparent"></div>
+        <h2 id="details-modal-title"
+          class="absolute bottom-6 left-8 font-heading text-3xl sm:text-4xl font-bold text-white">Título</h2>
+      </div>
+
+      <!-- Content -->
+      <div class="p-8 sm:p-10">
+        <div id="details-modal-text" class="text-charcoal-light font-light text-base leading-relaxed space-y-4">
+        </div>
+
+        <div class="mt-8 flex justify-end">
+          <button
+            onclick="closeDetailsModal(); setTimeout(() => openModal(document.getElementById('details-modal-title').textContent), 300)"
+            class="bg-coral text-white px-8 py-3 rounded-xl text-sm font-semibold hover:bg-coral-dark transition-colors shadow-lg shadow-coral/20">
+            Solicitar Orçamento →
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL ==================== -->
+  <div id="contact-modal"
+    class="fixed inset-0 z-[100] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-charcoal/60 backdrop-blur-sm" onclick="closeModal()"></div>
+
+    <!-- Modal Content -->
+    <div id="modal-content"
+      class="relative bg-cream rounded-3xl w-full max-w-lg p-8 lg:p-10 shadow-2xl transform scale-95 transition-transform duration-300 max-h-[90vh] overflow-y-auto">
+      <!-- Close Button -->
+      <button onclick="closeModal()"
+        class="absolute top-4 right-4 w-10 h-10 rounded-xl bg-charcoal/5 hover:bg-charcoal/10 flex items-center justify-center transition-colors duration-200"
+        aria-label="Fechar">
+        <svg class="w-5 h-5 text-charcoal-light" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      <!-- Form State: Default -->
+      <div id="form-state">
+        <div class="mb-8">
+          <div
+            class="inline-flex items-center gap-2 bg-coral-glow text-coral text-xs font-semibold tracking-wide uppercase px-4 py-2 rounded-full mb-4">
+            Solicitar Orçamento
+          </div>
+          <h3 class="font-heading text-2xl font-bold text-charcoal">Entre em contato</h3>
+          <p id="modal-service" class="text-charcoal-light font-light text-sm mt-2">Serviço: <span
+              class="font-medium text-coral" id="service-name"></span></p>
+        </div>
+
+        <form id="contact-form" onsubmit="submitForm(event)" novalidate>
+          <!-- Nome -->
+          <div class="mb-5">
+            <label for="form-nome" class="block text-sm font-medium text-charcoal mb-2">Nome completo</label>
+            <input type="text" id="form-nome" name="nome" required
+              class="w-full px-4 py-3.5 bg-cream-alt border border-charcoal/10 rounded-xl text-charcoal text-sm font-body placeholder:text-charcoal-light/50 focus:outline-none focus:border-coral focus:ring-2 focus:ring-coral/20 transition-all duration-200"
+              placeholder="Seu nome" />
+            <p class="text-red-500 text-xs mt-1 hidden" id="nome-error">Por favor, insira seu nome.</p>
+          </div>
+
+          <!-- Email -->
+          <div class="mb-5">
+            <label for="form-email" class="block text-sm font-medium text-charcoal mb-2">E-mail</label>
+            <input type="email" id="form-email" name="email" required
+              class="w-full px-4 py-3.5 bg-cream-alt border border-charcoal/10 rounded-xl text-charcoal text-sm font-body placeholder:text-charcoal-light/50 focus:outline-none focus:border-coral focus:ring-2 focus:ring-coral/20 transition-all duration-200"
+              placeholder="seu@email.com" />
+            <p class="text-red-500 text-xs mt-1 hidden" id="email-error">Por favor, insira um e-mail válido.</p>
+          </div>
+
+          <!-- Telefone -->
+          <div class="mb-5">
+            <label for="form-telefone" class="block text-sm font-medium text-charcoal mb-2">Telefone</label>
+            <input type="tel" id="form-telefone" name="telefone" required
+              class="w-full px-4 py-3.5 bg-cream-alt border border-charcoal/10 rounded-xl text-charcoal text-sm font-body placeholder:text-charcoal-light/50 focus:outline-none focus:border-coral focus:ring-2 focus:ring-coral/20 transition-all duration-200"
+              placeholder="(11) 99999-9999" maxlength="15" />
+            <p class="text-red-500 text-xs mt-1 hidden" id="telefone-error">Formato: (11) 99999-9999</p>
+          </div>
+
+          <!-- Mensagem -->
+          <div class="mb-6">
+            <label for="form-mensagem" class="block text-sm font-medium text-charcoal mb-2">Mensagem</label>
+            <textarea id="form-mensagem" name="mensagem" rows="3"
+              class="w-full px-4 py-3.5 bg-cream-alt border border-charcoal/10 rounded-xl text-charcoal text-sm font-body placeholder:text-charcoal-light/50 focus:outline-none focus:border-coral focus:ring-2 focus:ring-coral/20 transition-all duration-200 resize-none"
+              placeholder="Conte-nos sobre o que precisa..."></textarea>
+          </div>
+
+          <!-- Submit -->
+          <button type="submit" id="submit-btn"
+            class="btn-pulse w-full bg-coral text-white py-4 rounded-2xl text-sm font-semibold tracking-wide hover:bg-coral-dark transition-colors duration-200 flex items-center justify-center gap-2">
+            <span id="submit-text">Enviar Mensagem</span>
+            <svg id="submit-spinner" class="w-5 h-5 animate-spin hidden" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+          </button>
+        </form>
+      </div>
+
+      <!-- Success State -->
+      <div id="success-state" class="hidden text-center py-8">
+        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5">
+          <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <h3 class="font-heading text-xl font-bold text-charcoal mb-2">Mensagem enviada!</h3>
+        <p class="text-charcoal-light font-light text-sm mb-6">Entraremos em contato em breve. Obrigado pelo interesse!
+        </p>
+        <button onclick="closeModal()"
+          class="bg-coral text-white px-8 py-3 rounded-xl text-sm font-medium hover:bg-coral-dark transition-colors">Fechar</button>
+      </div>
+
+      <!-- Error State -->
+      <div id="error-state" class="hidden text-center py-8">
+        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-5">
+          <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </div>
+        <h3 class="font-heading text-xl font-bold text-charcoal mb-2">Erro ao enviar</h3>
+        <p class="text-charcoal-light font-light text-sm mb-6">Tente novamente ou entre em contato pelo WhatsApp.</p>
+        <button onclick="resetForm()"
+          class="bg-coral text-white px-8 py-3 rounded-xl text-sm font-medium hover:bg-coral-dark transition-colors">Tentar
+          Novamente</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== HIGHLIGHT MODAL ==================== -->
+  <div id="highlight-modal"
+    class="highlight-modal fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 pointer-events-none opacity-0 transition-opacity duration-300">
+    <div class="absolute inset-0 bg-charcoal/40 backdrop-blur-sm" onclick="closeHighlightModal()"></div>
+    <div id="highlight-modal-content"
+      class="highlight-modal-content relative bg-white rounded-[2rem] w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+      <!-- Close button -->
+      <button onclick="closeHighlightModal()"
+        class="absolute top-5 right-5 text-charcoal/40 hover:text-coral hover:bg-coral-glow w-10 h-10 rounded-full flex items-center justify-center transition-colors z-10">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      <!-- Header -->
+      <div class="p-8 sm:p-10 pb-0">
+        <div class="flex items-center gap-4 mb-6">
+          <div id="highlight-modal-icon" class="w-14 h-14 rounded-2xl bg-coral-glow border border-coral/20 flex items-center justify-center shrink-0"></div>
+          <div>
+            <h2 id="highlight-modal-title" class="font-heading text-2xl sm:text-3xl font-bold text-charcoal"></h2>
+          </div>
+        </div>
+        <div class="h-px bg-charcoal/8"></div>
+      </div>
+
+      <!-- Content -->
+      <div id="highlight-modal-body" class="p-8 sm:p-10 pt-6">
+        <!-- Dynamic content injected by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaflet JS for map -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- ==================== SCRIPTS ==================== -->
+  <script>
+    // ---- Google Apps Script endpoint (to be deployed) ----
+    // ----const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyuJEPq5IGBkRE19aibKAzY1-C8PIATFLihJidsRWG12mFKf_U0Zd4B-I20iI3M_Fo/exec'; ----
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyY_DVwuZG3nCXq3k3JKD3rsAaTtrFTM_YALCJ_ffF7NiNuozl2Qf_tj6CEZPiPgRti/exec';
+    // ---- Scroll Reveal ----
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('visible');
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // ---- Mobile menu ----
+    const toggle = document.getElementById('mobile-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    let menuOpen = false;
+
+    toggle.addEventListener('click', () => {
+      menuOpen = !menuOpen;
+      mobileMenu.style.maxHeight = menuOpen ? mobileMenu.scrollHeight + 'px' : '0';
+    });
+
+    function closeMobileMenu() {
+      menuOpen = false;
+      mobileMenu.style.maxHeight = '0';
+    }
+
+    // ---- Phone Mask ----
+    const phoneInput = document.getElementById('form-telefone');
+    phoneInput.addEventListener('input', (e) => {
+      let v = e.target.value.replace(/\D/g, '');
+      if (v.length > 11) v = v.slice(0, 11);
+      if (v.length > 7) {
+        v = `(${v.slice(0, 2)}) ${v.slice(2, 7)}-${v.slice(7)}`;
+      } else if (v.length > 2) {
+        v = `(${v.slice(0, 2)}) ${v.slice(2)}`;
+      } else if (v.length > 0) {
+        v = `(${v}`;
+      }
+      e.target.value = v;
+    });
+
+    // ---- Details Modal ----
+    const detailsData = {
+      mudancas: {
+        title: "Mudanças",
+        image: "images/mudancas.png",
+        text: "<p>Esse é o nosso clássico, vamos te ajudar a organizar a sua mudança. Isso quer dizer que podemos te ajudar naquela tarefa complicada de escolher os itens que merecem ir junto pro novo lar. Depois de escolhidos, todos serão embalados e arrumados de forma estratégica na nova casa. Além disso, damos um destino para os itens que ficaram para trás. Tudo isso feito sempre ouvindo o cliente, não vamos nos desfazer das suas coisas sem permissão.</p>"
+      },
+      acontecimentos: {
+        title: "Acontecimentos",
+        image: "images/acontecimentos.png",
+        text: "<p>Aqui ajudamos a organizar um lar que já faz parte da sua vida, mas que agora precisa abrir espaço pra um novo acontecimento, como um casamento, a chegada de um filho ou até mesmo de um pet. Ajudaremos a pensar e organizar a casa pra abraçar a nova realidade e deixar tudo o mais confortável possível pra todos os moradores.</p>"
+      },
+      ciclos: {
+        title: "Ciclos",
+        image: "images/ciclos.png",
+        text: "<p>Esse é o nosso serviço mais especial e cuidamos de tudo de forma muito carinhosa e respeitosa. Infelizmente em algum momento da vida, todos nós perdemos pessoas amadas. Além do buraco que fica no nosso coração, temos que resolver o que fazer com roupas, objetos e até mesmo imóveis. Porém isso nem sempre é uma tarefa fácil, tanto pela parte emocional, quanto pela parte prática que muitas vezes leva tempo.</p><p>Por isso criamos esse serviço pra ajudar famílias nesse momento tão difícil. Vamos organizar todos os pertences da pessoa que partiu de acordo com as necessidades da família e separar o que vocês desejam guardar e o que precisa sair do espaço. Tudo será tratado com muita calma e respeitando o tempo de todos os envolvidos. Por mais que seja um momento muito sofrido, nossa missão é ajudar as famílias a passarem por essas situações da forma um pouco mais leve. Inclusive, a Ohana Organiza nasceu com um serviço Ciclo feito pra uma família muito querida.</p>"
+      }
+    };
+
+    const detailsModal = document.getElementById('details-modal');
+    const detailsModalContent = document.getElementById('details-modal-content');
+
+    // ---- Bio Modal & Tabs ----
+    const bioModal = document.getElementById('bio-modal');
+    const bioModalContent = document.getElementById('bio-modal-content');
+
+    function openBioModal() {
+      bioModal.classList.remove('pointer-events-none');
+      requestAnimationFrame(() => {
+        bioModal.classList.remove('opacity-0');
+        bioModalContent.classList.remove('scale-95');
+        bioModalContent.classList.add('scale-100');
+      });
+      document.body.style.overflow = 'hidden';
+      // Reset to first tab
+      switchBioTab('lili');
+    }
+
+    function closeBioModal() {
+      bioModal.classList.add('opacity-0');
+      bioModalContent.classList.remove('scale-100');
+      bioModalContent.classList.add('scale-95');
+      setTimeout(() => {
+        bioModal.classList.add('pointer-events-none');
+        if (modal.classList.contains('opacity-0') && detailsModal.classList.contains('opacity-0')) {
+          document.body.style.overflow = '';
+        }
+      }, 300);
+    }
+
+    function switchBioTab(tabId) {
+      // Update Image
+      const bioImage = document.getElementById('bio-modal-image');
+      if (bioImage) {
+        bioImage.src = `images/bio_${tabId}.png`;
+      }
+
+      // Update Tab Styles
+      const tabs = document.querySelectorAll('.bio-tab');
+      tabs.forEach(tab => {
+        if (tab.id === 'tab-' + tabId) {
+          tab.classList.replace('text-charcoal-light', 'text-coral');
+          tab.classList.replace('font-medium', 'font-semibold');
+          tab.classList.replace('border-transparent', 'border-coral');
+          tab.classList.remove('hover:text-charcoal', 'hover:border-charcoal/30');
+        } else {
+          tab.classList.replace('text-coral', 'text-charcoal-light');
+          tab.classList.replace('font-semibold', 'font-medium');
+          tab.classList.replace('border-coral', 'border-transparent');
+          tab.classList.add('hover:text-charcoal', 'hover:border-charcoal/30');
+        }
+      });
+
+      // Show/Hide Content
+      const panels = document.querySelectorAll('.bio-panel');
+      panels.forEach(panel => {
+        if (panel.id === 'bio-content-' + tabId) {
+          panel.classList.remove('hidden');
+        } else {
+          panel.classList.add('hidden');
+        }
+      });
+    }
+
+    // ---- Contact Modal ----
+    const modal = document.getElementById('contact-modal');
+    const modalContent = document.getElementById('modal-content');
+
+    function openDetailsModal(key) {
+      const data = detailsData[key];
+      if (!data) return;
+
+      document.getElementById('details-modal-title').textContent = data.title;
+      document.getElementById('details-modal-image').src = data.image;
+      document.getElementById('details-modal-text').innerHTML = data.text;
+
+      detailsModal.classList.remove('pointer-events-none');
+      requestAnimationFrame(() => {
+        detailsModal.classList.remove('opacity-0');
+        detailsModalContent.classList.remove('scale-95');
+        detailsModalContent.classList.add('scale-100');
+      });
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeDetailsModal() {
+      detailsModal.classList.add('opacity-0');
+      detailsModalContent.classList.remove('scale-100');
+      detailsModalContent.classList.add('scale-95');
+      setTimeout(() => {
+        detailsModal.classList.add('pointer-events-none');
+        if (modal.classList.contains('opacity-0') && bioModal.classList.contains('opacity-0')) {
+          document.body.style.overflow = '';
+        }
+      }, 300);
+    }
+
+    function openModal(serviceName) {
+      document.getElementById('service-name').textContent = serviceName;
+      document.getElementById('form-state').classList.remove('hidden');
+      document.getElementById('success-state').classList.add('hidden');
+      document.getElementById('error-state').classList.add('hidden');
+      document.getElementById('contact-form').reset();
+      clearErrors();
+
+      modal.classList.remove('pointer-events-none');
+      requestAnimationFrame(() => {
+        modal.classList.remove('opacity-0');
+        modalContent.classList.remove('scale-95');
+        modalContent.classList.add('scale-100');
+      });
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      modal.classList.add('opacity-0');
+      modalContent.classList.remove('scale-100');
+      modalContent.classList.add('scale-95');
+      setTimeout(() => {
+        modal.classList.add('pointer-events-none');
+        if (detailsModal.classList.contains('opacity-0') && bioModal.classList.contains('opacity-0')) {
+          document.body.style.overflow = '';
+        }
+      }, 300);
+    }
+
+    // Close on Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeModal();
+        closeDetailsModal();
+        closeBioModal();
+      }
+    });
+
+    // ---- Validation ----
+    function clearErrors() {
+      document.querySelectorAll('[id$="-error"]').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('#contact-form input, #contact-form textarea').forEach(el => {
+        el.classList.remove('border-red-400');
+      });
+    }
+
+    function showError(fieldId) {
+      document.getElementById(fieldId).classList.remove('hidden');
+      const input = document.getElementById(fieldId.replace('-error', ''));
+      if (input) input.classList.add('border-red-400');
+    }
+
+    function validateEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    function validatePhone(phone) {
+      const digits = phone.replace(/\D/g, '');
+      return digits.length === 10 || digits.length === 11;
+    }
+
+    // ---- Submit ----
+    async function submitForm(e) {
+      e.preventDefault();
+      clearErrors();
+
+      const nome = document.getElementById('form-nome').value.trim();
+      const email = document.getElementById('form-email').value.trim();
+      const telefone = document.getElementById('form-telefone').value.trim();
+      const mensagem = document.getElementById('form-mensagem').value.trim();
+      const servico = document.getElementById('service-name').textContent;
+
+      let valid = true;
+
+      if (!nome) { showError('nome-error'); valid = false; }
+      if (!validateEmail(email)) { showError('email-error'); valid = false; }
+      if (!validatePhone(telefone)) { showError('telefone-error'); valid = false; }
+
+      if (!valid) return;
+
+      // Show loading
+      const btn = document.getElementById('submit-btn');
+      const btnText = document.getElementById('submit-text');
+      const spinner = document.getElementById('submit-spinner');
+      btn.disabled = true;
+      btnText.textContent = 'Enviando...';
+      spinner.classList.remove('hidden');
+
+      try {
+        const response = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nome, email, telefone, mensagem, servico })
+        });
+
+        // no-cors always returns opaque response, assume success
+        document.getElementById('form-state').classList.add('hidden');
+        document.getElementById('success-state').classList.remove('hidden');
+      } catch (err) {
+        document.getElementById('form-state').classList.add('hidden');
+        document.getElementById('error-state').classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+        btnText.textContent = 'Enviar Mensagem';
+        spinner.classList.add('hidden');
+      }
+    }
+
+    function resetForm() {
+      document.getElementById('error-state').classList.add('hidden');
+      document.getElementById('form-state').classList.remove('hidden');
+    }
+
+    // ---- Highlight Modal ----
+    const highlightModal = document.getElementById('highlight-modal');
+    const highlightModalContent = document.getElementById('highlight-modal-content');
+    let highlightMap = null;
+
+    const highlightData = {
+      'como-funciona': {
+        title: 'Como Funciona',
+        icon: '<svg class="w-7 h-7 text-coral" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 010-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>',
+        body: `
+          <div class="text-charcoal-light font-light text-[15px] leading-relaxed space-y-4">
+            <p>Vocês entram em contato com a gente e dizem quais dos 3 serviços precisam. Vamos conversar um pouco por WhatsApp e depois faremos uma <strong class="font-medium text-charcoal">visita no local</strong> onde vamos entender o perfil da família e tudo que desejam organizar.</p>
+            <p>Damos orçamento com prazo e valores. Depois do serviço fechado, vamos organizar tudo e entregar o que foi combinado. Manteremos contato para possíveis dúvidas de ambos os lados, mas as famílias <strong class="font-medium text-charcoal">não precisam se preocupar mais</strong>.</p>
+            <p>Nós arrumamos tudo e separamos em 3 categorias — sempre com o aval dos clientes. Não vamos nos desfazer de nada sem a permissão de vocês. E finalizamos com o espaço arrumado da forma que vocês precisam.</p>
+
+            <div class="mt-6 bg-cream-alt rounded-2xl overflow-hidden border border-charcoal/5">
+              <div class="px-5 py-3 bg-charcoal/[0.03] border-b border-charcoal/5">
+                <p class="font-heading font-semibold text-charcoal text-sm">Categorias de Destinação</p>
+              </div>
+              <table class="w-full category-table">
+                <tr>
+                  <td class="align-top" style="width: 140px">
+                    <span class="category-badge bg-red-50 text-red-600">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
+                      Descarte
+                    </span>
+                  </td>
+                  <td class="text-charcoal-light font-light text-sm">Coisas que estão estragadas ou que não podem ser aproveitadas e vão para o lixo.</td>
+                </tr>
+                <tr>
+                  <td class="align-top">
+                    <span class="category-badge bg-blue-50 text-blue-600">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" /></svg>
+                      Doação
+                    </span>
+                  </td>
+                  <td class="text-charcoal-light font-light text-sm">Peças de roupas, móveis, utensílios e eletrônicos que não fazem mais sentido para vocês, mas que estão em bom estado e podem ser aproveitadas por outras pessoas.</td>
+                </tr>
+                <tr>
+                  <td class="align-top">
+                    <span class="category-badge bg-green-50 text-green-600">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                      Venda
+                    </span>
+                  </td>
+                  <td class="text-charcoal-light font-light text-sm">Peças que têm um bom valor de mercado e podem ser vendidas.</td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        `
+      },
+      'acompanhamento': {
+        title: 'Acompanhamento nos Projetos',
+        icon: '<svg class="w-7 h-7 text-coral" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 01-.825-.242m9.345-8.334a2.126 2.126 0 00-.476-.095 48.64 48.64 0 00-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0011.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" /></svg>',
+        body: `
+          <div class="text-charcoal-light font-light text-[15px] leading-relaxed space-y-4">
+            <p>Na nossa primeira conversa, vamos falar de <strong class="font-medium text-charcoal">tudo que envolve a organização</strong> e do que vocês esperam da gente.</p>
+            <p>Quando começarmos o trabalho, vamos conversar sempre que necessário, tanto por dúvidas nossas, quanto por dúvidas de vocês.</p>
+            <p>Durante a execução do serviço, <strong class="font-medium text-charcoal">não é necessário que vocês nos acompanhem</strong>, principalmente porque será um trabalho de alguns dias. Mas caso se sintam mais confortáveis em estar presentes, serão muito bem-vindos pra passar pela aventura da organização com a gente.</p>
+            <div class="mt-4 flex items-start gap-3 bg-coral-glow/50 border border-coral/10 rounded-xl p-4">
+              <svg class="w-5 h-5 text-coral mt-0.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" /></svg>
+              <p class="text-sm text-charcoal">Transparência e comunicação aberta são os nossos pilares. Vocês sempre saberão exatamente o que está acontecendo.</p>
+            </div>
+          </div>
+        `
+      },
+      'valores': {
+        title: 'Valores',
+        icon: '<svg class="w-7 h-7 text-coral" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" /></svg>',
+        body: `
+          <div class="text-charcoal-light font-light text-[15px] leading-relaxed space-y-4">
+            <p>Cada projeto é <strong class="font-medium text-charcoal">único</strong> e vai demandar tempo diferente, por isso os orçamentos são individuais.</p>
+            <p>Vocês vão nos contratar pra fazer toda a organização e resolver todos os problemas relacionados a isso, porém pode ser necessário pagamento a empresas parceiras no caso de grandes volumes de descarte ou doações.</p>
+            <div class="mt-4 bg-cream-alt rounded-2xl border border-charcoal/5 p-6">
+              <p class="font-heading font-semibold text-charcoal text-sm mb-3">Como funciona a venda de itens</p>
+              <p class="text-sm mb-4">Sobre as vendas, nós cuidamos de tudo e dividimos o valor dos lucros com vocês. Veja o exemplo:</p>
+              <div class="flex items-center gap-3 flex-wrap">
+                <div class="flex-1 min-w-[140px] bg-white rounded-xl p-4 text-center border border-charcoal/5">
+                  <p class="text-xs text-charcoal-light mb-1">Valor total vendido</p>
+                  <p class="font-heading font-bold text-xl text-charcoal">R$ 2.000</p>
+                </div>
+                <svg class="w-5 h-5 text-charcoal/30 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                <div class="flex-1 min-w-[140px] bg-white rounded-xl p-4 text-center border border-coral/20">
+                  <p class="text-xs text-charcoal-light mb-1">Para vocês</p>
+                  <p class="font-heading font-bold text-xl text-coral">R$ 1.000</p>
+                </div>
+                <svg class="w-5 h-5 text-charcoal/30 shrink-0 hidden sm:block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15" /></svg>
+                <div class="flex-1 min-w-[140px] bg-white rounded-xl p-4 text-center border border-charcoal/5">
+                  <p class="text-xs text-charcoal-light mb-1">Para a Ohana</p>
+                  <p class="font-heading font-bold text-xl text-charcoal">R$ 1.000</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      'area': {
+        title: 'Área de Atuação',
+        icon: '<svg class="w-7 h-7 text-coral" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" /></svg>',
+        body: `
+          <div class="text-charcoal-light font-light text-[15px] leading-relaxed space-y-4">
+            <p>Somos uma empresa familiar de <strong class="font-medium text-charcoal">São Paulo</strong> e por enquanto só conseguimos atender bairros mais próximos de onde estamos.</p>
+
+            <div id="highlight-map" class="w-full h-[320px] sm:h-[380px] rounded-2xl border border-charcoal/10 overflow-hidden mb-4"></div>
+
+            <div class="flex flex-wrap gap-2">
+              ${['Jardim Paulista', 'Jardim América', 'Jardim Europa', 'Paraíso', 'Cerqueira César', 'Vila Mariana', 'Itaim Bibi', 'Vila Nova Conceição', 'Moema', 'Campo Belo', 'Indianópolis', 'Planalto Paulista', 'Vila Clementino', 'Vila Olímpia', 'Brooklin', 'Pinheiros', 'Vila Madalena', 'Perdizes', 'Higienópolis'].map(b => '<span class="inline-block bg-cream-alt border border-charcoal/5 text-charcoal text-xs font-medium px-3 py-1.5 rounded-full">' + b + '</span>').join('')}
+            </div>
+          </div>
+        `
+      }
+    };
+
+    function openHighlightModal(key) {
+      const data = highlightData[key];
+      if (!data) return;
+
+      document.getElementById('highlight-modal-title').textContent = data.title;
+      document.getElementById('highlight-modal-icon').innerHTML = data.icon;
+      document.getElementById('highlight-modal-body').innerHTML = data.body;
+
+      highlightModal.classList.remove('pointer-events-none');
+      requestAnimationFrame(() => {
+        highlightModal.classList.remove('opacity-0');
+        highlightModal.classList.add('active');
+      });
+      document.body.style.overflow = 'hidden';
+
+      // Initialize map if this is the area modal
+      if (key === 'area') {
+        setTimeout(() => initHighlightMap(), 100);
+      }
+    }
+
+    function closeHighlightModal() {
+      highlightModal.classList.add('opacity-0');
+      highlightModal.classList.remove('active');
+      setTimeout(() => {
+        highlightModal.classList.add('pointer-events-none');
+        // Destroy map to avoid memory leaks
+        if (highlightMap) {
+          highlightMap.remove();
+          highlightMap = null;
+        }
+        if (modal.classList.contains('opacity-0') && detailsModal.classList.contains('opacity-0') && bioModal.classList.contains('opacity-0')) {
+          document.body.style.overflow = '';
+        }
+      }, 300);
+    }
+
+    function initHighlightMap() {
+      const mapEl = document.getElementById('highlight-map');
+      if (!mapEl || highlightMap) return;
+
+      highlightMap = L.map('highlight-map', {
+        scrollWheelZoom: false,
+        zoomControl: true,
+        attributionControl: false
+      }).setView([-23.575, -46.655], 13);
+
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        maxZoom: 18
+      }).addTo(highlightMap);
+
+      // Service area polygon (approximate coverage of listed neighborhoods)
+      const serviceArea = [
+        [-23.533, -46.694], // Perdizes (NW)
+        [-23.530, -46.673], // Higienópolis
+        [-23.540, -46.653], // Cerqueira César
+        [-23.548, -46.640], // Paraíso (NE edge)
+        [-23.560, -46.636], // Vila Mariana
+        [-23.578, -46.634], // Vila Clementino
+        [-23.592, -46.640], // Planalto Paulista
+        [-23.603, -46.650], // Campo Belo (S)
+        [-23.605, -46.665], // Brooklin
+        [-23.598, -46.678], // Vila Olímpia
+        [-23.590, -46.684], // Itaim Bibi
+        [-23.580, -46.690], // Pinheiros
+        [-23.558, -46.697], // Vila Madalena
+        [-23.540, -46.697], // Perdizes (loop back)
+      ];
+
+      L.polygon(serviceArea, {
+        color: '#EF8972',
+        weight: 2,
+        opacity: 0.8,
+        fillColor: '#EF8972',
+        fillOpacity: 0.15,
+        smoothFactor: 1.5
+      }).addTo(highlightMap);
+
+      // Add neighborhood markers
+      const neighborhoods = [
+        { name: 'Jardim Paulista', lat: -23.5651, lng: -46.6580 },
+        { name: 'Jardim América', lat: -23.5620, lng: -46.6690 },
+        { name: 'Jardim Europa', lat: -23.5720, lng: -46.6740 },
+        { name: 'Paraíso', lat: -23.5760, lng: -46.6420 },
+        { name: 'Cerqueira César', lat: -23.5530, lng: -46.6630 },
+        { name: 'Vila Mariana', lat: -23.5860, lng: -46.6370 },
+        { name: 'Itaim Bibi', lat: -23.5840, lng: -46.6760 },
+        { name: 'Vila Nova Conceição', lat: -23.5890, lng: -46.6670 },
+        { name: 'Moema', lat: -23.5990, lng: -46.6600 },
+        { name: 'Campo Belo', lat: -23.6140, lng: -46.6610 },
+        { name: 'Pinheiros', lat: -23.5620, lng: -46.6870 },
+        { name: 'Vila Madalena', lat: -23.5530, lng: -46.6920 },
+        { name: 'Perdizes', lat: -23.5340, lng: -46.6900 },
+        { name: 'Higienópolis', lat: -23.5400, lng: -46.6600 },
+        { name: 'Vila Olímpia', lat: -23.5940, lng: -46.6830 },
+        { name: 'Brooklin', lat: -23.6050, lng: -46.6750 },
+        { name: 'Indianópolis', lat: -23.5960, lng: -46.6470 },
+        { name: 'Planalto Paulista', lat: -23.6100, lng: -46.6430 },
+        { name: 'Vila Clementino', lat: -23.5970, lng: -46.6380 },
+      ];
+
+      const coralIcon = L.divIcon({
+        className: '',
+        html: '<div style="width:10px;height:10px;background:#EF8972;border:2px solid white;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.2)"></div>',
+        iconSize: [10, 10],
+        iconAnchor: [5, 5]
+      });
+
+      neighborhoods.forEach(n => {
+        L.marker([n.lat, n.lng], { icon: coralIcon })
+          .bindTooltip(n.name, { direction: 'top', offset: [0, -8], className: 'leaflet-tooltip' })
+          .addTo(highlightMap);
+      });
+    }
+
+    // Add escape key handler for highlight modal
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !highlightModal.classList.contains('opacity-0')) {
+        closeHighlightModal();
+      }
+    });
+  </script>
+</body>
+
+</html>
