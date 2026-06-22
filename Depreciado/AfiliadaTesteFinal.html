@@ -1081,9 +1081,13 @@
             initDropdownOptions(el('posicaoVideo'), dropdownData.posicaoVideo);
             initDropdownOptions(el('skip'), dropdownData.skip);
 
-            new Choices(el('propriedade'), { ...commonSearchOpts, itemSelectText: '' });
+            const choicePropriedade = new Choices(el('propriedade'), { ...commonSearchOpts, itemSelectText: '' });
             const choicePosicaoVideo = new Choices(el('posicaoVideo'), { ...commonSearchOpts, itemSelectText: '' });
             const choiceSkip = new Choices(el('skip'), { searchEnabled: false, itemSelectText: '' });
+
+            choicesInstances.push({ id: `propriedade-${itemId}`, instance: choicePropriedade });
+            choicesInstances.push({ id: `posicaoVideo-${itemId}`, instance: choicePosicaoVideo });
+            choicesInstances.push({ id: `skip-${itemId}`, instance: choiceSkip });
 
             const choiceFormatos = new Choices(el('formatos'), { ...commonSearchOpts, removeItemButton: true, choices: formatChoices(dropdownData.formatos) });
             choicesInstances.push({ id: `formatos-${itemId}`, instance: choiceFormatos });
@@ -1469,27 +1473,51 @@
             addLineItem();
             const newId = lineItemCount;
 
-            const fields = ['propriedade', 'tipoLinha', 'posicaoVideo', 'skip', 'dataInicio', 'dataFim', 'entregaDeterminada', 'valorUnitario', 'desconto', 'editoria', 'cidades'];
+            // 1. Copy tipoLinha FIRST (native select)
+            const srcTipoLinha = document.getElementById(`tipoLinha-${sourceId}`);
+            const dstTipoLinha = document.getElementById(`tipoLinha-${newId}`);
+            if (srcTipoLinha && dstTipoLinha) {
+                dstTipoLinha.value = srcTipoLinha.value;
+                dstTipoLinha.dispatchEvent(new Event('change'));
+            }
+
+            // 2. Copy formatos (Choices.js multi-select)
+            const srcFormatos = choicesInstances.find(c => c.id === `formatos-${sourceId}`);
+            const dstFormatos = choicesInstances.find(c => c.id === `formatos-${newId}`);
+            if (srcFormatos && dstFormatos) {
+                const selectedValues = srcFormatos.instance.getValue(true);
+                if (selectedValues && selectedValues.length > 0) {
+                    dstFormatos.instance.setChoiceByValue(selectedValues);
+                    document.getElementById(`formatos-${newId}`).dispatchEvent(new Event('change'));
+                }
+            }
+
+            // 3. Copy other Choices.js instances in dependent order
+            const choiceFields = ['propriedade', 'posicaoVideo', 'skip', 'posicao', 'sites', 'geolocalizacao', 'programarDisponivel', 'idades', 'generos', 'potencialConsumo', 'interesses'];
+            choiceFields.forEach(f => {
+                const srcChoice = choicesInstances.find(c => c.id === `${f}-${sourceId}`);
+                const dstChoice = choicesInstances.find(c => c.id === `${f}-${newId}`);
+                if (srcChoice && dstChoice) {
+                    const selectedValues = srcChoice.instance.getValue(true);
+                    if (selectedValues !== undefined && selectedValues !== null) {
+                        const hasValue = Array.isArray(selectedValues) ? selectedValues.length > 0 : String(selectedValues).trim() !== '';
+                        if (hasValue) {
+                            dstChoice.instance.setChoiceByValue(selectedValues);
+                            const dstElem = document.getElementById(`${f}-${newId}`);
+                            if (dstElem) dstElem.dispatchEvent(new Event('change'));
+                        }
+                    }
+                }
+            });
+
+            // 4. Copy standard inputs
+            const fields = ['dataInicio', 'dataFim', 'entregaDeterminada', 'valorUnitario', 'desconto', 'editoria', 'cidades', 'observacoes'];
             fields.forEach(f => {
                 const src = document.getElementById(`${f}-${sourceId}`);
                 const dst = document.getElementById(`${f}-${newId}`);
                 if (src && dst) {
                     dst.value = src.value;
                     dst.dispatchEvent(new Event('change'));
-                }
-            });
-
-            const choiceFields = ['formatos', 'posicao', 'sites', 'geolocalizacao', 'programarDisponivel', 'idades', 'generos', 'potencialConsumo', 'interesses'];
-            choiceFields.forEach(f => {
-                const srcChoice = choicesInstances.find(c => c.id === `${f}-${sourceId}`);
-                const dstChoice = choicesInstances.find(c => c.id === `${f}-${newId}`);
-                if (srcChoice && dstChoice) {
-                    const selectedValues = srcChoice.instance.getValue(true);
-                    if (selectedValues && selectedValues.length > 0) {
-                        dstChoice.instance.setChoiceByValue(selectedValues);
-                        const dstElem = document.getElementById(`${f}-${newId}`);
-                        if (dstElem) dstElem.dispatchEvent(new Event('change'));
-                    }
                 }
             });
 
