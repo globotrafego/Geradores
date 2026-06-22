@@ -217,6 +217,16 @@
             background-color: var(--danger-hover);
         }
 
+        .btn-secondary {
+            background-color: var(--text-muted);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--border-color);
+        }
+
+
         .line-item {
             border: 1px solid var(--border-color);
             border-radius: 16px;
@@ -449,7 +459,10 @@
         <div class="card" id="section-lines">
             <div class="actions-bar" style="margin-top:0; margin-bottom:25px;">
                 <h2 style="border:none; margin:0; padding:0;">Line Items</h2>
-                <button class="btn btn-primary" onclick="addLineItem()">+ Adicionar Linha</button>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-secondary" onclick="copyLineItem()">Copiar Linha</button>
+                    <button class="btn btn-primary" onclick="addLineItem()">+ Adicionar Linha</button>
+                </div>
             </div>
             <div id="line-items-container"></div>
         </div>
@@ -1257,6 +1270,7 @@
                     return;
                 }
             }
+
             if (!validateRequiredLineFields()) return;
 
             const nomeCampanha = document.getElementById('cg-nome-campanha').value;
@@ -1283,53 +1297,101 @@
             const container = document.getElementById('line-items-container');
             const items = container.querySelectorAll('.line-item');
 
-            items.forEach((item, index) => {
-                const id = index + 1;
-                const el = field => document.getElementById(`${field}-${id}`) ? document.getElementById(`${field}-${id}`).value : "";
+            items.forEach((item) => {
+                const idMatch = item.id.match(/line-item-container-(\d+)/);
+                if (idMatch) {
+                    const id = idMatch[1];
+                    const el = field => document.getElementById(`${field}-${id}`) ? document.getElementById(`${field}-${id}`).value : "";
 
-                const formatRaw = getMultipleChoicesValue(`formatos-${id}`);
-                const isDAI = formatRaw.toUpperCase().includes("DAI");
+                    const formatRaw = getMultipleChoicesValue(`formatos-${id}`);
+                    const isDAI = formatRaw.toUpperCase().includes("DAI");
 
-                const formatMapped = mapValues(formatRaw, mappings.formatos);
+                    const formatMapped = mapValues(formatRaw, mappings.formatos);
 
-                const idadeMapped = mapValues(getMultipleChoicesValue(`idades-${id}`), isDAI ? mappings.idade_audience : mappings.idade_permutive);
-                const generoMapped = mapValues(getMultipleChoicesValue(`generos-${id}`), isDAI ? mappings.genero_audience : mappings.genero_permutive);
-                const potencialMapped = mapValues(getMultipleChoicesValue(`potencialConsumo-${id}`), isDAI ? mappings.potencial_audience : mappings.potencial_permutive);
-                const interesseMapped = mapValues(getMultipleChoicesValue(`interesses-${id}`), isDAI ? mappings.interesse_audience : mappings.interesse_permutive);
+                    const idadeMapped = mapValues(getMultipleChoicesValue(`idades-${id}`), isDAI ? mappings.idade_audience : mappings.idade_permutive);
+                    const generoMapped = mapValues(getMultipleChoicesValue(`generos-${id}`), isDAI ? mappings.genero_audience : mappings.genero_permutive);
+                    const potencialMapped = mapValues(getMultipleChoicesValue(`potencialConsumo-${id}`), isDAI ? mappings.potencial_audience : mappings.potencial_permutive);
+                    const interesseMapped = mapValues(getMultipleChoicesValue(`interesses-${id}`), isDAI ? mappings.interesse_audience : mappings.interesse_permutive);
 
-                let rowArr = [
-                    el('lineItemName'),
-                    el('propriedade'),
-                    el('tipoLinha'),
-                    formatMapped,
-                    isDAI ? 'DAI' : el('posicaoVideo'),
-                    isDAI ? 'Sem Skip' : el('skip'),
-                    getMultipleChoicesValue(`posicao-${id}`),
-                    el('dataInicio'),
-                    el('dataFim'),
-                    el('entregaDeterminada'),
-                    el('valorUnitario'),
-                    el('totalTabela'),
-                    el('desconto'),
-                    el('totalNegociado'),
-                    getMultipleChoicesValue(`sites-${id}`),
-                    el('editoria'),
-                    getMultipleChoicesValue(`geolocalizacao-${id}`),
-                    getMultipleChoicesValue(`programarDisponivel-${id}`),
-                    el('cidades'),
-                    idadeMapped,
-                    generoMapped,
-                    potencialMapped,
-                    interesseMapped,
-                    el('observacoes')
-                ];
-                aoa.push(rowArr);
+                    let rowArr = [
+                        el('lineItemName'),
+                        el('propriedade'),
+                        el('tipoLinha'),
+                        formatMapped,
+                        isDAI ? 'DAI' : el('posicaoVideo'),
+                        isDAI ? 'Sem Skip' : el('skip'),
+                        getMultipleChoicesValue(`posicao-${id}`),
+                        el('dataInicio'),
+                        el('dataFim'),
+                        el('entregaDeterminada'),
+                        el('valorUnitario'),
+                        el('totalTabela'),
+                        el('desconto'),
+                        el('totalNegociado'),
+                        getMultipleChoicesValue(`sites-${id}`),
+                        el('editoria'),
+                        getMultipleChoicesValue(`geolocalizacao-${id}`),
+                        getMultipleChoicesValue(`programarDisponivel-${id}`),
+                        el('cidades'),
+                        idadeMapped,
+                        generoMapped,
+                        potencialMapped,
+                        interesseMapped,
+                        el('observacoes')
+                    ];
+                    aoa.push(rowArr);
+                }
             });
+
+            if (items.length === 0) {
+                alert("Adicione pelo menos um Line Item.");
+                return;
+            }
 
             const worksheet = XLSX.utils.aoa_to_sheet(aoa);
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "Campanha");
             XLSX.writeFile(workbook, `Campanha_${nomeCampanha}.xlsx`);
+        }
+
+        function copyLineItem() {
+            const containers = document.querySelectorAll('.line-item');
+            if (containers.length === 0) {
+                alert("Adicione pelo menos uma linha para copiar.");
+                return;
+            }
+            const lastContainer = containers[containers.length - 1];
+            const sourceId = parseInt(lastContainer.id.replace('line-item-container-', ''));
+
+            addLineItem();
+            const newId = lineItemCount;
+
+            const fields = ['propriedade', 'tipoLinha', 'posicaoVideo', 'skip', 'dataInicio', 'dataFim', 'entregaDeterminada', 'valorUnitario', 'desconto', 'editoria', 'cidades'];
+            fields.forEach(f => {
+                const src = document.getElementById(`${f}-${sourceId}`);
+                const dst = document.getElementById(`${f}-${newId}`);
+                if (src && dst) {
+                    dst.value = src.value;
+                    dst.dispatchEvent(new Event('change'));
+                }
+            });
+
+            const choiceFields = ['formatos', 'posicao', 'sites', 'geolocalizacao', 'programarDisponivel', 'idades', 'generos', 'potencialConsumo', 'interesses'];
+            choiceFields.forEach(f => {
+                const srcChoice = choicesInstances.find(c => c.id === `${f}-${sourceId}`);
+                const dstChoice = choicesInstances.find(c => c.id === `${f}-${newId}`);
+                if (srcChoice && dstChoice) {
+                    const selectedValues = srcChoice.instance.getValue(true);
+                    if (selectedValues && selectedValues.length > 0) {
+                        dstChoice.instance.setChoiceByValue(selectedValues);
+                        const dstElem = document.getElementById(`${f}-${newId}`);
+                        if(dstElem) dstElem.dispatchEvent(new Event('change'));
+                    }
+                }
+            });
+
+            formatLineName(newId);
+            calculateTotals(newId);
         }
     </script>
 </body>
