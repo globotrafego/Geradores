@@ -867,6 +867,12 @@
             lineItemCount++;
             const itemId = lineItemCount;
             const container = document.getElementById('line-items-container');
+            
+            // Get today's date in YYYY-MM-DD format for min attribute
+            const todayDate = new Date();
+            // Adjust for local timezone offset
+            const todayStr = new Date(todayDate.getTime() - (todayDate.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+
 
             const itemDiv = document.createElement('div');
             itemDiv.className = 'line-item';
@@ -913,12 +919,12 @@
 
                 <div class="form-group">
                     <label>Data de Início *</label>
-                    <input type="date" id="dataInicio-${itemId}" required>
+                    <input type="date" id="dataInicio-${itemId}" min="${todayStr}" required>
                 </div>
 
                 <div class="form-group">
                     <label>Data Fim *</label>
-                    <input type="date" id="dataFim-${itemId}" required>
+                    <input type="date" id="dataFim-${itemId}" min="${todayStr}" required>
                 </div>
 
                 <div class="form-group">
