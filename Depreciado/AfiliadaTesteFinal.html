@@ -379,6 +379,28 @@
 
 <body>
 
+    <!-- Changelog Modal -->
+    <div id="changelog-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 class="modal-title">Novidades e Atualizações! 🚀</h3>
+            <div class="modal-body" id="changelog-text">
+                <p>O Gerador de Afiliadas foi atualizado com novas melhorias:</p>
+                <ul>
+                    <li><strong>Novo Botão Copiar Linha:</strong> Agora você pode duplicar qualquer linha existente!
+                        Basta clicar em "Copiar Linha" no cabeçalho da linha desejada e todas as informações serão
+                        replicadas para uma nova linha instantaneamente.</li>
+                    <li><strong>Melhorias de Sistema:</strong> Foram aplicados diversos ajustes no backend e na
+                        estrutura de código para garantir maior estabilidade.</li>
+                    <li><strong>Validação de Data:</strong> O calendário agora bloqueia automaticamente a seleção de
+                        datas passadas (anteriores ao dia de hoje) na Data de Início e Data Fim.</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="closeChangelogModal()">Entendido</button>
+            </div>
+        </div>
+    </div>
+
     <div id="loading-overlay"
         style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:var(--bg-color);">
         <div style="text-align:center;">
@@ -393,6 +415,70 @@
             to {
                 transform: rotate(360deg);
             }
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9998;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px var(--shadow-color);
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 15px;
+            margin-top: 0;
+        }
+
+        .modal-body {
+            color: var(--text-main);
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .modal-body ul {
+            margin-top: 10px;
+            padding-left: 20px;
+        }
+
+        .modal-body li {
+            margin-bottom: 8px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
         }
     </style>
 
@@ -867,7 +953,7 @@
             lineItemCount++;
             const itemId = lineItemCount;
             const container = document.getElementById('line-items-container');
-            
+
             // Get today's date in YYYY-MM-DD format for min attribute
             const todayDate = new Date();
             // Adjust for local timezone offset
@@ -1245,9 +1331,27 @@
             updateLineItemAddButtons();
         }
 
+        // --- CHANGELOG MODAL LOGIC ---
+        // Altere o texto no HTML acima (id="changelog-text") e MUDE esta versão para mostrar novamente o modal.
+        const CHANGELOG_VERSION = "v1.1.0";
+
+        function checkChangelog() {
+            const lastSeen = localStorage.getItem('changelogVersion');
+            if (lastSeen !== CHANGELOG_VERSION) {
+                document.getElementById('changelog-modal').classList.add('active');
+            }
+        }
+
+        function closeChangelogModal() {
+            localStorage.setItem('changelogVersion', CHANGELOG_VERSION);
+            document.getElementById('changelog-modal').classList.remove('active');
+        }
+        // -----------------------------
+
         // Boot: load base data, then initialize
         loadBaseData().then(() => {
             initApp();
+            checkChangelog();
         }).catch(err => {
             console.error('Failed to load base data:', err);
             alert('Erro ao carregar a base de dados. Verifique sua conexão e recarregue a página.');
