@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Campanhas - Afiliadas</title>
+    <title>Gerador de Afiliadas - Excel Export</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
@@ -231,12 +231,6 @@
             color: var(--primary);
         }
 
-        .line-item-add-row {
-            display: flex;
-            justify-content: flex-end;
-            margin-top: 20px;
-        }
-
         .actions-bar {
             display: flex;
             justify-content: space-between;
@@ -344,17 +338,9 @@
 </head>
 <body>
 
-<div id="loading-overlay" style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:var(--bg-color);">
-    <div style="text-align:center;">
-        <div style="width:48px;height:48px;border:4px solid var(--border-color);border-top-color:var(--primary);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px;"></div>
-        <p style="font-size:1.1rem;color:var(--text-muted);font-weight:500;">Carregando base de dados...</p>
-    </div>
-</div>
-<style>@keyframes spin { to { transform: rotate(360deg); } }</style>
-
 <div class="container">
     <div class="top-bar">
-        <h1 class="header-title">Gerador de Campanhas - Afiliadas</h1>
+        <h1 class="header-title">Gerador de Afiliadas</h1>
         <button class="theme-toggle" id="theme-toggle-btn" aria-label="Toggle Dark Mode">
             🌙
         </button>
@@ -441,79 +427,21 @@
         }
     });
 
-    const BASE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjRYT6xv7g-svK5_ScKZitolkns29Bbls5xAcMs8NONGY-p5xFa9Yz3tRJIwuhWOm4_FEY6vV0Ig1Z/pub?output=xlsx';
-
-    let dropdownData = {};
-    let mappings = {};
+    const dropdownData = {"afiliadas": ["EPTV", "INTER TV MG", "INTER TV RJ", "INTER TV RN", "NSC", "RBS", "REDE BAHIA", "RPCTV", "TV AMAZONICA AC", "TV AMAZONICA AM", "TV AMAZONICA AP", "TV AMAZONICA RO", "TV AMAZONICA RR", "TV ANHANGUERA", "TV ASA BRANCA", "TV CABO BRANCO", "TV CENTRO AMERICA", "TV CLUBE", "TV DIARIO", "TV FRONTEIRA", "TV GAZETA AL", "TV GAZETA ES", "TV GRANDE RIO", "TV INTEGRACAO", "TV LIBERAL", "TV MIRANTE", "TV MORENA", "TV RIO SUL", "TV SERGIPE", "TV TAPAJOS", "TV TEM", "TV TRIBUNA", "TV VANGUARDA", "TV VERDES MARES"], "propriedades": ["Midia Avulsa", "Midia de Apoio", "Midia de Divulga\u00e7\u00e3o"], "tipoDeLinha": ["DISPLAY", "VIDEO"], "formatos": ["300x250", "300x600", "320x100", "320x50", "970x150", "970x250", "Banner Video - 300x250", "Banner Video - 300x600", "Banner Video - 970x250", "Carrossel", "Carrossel Video", "Chamada", "Chamada Foto", "Chamada Video", "DAI", "Interstitial", "Native VIdeo", "Video"], "posicaoVideo": ["DAI", "Pre Roll"], "skip": ["Com Skip", "Sem Skip"], "posicao": ["FEED", "FEED_ESPECIAL", "FEED_ESPECIAL_M", "FEED_M", "HOME1", "HOME1_M", "HOME2", "HOME2_M", "HOME3", "HOME3_M", "HOME4", "HOME4_M", "HOME_FEED", "HOME_FIM", "MATERIA", "MATERIA1", "MATERIA1_M", "MATERIA2", "MATERIA2_M", "MATERIA_M", "MATERIA_TOPO", "MATERIA_TOPO_M"], "geolocalizacao": ["Acre (AC)", "Alagoas (AL)", "Amap\u00e1 (AP)", "Amazonas (AM)", "Bahia (BA)", "Cear\u00e1 (CE)", "Distrito Federal (DF)", "Esp\u00edrito Santo (ES)", "Goi\u00e1s (GO)", "Maranh\u00e3o (MA)", "Mato Grosso (MT)", "Mato Grosso do Sul (MS)", "Minas Gerais (MG)", "Paran\u00e1 (PR)", "Para\u00edba (PB)", "Par\u00e1 (PA)", "Pernambuco (PE)", "Piau\u00ed (PI)", "Rio Grande do Norte (RN)", "Rio Grande do Sul (RS)", "Rio de Janeiro (RJ)", "Rond\u00f4nia (RO)", "Roraima (RR)", "Santa Catarina (SC)", "Sergipe (SE)", "S\u00e3o Paulo (SP)", "Tocantins (TO)"], "programarDisponivel": ["NAO", "SIM"], "sites": ["G1", "GE", "GShow", "Receitas", "Rede Globo"], "idades": ["18-20", "21-24", "25-29", "30-34", "35-39", "40-44", "45-49", "50-54", "55-59", "60-64", "65-69", "70-74", "75+"], "generos": ["Feminino", "Masculino"], "potencialConsumo": ["Alto Potencial", "Baixo Potencial"], "interesses": ["Teste", "Teste1", "Teste2", "Teste3"]};
+    const mappings = {"formatos": {"970x250": "970x250", "300x250": "300x250", "300x600": "300x600", "970x150": "970x150", "320x50": "320x50", "320x100": "320x100", "Chamada": "TVG - ESP PUB", "Carrossel": "[PROD] Carousel", "Carrossel Video": "[PROD] Carousel Video", "Chamada Video": "TVG - Chamada Video Ad", "Chamada Foto": "TVG - Chamada Foto Ad", "Native VIdeo": "TVG - Native Video ad", "Interstitial": "320x480", "Banner Video - 970x250": "TVG - Banner Video Template - Billboard - [970x250]", "Banner Video - 300x250": "TVG - Banner Video Template - Ret\u00e2ngulo M\u00e9dio - [300x250]", "Banner Video - 300x600": "TVG - Banner Video Template - Meia Pagina - [300x600]", "Video": "1280x720v", "DAI": "1280x720v"}, "idade_permutive": {"18-20": "141615", "21-24": "141617", "25-29": "141619", "30-34": "141622", "35-39": "141623", "40-44": "141624", "45-49": "141625", "50-54": "141626", "55-59": "141627", "60-64": "141628", "65-69": "141629", "70-74": "141630", "75+": "141631"}, "idade_audience": {"18-20": "7940813449", "21-24": "7941050915", "25-29": "7941051428", "30-34": "7941495117", "35-39": "7941495600", "40-44": "7941053024", "45-49": "7941053996", "50-54": "7940823016", "55-59": "7940809663", "60-64": "7941055730", "65-69": "7941056069", "70-74": "7941033791", "75+": "7941500178"}, "genero_permutive": {"Masculino": "124596", "Feminino": "124605"}, "genero_audience": {"Masculino": "7655681421", "Feminino": "7655149751"}, "potencial_permutive": {"Alto Potencial": "127838", "Baixo Potencial": "127836"}, "potencial_audience": {"Alto Potencial": "7656364369", "Baixo Potencial": "7656363202"}, "interesse_permutive": {"Teste": "123", "Teste1": "456", "Teste2": "789", "Teste3": "135"}, "interesse_audience": {"Teste": "2341", "Teste1": "3451", "Teste2": "5671", "Teste3": "8901"}};
     let lineItemCount = 0;
     let choicesInstances = [];
-    let displayFormatos = [];
-    let videoFormatos = [];
 
-    // Helper: extract non-null values from a column in a sheet
-    function getColumn(rows, colIndex) {
-        return rows.slice(1).map(r => r[colIndex]).filter(v => v != null && v !== '').map(v => String(v).replace(/\u00AD/g, ''));
-    }
+    const displayFormatos = [
+        "970x250", "300x250", "300x600", "970x150", "320x50", "320x100", 
+        "Chamada", "Carrossel", "Carrossel Video", "Chamada Video", 
+        "Chamada Foto", "Native VIdeo", "Interstitial", 
+        "Banner Video - 970x250", "Banner Video - 300x250", "Banner Video - 300x600"
+    ];
 
-    // Helper: build a key→value map from two columns
-    function buildMap(rows, keyCol, valCol) {
-        const map = {};
-        rows.slice(1).forEach(r => {
-            if (r[keyCol] != null && r[keyCol] !== '' && r[valCol] != null) {
-                map[String(r[keyCol]).replace(/\u00AD/g, '')] = String(r[valCol]).replace(/\u00AD/g, '');
-            }
-        });
-        return map;
-    }
-
-    async function loadBaseData() {
-        const resp = await fetch(BASE_SHEET_URL);
-        const buf = await resp.arrayBuffer();
-        const wb = XLSX.read(buf, { type: 'array' });
-
-        // --- Afiliada sheet (each column is an independent list) ---
-        const afRows = XLSX.utils.sheet_to_json(wb.Sheets['Afiliada'], { header: 1 });
-        dropdownData.afiliadas = getColumn(afRows, 0);        // Col A
-        dropdownData.meses = getColumn(afRows, 1);             // Col B (not used for dropdown but available)
-        dropdownData.propriedades = getColumn(afRows, 2);      // Col C
-        dropdownData.tipoDeLinha = getColumn(afRows, 3);       // Col D
-        dropdownData.posicaoVideo = getColumn(afRows, 4);      // Col E
-        dropdownData.skip = getColumn(afRows, 5);              // Col F
-        dropdownData.posicao = getColumn(afRows, 6);           // Col G
-        dropdownData.geolocalizacao = getColumn(afRows, 7);    // Col H
-        dropdownData.programarDisponivel = getColumn(afRows, 8); // Col I
-
-        // --- BaseFormatos sheet ---
-        const fmtRows = XLSX.utils.sheet_to_json(wb.Sheets['BaseFormatos'], { header: 1 });
-        const allFormatoNames = getColumn(fmtRows, 0);
-        dropdownData.formatos = allFormatoNames;
-        mappings.formatos = buildMap(fmtRows, 0, 1);
-
-        // Derive display vs video format lists
-        videoFormatos = allFormatoNames.filter(f => ['DAI', 'Video'].includes(f));
-        displayFormatos = allFormatoNames.filter(f => !['DAI', 'Video'].includes(f));
-
-        // --- BaseSegmentacoes sheet ---
-        const segRows = XLSX.utils.sheet_to_json(wb.Sheets['BaseSegmentacoes'], { header: 1 });
-        dropdownData.idades = getColumn(segRows, 0);           // Col A
-        mappings.idade_permutive = buildMap(segRows, 0, 1);    // Col A→B
-        mappings.idade_audience = buildMap(segRows, 0, 2);     // Col A→C
-        dropdownData.generos = getColumn(segRows, 3);          // Col D
-        mappings.genero_permutive = buildMap(segRows, 3, 4);   // Col D→E
-        mappings.genero_audience = buildMap(segRows, 3, 5);    // Col D→F
-        dropdownData.potencialConsumo = getColumn(segRows, 6); // Col G
-        mappings.potencial_permutive = buildMap(segRows, 6, 7);// Col G→H
-        mappings.potencial_audience = buildMap(segRows, 6, 8); // Col G→I
-        dropdownData.interesses = getColumn(segRows, 9);       // Col J
-        mappings.interesse_permutive = buildMap(segRows, 9, 10);// Col J→K
-        mappings.interesse_audience = buildMap(segRows, 9, 11); // Col J→L
-
-        // --- Site sheet ---
-        const siteRows = XLSX.utils.sheet_to_json(wb.Sheets['Site'], { header: 1 });
-        dropdownData.sites = getColumn(siteRows, 0);           // Col A
-
-        console.log('Base data loaded:', { dropdownData, mappings });
-    }
+    const videoFormatos = [
+        "DAI", "Video"
+    ];
 
     const fieldsWithAll = ['formatos', 'posicao', 'sites', 'geolocalizacao', 'idades', 'generos', 'potencialConsumo', 'interesses'];
 
@@ -531,13 +459,28 @@
     const formatChoices = (arr) => arr.map(item => ({value: item, label: item}));
 
     function initDropdownOptions(selectElement, optionsArray, isMultiple = false) {
-        optionsArray.forEach(opt => {
-            const option = document.createElement('option');
-            option.value = opt;
-            option.textContent = opt;
-            selectElement.appendChild(option);
-        });
+        if (!isMultiple) {
+            optionsArray.forEach(opt => {
+                const option = document.createElement('option');
+                option.value = opt;
+                option.textContent = opt;
+                selectElement.appendChild(option);
+            });
+        } else {
+            optionsArray.forEach(opt => {
+                const option = document.createElement('option');
+                option.value = opt;
+                option.textContent = opt;
+                selectElement.appendChild(option);
+            });
+        }
     }
+
+    initDropdownOptions(document.getElementById('cg-afiliadas'), dropdownData.afiliadas);
+    new Choices(document.getElementById('cg-afiliadas'), { ...commonSearchOpts, itemSelectText: '' });
+    new Choices(document.getElementById('cg-mes'), { searchEnabled: false, itemSelectText: '', shouldSort: false });
+    
+    document.getElementById('cg-ano').value = new Date().getFullYear();
 
     function updateCampaignName() {
         const rp = document.getElementById('cg-rp').value || "[RP]";
@@ -552,143 +495,12 @@
         const result = `${rp}_${af}_${order}_${cliente}_${agencia}_${mesAno}_TVGLOBO`;
         document.getElementById('cg-nome-campanha').value = result;
     }
-    const daiSiteMappings = {
-        "TV TEM": ["Globo_BAU (TV TEM Bauru)", "Globo_ITP (TV TEM Itapetininga)", "Globo_SJR (TV TEM São José do Rio Preto)", "Globo_SOR (TV TEM Sorocaba)"],
-        "EPTV": ["Globo_CAM (EPTV Campinas)", "Globo_RIB (EPTV Ribeirão)", "Globo_SCA (EPTV Central)", "Globo_VAR (EPTV Sul de Minas)"],
-        "NSC": ["Globo_BLU (NSC Blumenau)", "Globo_CHA (NSC Chapecó)", "Globo_CRI (NSC Criciúma)", "Globo_JOA (NSC Centro-Oeste)", "Globo_JOI (NSC Joinville)", "Globo_SC1 (NSC Florianópolis)"],
-        "RBS": ["Globo_PEL (RBS TV Pelotas)", "Globo_PFO (RBS TV Passo Fundo)", "Globo_RS1 (RBS TV Porto Alegre)"],
-        "RPCTV": ["Globo_CAV (RPC Cascavel)", "Globo_CUR (RPC Curitiba)", "Globo_FOZ (RPC Foz do Iguaçu)", "Globo_GAV (RPC Guarapuava)", "Globo_LON (RPC Londrina)", "Globo_MAR (RPC Maringá)", "Globo_PGR (RPC Ponta Grossa)", "Globo_PR3 (RPC Paranavaí)"],
-        "INTER TV RJ": ["Globo_CAB (Inter TV Alto Litoral)", "Globo_FLU (Inter TV Planície)", "Globo_FRI (Inter TV Serra+Mar)"],
-        "INTER TV MG": ["Globo_FAB (Inter TV dos Vales)", "Globo_MTC (Inter TV Grande Minas)"],
-        "INTER TV RN": ["Globo_NA2 (Inter TV Costa Branca)", "Globo_NAT (Inter TV Cabugi)"],
-        "TV INTEGRACAO": ["Globo_JF (TV Integração Juiz de Fora)", "Globo_UBE (TV Integração Uberlândia)"],
-        "TV LIBERAL": ["Globo_BEL (TV Liberal Belém)"],
-        "TV VERDES MARES": ["Globo_CE1 (TV Verdes Mares)"],
-        "TV ANHANGUERA": ["Globo_GO01 (TV Anhanguera Goiânia)"],
-        "TV MIRANTE": ["Globo_MA1 (TV Mirante São Luís)"],
-        "TV AMAZONICA AM": ["Globo_MAN (Rede Amazônica Manaus)"],
-        "TV DIARIO": ["Globo_MOC (TV Diário)"],
-        "TV MORENA": ["Globo_MS1 (TV Morena Campo Grande)"],
-        "TV RIO SUL": ["Globo_RES (TV Rio Sul)"],
-        "REDE BAHIA": ["Globo_SAL (TV Bahia)"],
-        "TV TRIBUNA": ["Globo_SAN (TV Tribuna)"],
-        "TV SERGIPE": ["Globo_SER (TV Sergipe)"],
-        "TV GAZETA ES": ["Globo_VIT (TV Gazeta)"]
-    };
 
-    function setConditionalRequired(itemId, fieldId, isRequired) {
-        const field = document.getElementById(`${fieldId}-${itemId}`);
-        if (!field) return;
-        if (isRequired) field.setAttribute('required', 'required');
-        else field.removeAttribute('required');
-    }
-
-    function validateRequiredLineFields() {
-        const items = document.querySelectorAll('#line-items-container .line-item');
-        for (let index = 0; index < items.length; index++) {
-            const itemId = index + 1;
-            const checks = [
-                { id: `propriedade-${itemId}`, message: `Preencha o campo obrigatório Propriedades na Linha ${itemId}.` },
-                { id: `tipoLinha-${itemId}`, message: `Preencha o campo obrigatório Tipo de Linha na Linha ${itemId}.` },
-                { id: `formatos-${itemId}`, message: `Selecione ao menos um Formato na Linha ${itemId}.`, isMulti: true },
-                { id: `dataInicio-${itemId}`, message: `Preencha Data de Início na Linha ${itemId}.` },
-                { id: `dataFim-${itemId}`, message: `Preencha Data Fim na Linha ${itemId}.` },
-                { id: `entregaDeterminada-${itemId}`, message: `Preencha Entrega Determinada na Linha ${itemId}.` },
-                { id: `valorUnitario-${itemId}`, message: `Preencha Valor Unitário (R$) na Linha ${itemId}.` },
-                { id: `desconto-${itemId}`, message: `Preencha Desconto (%) na Linha ${itemId}.` },
-                { id: `sites-${itemId}`, message: `Selecione ao menos um Site na Linha ${itemId}.`, isMulti: true }
-            ];
-
-            for (const check of checks) {
-                const el = document.getElementById(check.id);
-                if (!el) continue;
-                const hasValue = check.isMulti ? el.selectedOptions.length > 0 : !!String(el.value).trim();
-                if (!hasValue) {
-                    alert(check.message);
-                    el.focus();
-                    return false;
-                }
-            }
-
-            const posVideoGroup = document.getElementById(`fg-posicaoVideo-${itemId}`);
-            const skipGroup = document.getElementById(`fg-skip-${itemId}`);
-            const posicaoGroup = document.getElementById(`fg-posicao-${itemId}`);
-            const posVideo = document.getElementById(`posicaoVideo-${itemId}`);
-            const skip = document.getElementById(`skip-${itemId}`);
-            const posicao = document.getElementById(`posicao-${itemId}`);
-
-            if (posVideoGroup && !posVideoGroup.classList.contains('hidden') && posVideo && !String(posVideo.value).trim()) {
-                alert(`Preencha Posição Vídeo na Linha ${itemId}.`);
-                posVideo.focus();
-                return false;
-            }
-            if (skipGroup && !skipGroup.classList.contains('hidden') && skip && !String(skip.value).trim()) {
-                alert(`Preencha Skip na Linha ${itemId}.`);
-                skip.focus();
-                return false;
-            }
-            if (posicaoGroup && !posicaoGroup.classList.contains('hidden') && posicao && posicao.selectedOptions.length === 0) {
-                alert(`Selecione ao menos uma Posição na Linha ${itemId}.`);
-                posicao.focus();
-                return false;
-            }
-        }
-        return true;
-    }
-
-    function updateSitesForDAI(itemId) {
-        const choiceSitesObj = choicesInstances.find(c => c.id === `sites-${itemId}`);
-        if (!choiceSitesObj || !choiceSitesObj.instance) return;
-        
-        const formatSelect = document.getElementById(`formatos-${itemId}`);
-        if (!formatSelect) return;
-        
-        const hasDAI = Array.from(formatSelect.selectedOptions || []).map(o => o.value.toUpperCase()).includes('DAI');
-        
-        if (hasDAI) {
-            const afiliada = document.getElementById('cg-afiliadas').value;
-            const daiSites = daiSiteMappings[afiliada] || [];
-            choiceSitesObj.instance.clearStore();
-            choiceSitesObj.instance.setChoices(formatChoices(daiSites), 'value', 'label', true);
-        } else {
-            const allDaiSites = Object.values(daiSiteMappings).flat();
-            const nonDaiSites = dropdownData.sites.filter(site => !allDaiSites.includes(site));
-            choiceSitesObj.instance.clearStore();
-            choiceSitesObj.instance.setChoices(formatChoices(nonDaiSites), 'value', 'label', true);
-        }
-    }
-
-    function initApp() {
-        initDropdownOptions(document.getElementById('cg-afiliadas'), dropdownData.afiliadas);
-        new Choices(document.getElementById('cg-afiliadas'), { ...commonSearchOpts, itemSelectText: '' });
-        new Choices(document.getElementById('cg-mes'), { searchEnabled: false, itemSelectText: '', shouldSort: false });
-        
-        document.getElementById('cg-ano').value = new Date().getFullYear();
-
-        ['cg-rp', 'cg-order-id', 'cg-cliente', 'cg-agencia', 'cg-mes', 'cg-ano'].forEach(id => {
-            document.getElementById(id).addEventListener('input', updateCampaignName);
-            document.getElementById(id).addEventListener('change', updateCampaignName);
-        });
-
-        const afSelect = document.getElementById('cg-afiliadas');
-        afSelect.addEventListener('input', updateCampaignName);
-        afSelect.addEventListener('change', () => {
-            updateCampaignName();
-            for (let i = 1; i <= lineItemCount; i++) {
-                if (document.getElementById(`line-item-${i}`)) {
-                    updateSitesForDAI(i);
-                }
-            }
-        });
-        updateCampaignName();
-
-        // Add first line item
-        addLineItem();
-
-        // Hide loading overlay
-        const overlay = document.getElementById('loading-overlay');
-        if (overlay) overlay.style.display = 'none';
-    }
+    ['cg-rp', 'cg-afiliadas', 'cg-order-id', 'cg-cliente', 'cg-agencia', 'cg-mes', 'cg-ano'].forEach(id => {
+        document.getElementById(id).addEventListener('input', updateCampaignName);
+        document.getElementById(id).addEventListener('change', updateCampaignName);
+    });
+    updateCampaignName();
 
     function selectAll(field, itemId) {
         const choiceObj = choicesInstances.find(c => c.id === `${field}-${itemId}`);
@@ -806,14 +618,12 @@
         el('totalNegociado').value = totalNegociado.toFixed(2);
     }
 
-    function buildMultiGroup(label, id, itemId, isHidden = false, isRequired = false) {
+    function buildMultiGroup(label, id, itemId, isHidden = false) {
         const hiddenClass = isHidden ? "hidden" : "";
-        const requiredAttr = isRequired ? "required" : "";
-        const requiredMark = isRequired ? " *" : "";
         return `
             <div class="form-group ${hiddenClass}" id="fg-${id}-${itemId}">
-                <label>${label}${requiredMark}</label>
-                <select id="${id}-${itemId}" multiple ${requiredAttr}></select>
+                <label>${label}</label>
+                <select id="${id}-${itemId}" multiple></select>
             </div>
         `;
     }
@@ -840,47 +650,47 @@
 
             <div class="grid">
                 <div class="form-group">
-                    <label>Propriedades *</label>
-                    <select id="propriedade-${itemId}" required><option value="">Selecione...</option></select>
+                    <label>Propriedades</label>
+                    <select id="propriedade-${itemId}"><option value="">Selecione...</option></select>
                 </div>
                 
                 <div class="form-group">
-                    <label>Tipo de Linha *</label>
-                    <select id="tipoLinha-${itemId}" required><option value="">Selecione...</option></select>
+                    <label>Tipo de Linha</label>
+                    <select id="tipoLinha-${itemId}"><option value="">Selecione...</option></select>
                 </div>
 
-                ${buildMultiGroup("Formatos", "formatos", itemId, false, true)}
+                ${buildMultiGroup("Formatos", "formatos", itemId)}
 
                 <div class="form-group hidden" id="fg-posicaoVideo-${itemId}">
-                    <label>Posição Vídeo *</label>
-                    <select id="posicaoVideo-${itemId}" required><option value="">Selecione...</option></select>
+                    <label>Posição Vídeo</label>
+                    <select id="posicaoVideo-${itemId}"><option value="">Selecione...</option></select>
                 </div>
 
                 <div class="form-group hidden" id="fg-skip-${itemId}">
-                    <label>Skip *</label>
-                    <select id="skip-${itemId}" required><option value="">Selecione...</option></select>
+                    <label>Skip</label>
+                    <select id="skip-${itemId}"><option value="">Selecione...</option></select>
                 </div>
 
-                ${buildMultiGroup("Posição", "posicao", itemId, true, true)}
+                ${buildMultiGroup("Posição", "posicao", itemId, true)}
 
                 <div class="form-group">
-                    <label>Data de Início *</label>
-                    <input type="date" id="dataInicio-${itemId}" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Data Fim *</label>
-                    <input type="date" id="dataFim-${itemId}" required>
+                    <label>Data de Início</label>
+                    <input type="date" id="dataInicio-${itemId}">
                 </div>
 
                 <div class="form-group">
-                    <label>Entrega Determinada *</label>
-                    <input type="number" id="entregaDeterminada-${itemId}" min="0" required>
+                    <label>Data Fim</label>
+                    <input type="date" id="dataFim-${itemId}">
                 </div>
 
                 <div class="form-group">
-                    <label>Valor Unitário (R$) *</label>
-                    <input type="number" step="0.01" id="valorUnitario-${itemId}" min="0" required>
+                    <label>Entrega Determinada</label>
+                    <input type="number" id="entregaDeterminada-${itemId}" min="0">
+                </div>
+
+                <div class="form-group">
+                    <label>Valor Unitário (R$)</label>
+                    <input type="number" step="0.01" id="valorUnitario-${itemId}" min="0">
                 </div>
                 
                 <div class="form-group">
@@ -889,8 +699,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Desconto (%) *</label>
-                    <input type="number" step="0.01" id="desconto-${itemId}" value="0" min="0" max="100" required>
+                    <label>Desconto (%)</label>
+                    <input type="number" step="0.01" id="desconto-${itemId}" value="0" min="0" max="100">
                 </div>
 
                 <div class="form-group">
@@ -898,7 +708,7 @@
                     <input type="number" id="totalNegociado-${itemId}" readonly>
                 </div>
 
-                ${buildMultiGroup("Site", "sites", itemId, false, true)}
+                ${buildMultiGroup("Site", "sites", itemId)}
 
                 <div class="form-group">
                     <label>Editoria / Programa</label>
@@ -927,10 +737,6 @@
                     <input type="text" id="observacoes-${itemId}">
                 </div>
             </div>
-
-            <div class="line-item-add-row">
-                <button type="button" class="btn btn-primary btn-add-line-item" onclick="addLineItem()">+ Adicionar Linha</button>
-            </div>
         `;
         
         container.appendChild(itemDiv);
@@ -942,20 +748,15 @@
         initDropdownOptions(el('skip'), dropdownData.skip);
 
         new Choices(el('propriedade'), { ...commonSearchOpts, itemSelectText: '' });
-        const choicePosicaoVideo = new Choices(el('posicaoVideo'), { ...commonSearchOpts, itemSelectText: '' });
-        const choiceSkip = new Choices(el('skip'), { searchEnabled: false, itemSelectText: '' });
+        new Choices(el('posicaoVideo'), { ...commonSearchOpts, itemSelectText: '' });
+        new Choices(el('skip'), { searchEnabled: false, itemSelectText: '' });
 
         const choiceFormatos = new Choices(el('formatos'), { ...commonSearchOpts, removeItemButton: true, choices: formatChoices(dropdownData.formatos) });
         choicesInstances.push({ id: `formatos-${itemId}`, instance: choiceFormatos });
-        setConditionalRequired(itemId, 'formatos', true);
-        setConditionalRequired(itemId, 'sites', true);
         
-        const allDaiSites = Object.values(daiSiteMappings).flat();
-        const nonDaiSites = dropdownData.sites.filter(site => !allDaiSites.includes(site));
-
         const multiSetup = [
             {id: 'posicao', data: dropdownData.posicao},
-            {id: 'sites', data: nonDaiSites},
+            {id: 'sites', data: dropdownData.sites},
             {id: 'geolocalizacao', data: dropdownData.geolocalizacao},
             {id: 'programarDisponivel', data: dropdownData.programarDisponivel},
             {id: 'idades', data: dropdownData.idades},
@@ -1007,104 +808,58 @@
         el('tipoLinha').addEventListener('change', function(e) {
             const tipo = e.target.value;
             const fgPosVideo = document.getElementById(`fg-posicaoVideo-${itemId}`);
-            const fgPosicao = document.getElementById(`fg-posicao-${itemId}`);
             const fgSkip = document.getElementById(`fg-skip-${itemId}`);
+            const fgPosicao = document.getElementById(`fg-posicao-${itemId}`);
+            
+            // Clear all dependent fields
             choiceFormatos.clearStore();
+            
+            // Reset Posição Vídeo (single select via Choices.js)
+            const posVideoChoices = choicesInstances.find(c => c.id === `posicaoVideo-${itemId}`);
+            if (posVideoChoices) {
+                // For single-select Choices, we need to find the underlying select
+                el('posicaoVideo').value = '';
+                el('posicaoVideo').dispatchEvent(new Event('change'));
+            } else {
+                el('posicaoVideo').value = '';
+            }
+            
+            // Reset Skip (single select via Choices.js)
+            el('skip').value = '';
+            
+            // Clear Posição (multi-select via Choices.js)
+            const posicaoChoice = choicesInstances.find(c => c.id === `posicao-${itemId}`);
+            if (posicaoChoice) posicaoChoice.instance.removeActiveItems();
             
             let availableFormatos = [];
             if (tipo === "DISPLAY") {
                 availableFormatos = displayFormatos;
                 fgPosVideo.classList.add('hidden');
                 fgSkip.classList.add('hidden');
-                setConditionalRequired(itemId, 'posicaoVideo', false);
-                setConditionalRequired(itemId, 'skip', false);
-                setConditionalRequired(itemId, 'posicaoVideo', false);
-                setConditionalRequired(itemId, 'skip', false);
                 fgPosicao.classList.remove('hidden');
-                setConditionalRequired(itemId, 'posicaoVideo', false);
-                setConditionalRequired(itemId, 'skip', false);
-                setConditionalRequired(itemId, 'posicao', true);
             } else if (tipo === "VIDEO") {
                 availableFormatos = videoFormatos;
-                fgPosVideo.classList.add('hidden');
-                fgSkip.classList.add('hidden');
-                setConditionalRequired(itemId, 'posicaoVideo', false);
-                setConditionalRequired(itemId, 'skip', false);
+                fgPosVideo.classList.remove('hidden');
                 fgPosicao.classList.add('hidden');
-                setConditionalRequired(itemId, 'posicaoVideo', false);
-                setConditionalRequired(itemId, 'skip', false);
-                setConditionalRequired(itemId, 'posicao', false);
-                setConditionalRequired(itemId, 'posicaoVideo', false);
-                setConditionalRequired(itemId, 'skip', false);
-                setConditionalRequired(itemId, 'posicao', false);
+                fgSkip.classList.add('hidden');
             } else {
                 availableFormatos = dropdownData.formatos;
                 fgPosVideo.classList.add('hidden');
                 fgSkip.classList.add('hidden');
-                setConditionalRequired(itemId, 'posicaoVideo', false);
-                setConditionalRequired(itemId, 'skip', false);
                 fgPosicao.classList.add('hidden');
-                setConditionalRequired(itemId, 'posicaoVideo', false);
-                setConditionalRequired(itemId, 'skip', false);
-                setConditionalRequired(itemId, 'posicao', false);
             }
             
             choiceFormatos.setChoices(formatChoices(availableFormatos), 'value', 'label', true);
             formatLineName(itemId);
         });
 
-        // Video/DAI format logic: driven by Formatos selection
-        el('formatos').addEventListener('change', function() {
-            const selected = Array.from(el('formatos').selectedOptions || []).map(o => o.value.toUpperCase());
-            const hasVideo = selected.includes('VIDEO');
-            const hasDAI = selected.includes('DAI');
-            const fgPosVideo = document.getElementById(`fg-posicaoVideo-${itemId}`);
-            const fgSkip = document.getElementById(`fg-skip-${itemId}`);
-            const posVideoSelect = el('posicaoVideo');
-            const skipSelect = el('skip');
-
-            if (hasVideo && !hasDAI) {
-                // Show Posição Vídeo WITHOUT the DAI option
-                fgPosVideo.classList.remove('hidden');
-                setConditionalRequired(itemId, 'posicaoVideo', true);
-                setConditionalRequired(itemId, 'skip', false);
-                
-                // Filter out placeholder-like values and keep only spreadsheet options
-                const nonPlaceholderOptions = dropdownData.posicaoVideo.filter(p => {
-                    const normalized = String(p).trim().toLowerCase();
-                    return normalized && normalized !== 'selecione...' && normalized !== 'selecione';
-                });
-                choicePosicaoVideo.clearStore();
-                choicePosicaoVideo.setChoices(
-                    nonPlaceholderOptions.map(opt => ({ value: opt, label: opt })),
-                    'value', 'label', true
-                );
-                posVideoSelect.value = '';
-            } else if (hasDAI) {
-                // Hide both Posição Vídeo and Skip for DAI
-                fgPosVideo.classList.add('hidden');
-                fgSkip.classList.add('hidden');
-                setConditionalRequired(itemId, 'posicaoVideo', false);
-                setConditionalRequired(itemId, 'skip', false);
-            } else {
-                fgPosVideo.classList.add('hidden');
-                fgSkip.classList.add('hidden');
-                setConditionalRequired(itemId, 'posicaoVideo', false);
-                setConditionalRequired(itemId, 'skip', false);
-            }
-            formatLineName(itemId);
-            updateSitesForDAI(itemId);
-        });
-
         el('posicaoVideo').addEventListener('change', function(e) {
             const posicao = e.target.value;
             const fgSkip = document.getElementById(`fg-skip-${itemId}`);
-            if (posicao) {
+            if (posicao === "Pre Roll") {
                 fgSkip.classList.remove('hidden');
-                setConditionalRequired(itemId, 'skip', true);
             } else {
                 fgSkip.classList.add('hidden');
-                setConditionalRequired(itemId, 'skip', false);
             }
         });
         
@@ -1118,19 +873,6 @@
         });
         
         formatLineName(itemId);
-        updateLineItemAddButtons();
-    }
-
-    function updateLineItemAddButtons() {
-        const container = document.getElementById('line-items-container');
-        const items = container.querySelectorAll('.line-item');
-
-        items.forEach((item, index) => {
-            const addButton = item.querySelector('.btn-add-line-item');
-            if (addButton) {
-                addButton.style.display = index === items.length - 1 ? 'inline-flex' : 'none';
-            }
-        });
     }
 
     function removeLineItem(idToRemove) {
@@ -1170,19 +912,9 @@
             
             formatLineName(newId);
         });
-
-        updateLineItemAddButtons();
     }
 
-    // Boot: load base data, then initialize
-    loadBaseData().then(() => {
-        initApp();
-    }).catch(err => {
-        console.error('Failed to load base data:', err);
-        alert('Erro ao carregar a base de dados. Verifique sua conexão e recarregue a página.');
-        const overlay = document.getElementById('loading-overlay');
-        if (overlay) overlay.querySelector('p').textContent = 'Erro ao carregar. Recarregue a página.';
-    });
+    addLineItem();
 
     function getMultipleChoicesValue(id) {
         const select = document.getElementById(id);
@@ -1206,79 +938,93 @@
                 return;
             }
         }
-        if (!validateRequiredLineFields()) return;
         
-        const nomeCampanha = document.getElementById('cg-nome-campanha').value;
-        const cliente = document.getElementById('cg-cliente').value;
-        const afiliadas = document.getElementById('cg-afiliadas').value;
+        const campDataObj = {
+            'Número de RP': document.getElementById('cg-rp').value,
+            'Afiliadas': document.getElementById('cg-afiliadas').value,
+            'Order ID': document.getElementById('cg-order-id').value,
+            'Cliente': document.getElementById('cg-cliente').value,
+            'Agência / Direto': document.getElementById('cg-agencia').value || 'Direto',
+            'Mês': document.getElementById('cg-mes').value,
+            'Ano': document.getElementById('cg-ano').value,
+            'Nome da Campanha': document.getElementById('cg-nome-campanha').value
+        };
 
         const headers = [
-            'Nome da Linha', 'Propriedades', 'Tipo de Linha', 'Formatos',
-            'Posição Vídeo', 'Skip', 'Posição', 'Data de Início', 'Data Fim',
-            'Entrega Determinada', 'Valor Unitário (R$)', 'Total Tabela (R$)',
-            'Desconto (%)', 'Total Negociado (R$)', 'Site', 'Editoria / Programa',
-            'Geolocalização', 'Caso Under, programar o disponível?', 'Cidades',
+            'Nome da Linha', 'Número de RP', 'Afiliadas', 'Order ID', 'Cliente', 'Agência / Direto', 'Mês', 'Ano', 'Nome da Campanha',
+            'Propriedades', 'Tipo de Linha', 'Formatos', 'Posição Vídeo', 'Skip', 'Posição', 'Data de Início', 'Data Fim',
+            'Entrega Determinada', 'Valor Unitário (R$)', 'Total Tabela (R$)', 'Desconto (%)', 'Total Negociado (R$)',
+            'Site', 'Editoria / Programa', 'Geolocalização', 'Caso Under, programar o disponível?', 'Cidades',
             'Idade', 'Gênero', 'Potencial de Consumo', 'Interesse', 'Observações'
         ];
 
         let aoa = [];
-        // Row 1: Campaign info (A1=Nome da Campanha, B1=Cliente, C1=Afiliadas)
-        aoa.push([nomeCampanha, cliente, afiliadas]);
-        // Row 2: Blank
+        // Row 1
+        aoa.push([campDataObj['Nome da Campanha'], campDataObj['Cliente']]);
+        // Row 2
         aoa.push([]);
-        // Row 3: Headers
+        // Row 3
         aoa.push(headers);
 
         const container = document.getElementById('line-items-container');
         const items = container.querySelectorAll('.line-item');
         
-        items.forEach((item, index) => {
-            const id = index + 1;
-            const el = field => document.getElementById(`${field}-${id}`) ? document.getElementById(`${field}-${id}`).value : "";
-            
-            const formatRaw = getMultipleChoicesValue(`formatos-${id}`);
-            const isDAI = formatRaw.toUpperCase().includes("DAI");
-
-            const formatMapped = mapValues(formatRaw, mappings.formatos);
-            
-            const idadeMapped = mapValues(getMultipleChoicesValue(`idades-${id}`), isDAI ? mappings.idade_audience : mappings.idade_permutive);
-            const generoMapped = mapValues(getMultipleChoicesValue(`generos-${id}`), isDAI ? mappings.genero_audience : mappings.genero_permutive);
-            const potencialMapped = mapValues(getMultipleChoicesValue(`potencialConsumo-${id}`), isDAI ? mappings.potencial_audience : mappings.potencial_permutive);
-            const interesseMapped = mapValues(getMultipleChoicesValue(`interesses-${id}`), isDAI ? mappings.interesse_audience : mappings.interesse_permutive);
-
-            let rowArr = [
-                el('lineItemName'),
-                el('propriedade'),
-                el('tipoLinha'),
-                formatMapped,
-                el('posicaoVideo'),
-                isDAI ? 'Sem Skip' : el('skip'),
-                getMultipleChoicesValue(`posicao-${id}`),
-                el('dataInicio'),
-                el('dataFim'),
-                el('entregaDeterminada'),
-                el('valorUnitario'),
-                el('totalTabela'),
-                el('desconto'),
-                el('totalNegociado'),
-                getMultipleChoicesValue(`sites-${id}`),
-                el('editoria'),
-                getMultipleChoicesValue(`geolocalizacao-${id}`),
-                getMultipleChoicesValue(`programarDisponivel-${id}`),
-                el('cidades'),
-                idadeMapped,
-                generoMapped,
-                potencialMapped,
-                interesseMapped,
-                el('observacoes')
-            ];
+        if (items.length === 0) {
+            let rowDict = {...campDataObj};
+            let rowArr = headers.map(h => rowDict[h] || "");
             aoa.push(rowArr);
-        });
+        } else {
+            items.forEach((item, index) => {
+                const id = index + 1;
+                const el = field => document.getElementById(`${field}-${id}`) ? document.getElementById(`${field}-${id}`).value : "";
+                
+                const formatRaw = getMultipleChoicesValue(`formatos-${id}`);
+                const isDAI = formatRaw.toUpperCase().includes("DAI");
+
+                const formatMapped = mapValues(formatRaw, mappings.formatos);
+                
+                const idadeMapped = mapValues(getMultipleChoicesValue(`idades-${id}`), isDAI ? mappings.idade_audience : mappings.idade_permutive);
+                const generoMapped = mapValues(getMultipleChoicesValue(`generos-${id}`), isDAI ? mappings.genero_audience : mappings.genero_permutive);
+                const potencialMapped = mapValues(getMultipleChoicesValue(`potencialConsumo-${id}`), isDAI ? mappings.potencial_audience : mappings.potencial_permutive);
+                const interesseMapped = mapValues(getMultipleChoicesValue(`interesses-${id}`), isDAI ? mappings.interesse_audience : mappings.interesse_permutive);
+
+                let rowDict = {
+                    ...campDataObj,
+                    'Nome da Linha': el('lineItemName'),
+                    'Propriedades': el('propriedade'),
+                    'Tipo de Linha': el('tipoLinha'),
+                    'Formatos': formatMapped,
+                    'Posição Vídeo': el('posicaoVideo'),
+                    'Skip': el('skip'),
+                    'Posição': getMultipleChoicesValue(`posicao-${id}`),
+                    'Data de Início': el('dataInicio'),
+                    'Data Fim': el('dataFim'),
+                    'Entrega Determinada': el('entregaDeterminada'),
+                    'Valor Unitário (R$)': el('valorUnitario'),
+                    'Total Tabela (R$)': el('totalTabela'),
+                    'Desconto (%)': el('desconto'),
+                    'Total Negociado (R$)': el('totalNegociado'),
+                    'Site': getMultipleChoicesValue(`sites-${id}`),
+                    'Editoria / Programa': el('editoria'),
+                    'Geolocalização': getMultipleChoicesValue(`geolocalizacao-${id}`),
+                    'Caso Under, programar o disponível?': getMultipleChoicesValue(`programarDisponivel-${id}`),
+                    'Cidades': el('cidades'),
+                    'Idade': idadeMapped,
+                    'Gênero': generoMapped,
+                    'Potencial de Consumo': potencialMapped,
+                    'Interesse': interesseMapped,
+                    'Observações': el('observacoes')
+                };
+
+                let rowArr = headers.map(h => rowDict[h] || "");
+                aoa.push(rowArr);
+            });
+        }
 
         const worksheet = XLSX.utils.aoa_to_sheet(aoa);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Campanha");
-        XLSX.writeFile(workbook, `Campanha_${nomeCampanha}.xlsx`);
+        XLSX.writeFile(workbook, `Campanha_${campDataObj['Nome da Campanha']}.xlsx`);
     }
 </script>
 </body>
