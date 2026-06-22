@@ -1056,28 +1056,28 @@
                 const fgPosVideo = document.getElementById(`fg-posicaoVideo-${itemId}`);
                 const fgPosicao = document.getElementById(`fg-posicao-${itemId}`);
                 const fgSkip = document.getElementById(`fg-skip-${itemId}`);
-                
+
                 // 1. Clear all dependent field VALUES to prevent stale data in Excel
                 choiceFormatos.clearStore();
-                
+
                 // Clear Posição Vídeo (Choices.js single-select)
                 choicePosicaoVideo.clearStore();
                 choicePosicaoVideo.setChoices(
                     dropdownData.posicaoVideo.filter(p => p && p !== 'Selecione...').map(opt => ({ value: opt, label: opt })),
                     'value', 'label', true
                 );
-                
+
                 // Clear Skip (Choices.js single-select)
                 choiceSkip.clearStore();
                 choiceSkip.setChoices(
                     dropdownData.skip.map(opt => ({ value: opt, label: opt })),
                     'value', 'label', true
                 );
-                
+
                 // Clear Posição (multi-select)
                 const posicaoChoice = choicesInstances.find(c => c.id === `posicao-${itemId}`);
                 if (posicaoChoice) posicaoChoice.instance.removeActiveItems();
-                
+
                 // Clear Sites (multi-select) — will be re-populated by updateSitesForDAI
                 const sitesChoice = choicesInstances.find(c => c.id === `sites-${itemId}`);
                 if (sitesChoice) sitesChoice.instance.removeActiveItems();
@@ -1385,7 +1385,7 @@
                     if (selectedValues && selectedValues.length > 0) {
                         dstChoice.instance.setChoiceByValue(selectedValues);
                         const dstElem = document.getElementById(`${f}-${newId}`);
-                        if(dstElem) dstElem.dispatchEvent(new Event('change'));
+                        if (dstElem) dstElem.dispatchEvent(new Event('change'));
                     }
                 }
             });
