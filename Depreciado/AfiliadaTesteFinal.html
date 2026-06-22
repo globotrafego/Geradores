@@ -809,11 +809,11 @@
             let nameParts = [prop, tipoLinha, formato];
 
             if (tipoLinha === "VIDEO") {
-                const posVid = el('posicaoVideo').value;
-                if (posVid) nameParts.push(posVid);
-
                 const hasDAI = selectFormatos && Array.from(selectFormatos.selectedOptions).some(o => o.value.toUpperCase() === "DAI");
                 const hasVideo = selectFormatos && Array.from(selectFormatos.selectedOptions).some(o => o.value.toUpperCase() === "VIDEO");
+
+                const posVid = hasDAI ? "DAI" : el('posicaoVideo').value;
+                if (posVid) nameParts.push(posVid);
 
                 if (!(hasDAI && !hasVideo)) {
                     const skipVal = el('skip').value;
@@ -1130,16 +1130,18 @@
                     );
                     posVideoSelect.value = '';
                 } else if (hasDAI) {
-                    // Hide both Posição Vídeo and Skip for DAI
+                    // Hide both Posição Vídeo and Skip for DAI and clear stale values
                     fgPosVideo.classList.add('hidden');
                     fgSkip.classList.add('hidden');
                     setConditionalRequired(itemId, 'posicaoVideo', false);
                     setConditionalRequired(itemId, 'skip', false);
+                    posVideoSelect.value = '';
                 } else {
                     fgPosVideo.classList.add('hidden');
                     fgSkip.classList.add('hidden');
                     setConditionalRequired(itemId, 'posicaoVideo', false);
                     setConditionalRequired(itemId, 'skip', false);
+                    posVideoSelect.value = '';
                 }
                 formatLineName(itemId);
                 updateSitesForDAI(itemId);
