@@ -783,7 +783,12 @@
                 choiceSitesObj.instance.setChoices(formatChoices(daiSites), 'value', 'label', true);
             } else {
                 const allDaiSites = Object.values(daiSiteMappings).flat();
-                const nonDaiSites = dropdownData.sites.filter(site => !allDaiSites.includes(site));
+                let nonDaiSites = dropdownData.sites.filter(site => !allDaiSites.includes(site));
+                // Add Globoplay only for Video lines (non-DAI)
+                const tipoLinha = document.getElementById(`tipoLinha-${itemId}`);
+                if (tipoLinha && tipoLinha.value === 'VIDEO' && !nonDaiSites.includes('Globoplay')) {
+                    nonDaiSites = ['Globoplay', ...nonDaiSites];
+                }
                 choiceSitesObj.instance.clearStore();
                 choiceSitesObj.instance.setChoices(formatChoices(nonDaiSites), 'value', 'label', true);
             }
@@ -887,15 +892,7 @@
                 if (selected.length > 0) site = selected.join(",");
             }
 
-            let geo = "[Geolocalização]";
-            const selectGeo = el('geolocalizacao');
-            if (selectGeo && selectGeo.selectedOptions) {
-                const selected = Array.from(selectGeo.selectedOptions).map(o => {
-                    const match = o.value.match(/\((.*?)\)/);
-                    return match ? match[1] : o.value;
-                });
-                if (selected.length > 0) geo = selected.join(",");
-            }
+            let geo = "";
 
             const dInicioRaw = el('dataInicio').value;
             const dFimRaw = el('dataFim').value;
@@ -1015,7 +1012,7 @@
 
                 <div class="form-group">
                     <label>Entrega Determinada *</label>
-                    <input type="number" id="entregaDeterminada-${itemId}" min="0" step="1" onkeypress="return event.charCode >= 48 && event.charCode <= 57" required>
+                    <input type="text" inputmode="numeric" pattern="[0-9]*" id="entregaDeterminada-${itemId}" oninput="this.value=this.value.replace(/[^0-9]/g,'')" required>
                 </div>
 
                 <div class="form-group">
@@ -1030,7 +1027,7 @@
 
                 <div class="form-group">
                     <label>Desconto (%) *</label>
-                    <input type="number" step="1" id="desconto-${itemId}" value="0" min="0" max="100" required>
+                    <input type="text" inputmode="numeric" pattern="[0-9]*" id="desconto-${itemId}" value="0" oninput="this.value=this.value.replace(/[^0-9]/g,''); if(parseInt(this.value)>100) this.value='100';" required>
                 </div>
 
                 <div class="form-group">
