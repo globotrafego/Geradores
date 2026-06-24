@@ -386,13 +386,9 @@
             <div class="modal-body" id="changelog-text">
                 <p>O Gerador de Afiliadas foi atualizado com novas melhorias:</p>
                 <ul>
-                    <li><strong>Novo Botão Copiar Linha:</strong> Agora você pode duplicar qualquer linha existente!
-                        Basta clicar em "Copiar Linha" no cabeçalho da linha desejada e todas as informações serão
-                        replicadas para uma nova linha instantaneamente.</li>
-                    <li><strong>Melhorias de Sistema:</strong> Foram aplicados diversos ajustes no backend e na
-                        estrutura de código para garantir maior estabilidade.</li>
-                    <li><strong>Validação de Data:</strong> O calendário agora bloqueia automaticamente a seleção de
-                        datas passadas (anteriores ao dia de hoje) na Data de Início e Data Fim.</li>
+                    <li><strong>Nova opção de Ad Unit:</strong> Agora você pode selecionar Globoplay dentro de Site para Video.</li>
+                    <li><strong>Alteração em valores:</strong> Nos campos Entrega Determinada e Desconto agora é aceito apenas números sem separadores ou decimais</li>
+                    <li><strong>Melhorias de Sistema:</strong> Foram aplicados diversos ajustes no backend e na estrutura de código para garantir maior estabilidade.</li>
                 </ul>
             </div>
             <div class="modal-footer">
@@ -783,7 +779,12 @@
                 choiceSitesObj.instance.setChoices(formatChoices(daiSites), 'value', 'label', true);
             } else {
                 const allDaiSites = Object.values(daiSiteMappings).flat();
-                const nonDaiSites = dropdownData.sites.filter(site => !allDaiSites.includes(site));
+                let nonDaiSites = dropdownData.sites.filter(site => !allDaiSites.includes(site));
+                // Add Globoplay only for Video lines (non-DAI)
+                const tipoLinha = document.getElementById(`tipoLinha-${itemId}`);
+                if (tipoLinha && tipoLinha.value === 'VIDEO' && !nonDaiSites.includes('Globoplay')) {
+                    nonDaiSites = ['Globoplay', ...nonDaiSites];
+                }
                 choiceSitesObj.instance.clearStore();
                 choiceSitesObj.instance.setChoices(formatChoices(nonDaiSites), 'value', 'label', true);
             }
@@ -887,15 +888,7 @@
                 if (selected.length > 0) site = selected.join(",");
             }
 
-            let geo = "[Geolocalização]";
-            const selectGeo = el('geolocalizacao');
-            if (selectGeo && selectGeo.selectedOptions) {
-                const selected = Array.from(selectGeo.selectedOptions).map(o => {
-                    const match = o.value.match(/\((.*?)\)/);
-                    return match ? match[1] : o.value;
-                });
-                if (selected.length > 0) geo = selected.join(",");
-            }
+            let geo = "";
 
             const dInicioRaw = el('dataInicio').value;
             const dFimRaw = el('dataFim').value;
@@ -918,7 +911,7 @@
                 }
             }
 
-            nameParts.push(site, geo, dInicio, dFim, itemId);
+            nameParts.push(site, dInicio, dFim, itemId);
 
             const name = nameParts.filter(Boolean).join('_');
             el('lineItemName').value = name;
@@ -1015,7 +1008,7 @@
 
                 <div class="form-group">
                     <label>Entrega Determinada *</label>
-                    <input type="number" id="entregaDeterminada-${itemId}" min="0" step="1" onkeypress="return event.charCode >= 48 && event.charCode <= 57" required>
+                    <input type="text" inputmode="numeric" pattern="[0-9]*" id="entregaDeterminada-${itemId}" oninput="this.value=this.value.replace(/[^0-9]/g,'')" required>
                 </div>
 
                 <div class="form-group">
@@ -1030,7 +1023,7 @@
 
                 <div class="form-group">
                     <label>Desconto (%) *</label>
-                    <input type="number" step="0.01" id="desconto-${itemId}" value="0" min="0" max="100" required>
+                    <input type="text" inputmode="numeric" pattern="[0-9]*" id="desconto-${itemId}" value="0" oninput="this.value=this.value.replace(/[^0-9]/g,''); if(parseInt(this.value)>100) this.value='100';" required>
                 </div>
 
                 <div class="form-group">
@@ -1337,7 +1330,7 @@
 
         // --- CHANGELOG MODAL LOGIC ---
         // Altere o texto no HTML acima (id="changelog-text") e MUDE esta versão para mostrar novamente o modal.
-        const CHANGELOG_VERSION = "v1.1.0";
+        const CHANGELOG_VERSION = "v1.1.1";
 
         function checkChangelog() {
             const lastSeen = localStorage.getItem('changelogVersion');
