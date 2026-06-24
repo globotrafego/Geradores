@@ -918,7 +918,7 @@
                 }
             }
 
-            nameParts.push(site, geo, dInicio, dFim, itemId);
+            nameParts.push(site, dInicio, dFim, itemId);
 
             const name = nameParts.filter(Boolean).join('_');
             el('lineItemName').value = name;
@@ -1015,7 +1015,7 @@
 
                 <div class="form-group">
                     <label>Entrega Determinada *</label>
-                    <input type="number" id="entregaDeterminada-${itemId}" min="0" required>
+                    <input type="number" id="entregaDeterminada-${itemId}" min="0" step="1" onkeypress="return event.charCode >= 48 && event.charCode <= 57" required>
                 </div>
 
                 <div class="form-group">
@@ -1030,7 +1030,7 @@
 
                 <div class="form-group">
                     <label>Desconto (%) *</label>
-                    <input type="number" step="0.01" id="desconto-${itemId}" value="0" min="0" max="100" required>
+                    <input type="number" step="1" id="desconto-${itemId}" value="0" min="0" max="100" required>
                 </div>
 
                 <div class="form-group">
