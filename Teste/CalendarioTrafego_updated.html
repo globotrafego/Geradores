@@ -104,8 +104,8 @@
     .day-events{display:grid;gap:5px;align-content:start}
     .chip{width:100%;text-align:left;padding:.38rem .55rem;border-radius:var(--rad-md);font-size:.78rem;line-height:1.2;font-weight:500;cursor:pointer;border:1px solid transparent;transition:filter var(--trans),box-shadow var(--trans),transform var(--trans)}
     .chip:hover{filter:brightness(.93);transform:translateY(-1px);box-shadow:var(--sh-sm)}
-    .chip-plantan{background:color-mix(in srgb,var(--primary) 10%,var(--surf));border-color:color-mix(in srgb,var(--primary) 25%,var(--border))}
-    .chip-ferias{background:color-mix(in srgb,var(--blue) 10%,var(--surf));border-color:color-mix(in srgb,var(--blue) 25%,var(--border))}
+    .chip-plantan{background:var(--c-plantao-bg);border-color:var(--c-plantao-border);color:var(--c-plantao-text);font-weight:600}
+    .chip-ferias{background:var(--c-ferias-bg);border-color:var(--c-ferias-border);color:var(--c-ferias-text);font-weight:600}
     .chip-selected{outline:2px solid var(--success);outline-offset:1px}
     .chip-type{display:block;color:var(--muted);font-size:.7rem;margin-bottom:2px}
     .chip-more{font-size:.72rem;color:var(--muted);padding-left:.55rem}
@@ -491,7 +491,9 @@ function renderCalendar() {
     const MAX = 3;
     events.slice(0, MAX).forEach(ev => {
       const btn = document.createElement('button');
-      const cls = ev.tipo==='Férias' ? 'chip-ferias' : 'chip-plantan';
+      const norm = v => String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+      const eNorm = norm(ev.tipo);
+      const cls = eNorm==='cobertura' ? 'chip-cobertura' : eNorm==='ferias' ? 'chip-ferias' : eNorm==='rodizio' ? 'chip-rodizio' : 'chip-plantan';
       const sel = state.selected&&state.selected.id===ev.id ? ' chip-selected' : '';
       btn.className = `chip ${cls}${sel}`;
       btn.innerHTML = `<span class="chip-type">${escHtml(ev.tipo)}</span>${escHtml(ev.pessoa)}`;
@@ -525,7 +527,9 @@ function selectEvent(ev) {
   els.outlookEmailBtn.disabled = false;
   // Notify button only enabled for Plantão
   els.notifyTeamBtn.disabled = ev.tipo !== 'Plantão';
-  const badgeCls = ev.tipo==='Férias' ? 'badge-blue' : 'badge-primary';
+  const norm = v => String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+  const eNorm = norm(ev.tipo);
+  const badgeCls = eNorm==='cobertura' ? 'badge-cobertura' : eNorm==='ferias' ? 'badge-blue' : eNorm==='rodizio' ? 'badge-purple' : 'badge-primary';
   els.detailContent.innerHTML = `
     <div class="dl-row"><span class="dl-label">Pessoa</span><span>${escHtml(ev.pessoa)}</span></div>
     <div class="dl-row"><span class="dl-label">Tipo</span><span><span class="badge ${badgeCls}">${escHtml(ev.tipo)}</span></span></div>
