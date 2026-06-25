@@ -624,21 +624,4 @@ els.notifyTeamBtn.addEventListener('click', notifyTeam);
 loadData();
 </script>
 </body>
-</html>// ── COLOR CUSTOMIZATION ──────────────────────────────────────────────────
-const COLOR_DEFAULTS = { plantao:{light:'#52b96a',dark:'#6dd68a'}, ferias:{light:'#e07030',dark:'#f08040'}, rodizio:{light:'#a050e0',dark:'#c070f0'}, cobertura:{light:'#b35a1f',dark:'#d08a55'} };
-const LS_KEY='escala-colors';
-const hexToRgb=h=>({r:parseInt(h.slice(1,3),16),g:parseInt(h.slice(3,5),16),b:parseInt(h.slice(5,7),16)});
-const lighten=(h,a=.85)=>{const c=hexToRgb(h);return `rgb(${Math.round(c.r+(255-c.r)*a)},${Math.round(c.g+(255-c.g)*a)},${Math.round(c.b+(255-c.b)*a)})`;};
-const darken=(h,a=.7)=>{const c=hexToRgb(h);return `rgb(${Math.round(c.r*(1-a))},${Math.round(c.g*(1-a))},${Math.round(c.b*(1-a))})`;};
-const textOnLight=h=>{const c=hexToRgb(h);return `rgb(${Math.round(c.r*.3)},${Math.round(c.g*.3)},${Math.round(c.b*.3)})`;};
-const textOnDark=h=>{const c=hexToRgb(h);return `rgb(${Math.round(c.r+(255-c.r)*.5)},${Math.round(c.g+(255-c.g)*.5)},${Math.round(c.b+(255-c.b)*.5)})`;};
-const loadSavedColors=()=>{try{return JSON.parse(localStorage.getItem(LS_KEY))||{}}catch(e){return {}}};
-function applyColors(saved){const isDark=document.documentElement.getAttribute('data-theme')==='dark';const root=document.documentElement;['plantao','ferias','rodizio','cobertura'].forEach(key=>{const hex=(saved&&saved[key])?saved[key]:COLOR_DEFAULTS[key][isDark?'dark':'light'];const bg=isDark?darken(hex,.75):lighten(hex,.85);const brd=isDark?darken(hex,.3):hex;const txt=isDark?textOnDark(hex):textOnLight(hex);root.style.setProperty('--c-'+key,hex);root.style.setProperty('--c-'+key+'-bg',bg);root.style.setProperty('--c-'+key+'-border',brd);root.style.setProperty('--c-'+key+'-text',txt);});updateLegendDots();}
-function updateLegendDots(){const s=getComputedStyle(document.documentElement);document.querySelectorAll('.legend-item').forEach(item=>{const dot=item.querySelector('.legend-dot');const txt=item.textContent.trim();if(!dot)return;if(txt.includes('Cobertura Férias'))dot.style.background=s.getPropertyValue('--c-cobertura').trim();else if(txt.includes('Plantão'))dot.style.background=s.getPropertyValue('--c-plantao').trim();else if(txt.includes('Férias'))dot.style.background=s.getPropertyValue('--c-ferias').trim();else if(txt.includes('Rodízio'))dot.style.background=s.getPropertyValue('--c-rodizio').trim();});}
-function syncPickerInputs(saved){const isDark=document.documentElement.getAttribute('data-theme')==='dark';['plantao','ferias','rodizio','cobertura'].forEach(key=>{const hex=(saved&&saved[key])?saved[key]:COLOR_DEFAULTS[key][isDark?'dark':'light'];const id=key==='plantao'?'cpPlantao':key==='ferias'?'cpFerias':key==='rodizio'?'cpRodizio':'cpCobertura';const inp=document.getElementById(id);if(inp)inp.value=hex;});}
-function openColorModal(){syncPickerInputs(loadSavedColors());document.getElementById('colorModal').classList.remove('hidden');}
-function closeColorModal(){document.getElementById('colorModal').classList.add('hidden');}
-function saveColors(){const saved={plantao:document.getElementById('cpPlantao').value,ferias:document.getElementById('cpFerias').value,rodizio:document.getElementById('cpRodizio').value,cobertura:document.getElementById('cpCobertura').value};localStorage.setItem(LS_KEY,JSON.stringify(saved));applyColors(saved);renderCalendar();closeColorModal();}
-function resetColors(){localStorage.removeItem(LS_KEY);applyColors({});renderCalendar();closeColorModal();}
-document.getElementById('colorSettingsBtn').addEventListener('click',openColorModal);document.getElementById('colorCancelBtn').addEventListener('click',closeColorModal);document.getElementById('colorSaveBtn').addEventListener('click',saveColors);document.getElementById('colorResetBtn').addEventListener('click',resetColors);document.getElementById('colorModal').addEventListener('click',e=>{if(e.target.id==='colorModal')closeColorModal();});document.querySelector('[data-theme-toggle]').addEventListener('click',()=>{setTimeout(()=>{applyColors(loadSavedColors());renderCalendar();},30);});applyColors(loadSavedColors());
-
+</html>
