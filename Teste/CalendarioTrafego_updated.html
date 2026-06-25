@@ -153,9 +153,9 @@
     .color-row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:var(--sp3);padding:var(--sp3);background:var(--surf2);border-radius:var(--rad-md);border:1px solid var(--border)}
     .color-row-label{font-size:var(--text-sm);font-weight:600}
     .color-row-preview{display:flex;gap:var(--sp2);align-items:center}
-    .color-swatch{width:28px;height:28px;border-radius:var(--rad-md);border:2px solid var(--border);cursor:pointer;padding:0;background:none;overflow:hidden;position:relative}
-    .color-swatch input[type=color]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-    .color-swatch-dot{width:100%;height:100%;display:block;border-radius:calc(var(--rad-md) - 2px)}
+    .color-swatch{width:36px;height:36px;border-radius:var(--rad-md);border:2px solid var(--border);cursor:pointer;padding:2px;background:var(--surf2)}
+    .color-swatch input[type=color]{width:100%;height:100%;border:none;padding:0;background:none;cursor:pointer;border-radius:calc(var(--rad-md) - 2px)}
+    .color-swatch-dot{display:none}
     .modal-actions{display:flex;gap:var(--sp2);justify-content:flex-end;flex-wrap:wrap}
 
     </style>
@@ -181,7 +181,7 @@
     </div>
     <div class="topbar-right">
       <button id="reloadBtn" class="btn btn-secondary btn-sm">↻ Atualizar</button>
-      <button id="colorSettingsBtn" class="btn btn-ghost btn-sm" aria-label="Personalizar cores">🎨</button>
+      <button type="button" id="colorSettingsBtn" class="btn btn-ghost btn-sm" aria-label="Personalizar cores">🎨</button>
       <button data-theme-toggle class="btn btn-ghost btn-sm" aria-label="Alternar tema">🌙</button>
     </div>
   </header>
@@ -683,6 +683,9 @@ document.getElementById('colorCancelBtn').addEventListener('click', () => {
 document.getElementById('colorModal').addEventListener('click', (e) => {
   if (e.target === e.currentTarget) e.currentTarget.classList.add('hidden');
 });
+document.querySelector('#colorModal .modal').addEventListener('click', (e) => {
+  e.stopPropagation();
+});
 document.getElementById('colorSaveBtn').addEventListener('click', () => {
   const saved = {
     plantao: document.getElementById('cpPlantao').value,
@@ -740,10 +743,10 @@ document.addEventListener('DOMContentLoaded', () => { updateLegendDots(); });
         <div style="font-size:var(--text-xs);color:var(--muted)">Chip, badge e legenda</div>
       </div>
       <div class="color-row-preview">
-        <label class="color-swatch" title="Cor principal">
+        <div class="color-swatch">
           <input type="color" id="cpPlantao" />
           <span class="color-swatch-dot" id="cpPlantaoDot"></span>
-        </label>
+        </div>
       </div>
     </div>
     <div class="color-row">
@@ -752,10 +755,10 @@ document.addEventListener('DOMContentLoaded', () => { updateLegendDots(); });
         <div style="font-size:var(--text-xs);color:var(--muted)">Chip, badge e legenda</div>
       </div>
       <div class="color-row-preview">
-        <label class="color-swatch" title="Cor principal">
+        <div class="color-swatch">
           <input type="color" id="cpFerias" />
           <span class="color-swatch-dot" id="cpFeriasDot"></span>
-        </label>
+        </div>
       </div>
     </div>
     <div class="color-row">
@@ -764,16 +767,16 @@ document.addEventListener('DOMContentLoaded', () => { updateLegendDots(); });
         <div style="font-size:var(--text-xs);color:var(--muted)">Chip, badge e legenda</div>
       </div>
       <div class="color-row-preview">
-        <label class="color-swatch" title="Cor principal">
+        <div class="color-swatch">
           <input type="color" id="cpRodizio" />
           <span class="color-swatch-dot" id="cpRodizioDot"></span>
-        </label>
+        </div>
       </div>
     </div>
     <div class="modal-actions">
-      <button id="colorResetBtn" class="btn btn-ghost btn-sm">Restaurar padrão</button>
-      <button id="colorCancelBtn" class="btn btn-secondary btn-sm">Cancelar</button>
-      <button id="colorSaveBtn" class="btn btn-primary btn-sm">Salvar</button>
+      <button type="button" id="colorResetBtn" class="btn btn-ghost btn-sm">Restaurar padrão</button>
+      <button type="button" id="colorCancelBtn" class="btn btn-secondary btn-sm">Cancelar</button>
+      <button type="button" id="colorSaveBtn" class="btn btn-primary btn-sm">Salvar</button>
     </div>
   </div>
 </div>
