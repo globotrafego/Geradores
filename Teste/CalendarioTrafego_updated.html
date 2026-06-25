@@ -612,82 +612,78 @@ function hexToRgb(hex) {
   const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
   return {r,g,b};
 }
-function lighten(hex, amt=0.85) {
-  const {r,g,b} = hexToRgb(hex);
-  const mix = (c) => Math.round(c + (255 - c) * amt);
-  return `rgb(${mix(r)},${mix(g)},${mix(b)})`;
+function lighten(hex, amt) {
+  amt = amt === undefined ? 0.85 : amt;
+  const c = hexToRgb(hex);
+  return 'rgb('+Math.round(c.r+(255-c.r)*amt)+','+Math.round(c.g+(255-c.g)*amt)+','+Math.round(c.b+(255-c.b)*amt)+')';
 }
-function darken(hex, amt=0.7) {
-  const {r,g,b} = hexToRgb(hex);
-  const mix = (c) => Math.round(c * (1 - amt));
-  return `rgb(${mix(r)},${mix(g)},${mix(b)})`;
+function darken(hex, amt) {
+  amt = amt === undefined ? 0.7 : amt;
+  const c = hexToRgb(hex);
+  return 'rgb('+Math.round(c.r*(1-amt))+','+Math.round(c.g*(1-amt))+','+Math.round(c.b*(1-amt))+')';
 }
 function textOnLight(hex) {
-  const {r,g,b} = hexToRgb(hex);
-  return `rgb(${Math.round(r*0.3)},${Math.round(g*0.3)},${Math.round(b*0.3)})`;
+  const c = hexToRgb(hex);
+  return 'rgb('+Math.round(c.r*0.3)+','+Math.round(c.g*0.3)+','+Math.round(c.b*0.3)+')';
 }
 function textOnDark(hex) {
-  const {r,g,b} = hexToRgb(hex);
-  const mix = (c) => Math.round(c + (255-c)*0.5);
-  return `rgb(${mix(r)},${mix(g)},${mix(b)})`;
-}
-
-function applyColors(saved) {
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  const root = document.documentElement;
-  ['plantao','ferias','rodizio'].forEach(key => {
-    const hex = saved?.[key] || COLOR_DEFAULTS[key][isDark ? 'dark' : 'light'];
-    const bg  = isDark ? darken(hex, 0.75) : lighten(hex, 0.85);
-    const brd = isDark ? darken(hex, 0.3)  : hex;
-    const txt = isDark ? textOnDark(hex)   : textOnLight(hex);
-    root.style.setProperty(`--c-${key}`, hex);
-    root.style.setProperty(`--c-${key}-bg`, bg);
-    root.style.setProperty(`--c-${key}-border`, brd);
-    root.style.setProperty(`--c-${key}-text`, txt);
-  });
+  const c = hexToRgb(hex);
+  return 'rgb('+Math.round(c.r+(255-c.r)*0.5)+','+Math.round(c.g+(255-c.g)*0.5)+','+Math.round(c.b+(255-c.b)*0.5)+')';
 }
 
 function loadSavedColors() {
-  try { return JSON.parse(localStorage.getItem(LS_KEY)) || {}; } catch { return {}; }
+  try { return JSON.parse(localStorage.getItem(LS_KEY)) || {}; } catch(e) { return {}; }
 }
 
-function syncPickerDots(saved) {
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  ['plantao','ferias','rodizio'].forEach(key => {
-    const hex = saved?.[key] || COLOR_DEFAULTS[key][isDark ? 'dark' : 'light'];
-    const inputId = key === 'plantao' ? 'cpPlantao' : key === 'ferias' ? 'cpFerias' : 'cpRodizio';
-    const dotId   = inputId + 'Dot';
-    const inp = document.getElementById(inputId);
-    const dot = document.getElementById(dotId);
+function applyColors(saved) {
+  var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  var root = document.documentElement;
+  ['plantao','ferias','rodizio'].forEach(function(key) {
+    var hex = (saved && saved[key]) ? saved[key] : COLOR_DEFAULTS[key][isDark ? 'dark' : 'light'];
+    var bg  = isDark ? darken(hex, 0.75) : lighten(hex, 0.85);
+    var brd = isDark ? darken(hex, 0.3)  : hex;
+    var txt = isDark ? textOnDark(hex)   : textOnLight(hex);
+    root.style.setProperty('--c-'+key, hex);
+    root.style.setProperty('--c-'+key+'-bg', bg);
+    root.style.setProperty('--c-'+key+'-border', brd);
+    root.style.setProperty('--c-'+key+'-text', txt);
+  });
+  updateLegendDots();
+}
+
+function updateLegendDots() {
+  var s = getComputedStyle(document.documentElement);
+  document.querySelectorAll('.legend-item').forEach(function(item) {
+    var dot = item.querySelector('.legend-dot');
+    var txt = item.textContent.trim();
+    if (!dot) return;
+    if (txt.indexOf('Plantão') !== -1) dot.style.background = s.getPropertyValue('--c-plantao').trim();
+    else if (txt.indexOf('Férias') !== -1) dot.style.background = s.getPropertyValue('--c-ferias').trim();
+    else if (txt.indexOf('Rodízio') !== -1) dot.style.background = s.getPropertyValue('--c-rodizio').trim();
+  });
+}
+
+function syncPickerInputs(saved) {
+  var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  ['plantao','ferias','rodizio'].forEach(function(key) {
+    var hex = (saved && saved[key]) ? saved[key] : COLOR_DEFAULTS[key][isDark ? 'dark' : 'light'];
+    var inputId = key === 'plantao' ? 'cpPlantao' : key === 'ferias' ? 'cpFerias' : 'cpRodizio';
+    var inp = document.getElementById(inputId);
     if (inp) inp.value = hex;
-    if (dot) dot.style.background = hex;
   });
 }
 
-// Wire up pickers so dot updates live
-['cpPlantao','cpFerias','cpRodizio'].forEach(id => {
-  const inp = document.getElementById(id);
-  if (inp) inp.addEventListener('input', () => {
-    const dot = document.getElementById(id + 'Dot');
-    if (dot) dot.style.background = inp.value;
-  });
-});
-
-document.getElementById('colorSettingsBtn').addEventListener('click', () => {
-  syncPickerDots(loadSavedColors());
+function openColorModal() {
+  syncPickerInputs(loadSavedColors());
   document.getElementById('colorModal').classList.remove('hidden');
-});
-document.getElementById('colorCancelBtn').addEventListener('click', () => {
+}
+
+function closeColorModal() {
   document.getElementById('colorModal').classList.add('hidden');
-});
-document.getElementById('colorModal').addEventListener('click', (e) => {
-  if (e.target === e.currentTarget) e.currentTarget.classList.add('hidden');
-});
-document.querySelector('#colorModal .modal').addEventListener('click', (e) => {
-  e.stopPropagation();
-});
-document.getElementById('colorSaveBtn').addEventListener('click', () => {
-  const saved = {
+}
+
+function saveColors() {
+  var saved = {
     plantao: document.getElementById('cpPlantao').value,
     ferias:  document.getElementById('cpFerias').value,
     rodizio: document.getElementById('cpRodizio').value,
@@ -695,41 +691,30 @@ document.getElementById('colorSaveBtn').addEventListener('click', () => {
   localStorage.setItem(LS_KEY, JSON.stringify(saved));
   applyColors(saved);
   renderCalendar();
-  document.getElementById('colorModal').classList.add('hidden');
-});
-document.getElementById('colorResetBtn').addEventListener('click', () => {
+  closeColorModal();
+}
+
+function resetColors() {
   localStorage.removeItem(LS_KEY);
-  syncPickerDots({});
   applyColors({});
   renderCalendar();
-  document.getElementById('colorModal').classList.add('hidden');
-});
-
-// Re-apply on theme toggle
-document.querySelector('[data-theme-toggle]').addEventListener('click', () => {
-  setTimeout(() => { applyColors(loadSavedColors()); renderCalendar(); }, 20);
-});
-
-// Init on load
-applyColors(loadSavedColors());
-
-// Also update legend dots dynamically
-function updateLegendDots() {
-  const s = getComputedStyle(document.documentElement);
-  document.querySelectorAll('.legend-item').forEach(item => {
-    const dot = item.querySelector('.legend-dot');
-    const txt = item.textContent.trim();
-    if (!dot) return;
-    if (txt.includes('Plantão')) dot.style.background = s.getPropertyValue('--c-plantao').trim();
-    else if (txt.includes('Férias')) dot.style.background = s.getPropertyValue('--c-ferias').trim();
-    else if (txt.includes('Rodízio')) dot.style.background = s.getPropertyValue('--c-rodizio').trim();
-  });
+  closeColorModal();
 }
-const _origRender = renderCalendar;
-// Patch renderCalendar to also update legend dots
-const _patchedRender = function() { _origRender(); updateLegendDots(); };
-// Override via event after first call
-document.addEventListener('DOMContentLoaded', () => { updateLegendDots(); });
+
+document.getElementById('colorSettingsBtn').addEventListener('click', openColorModal);
+document.getElementById('colorCancelBtn').addEventListener('click', closeColorModal);
+document.getElementById('colorSaveBtn').addEventListener('click', saveColors);
+document.getElementById('colorResetBtn').addEventListener('click', resetColors);
+
+document.getElementById('colorModal').addEventListener('click', function(e) {
+  if (e.target.id === 'colorModal') closeColorModal();
+});
+
+document.querySelector('[data-theme-toggle]').addEventListener('click', function() {
+  setTimeout(function() { applyColors(loadSavedColors()); renderCalendar(); }, 30);
+});
+
+applyColors(loadSavedColors());
 
 </script>
 
