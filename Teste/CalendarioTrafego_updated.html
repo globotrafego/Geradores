@@ -301,6 +301,54 @@ Atenciosamente,</textarea>
   </div>
 </div>
 
+<!-- Color settings modal -->
+<div id="colorModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-label="Personalizar cores">
+  <div class="modal">
+    <h2>🎨 Personalizar cores</h2>
+    <div class="color-row">
+      <div>
+        <div class="color-row-label">Plantão</div>
+        <div style="font-size:var(--text-xs);color:var(--muted)">Chip, badge e legenda</div>
+      </div>
+      <div class="color-row-preview">
+        <div class="color-swatch">
+          <input type="color" id="cpPlantao" />
+          <span class="color-swatch-dot" id="cpPlantaoDot"></span>
+        </div>
+      </div>
+    </div>
+    <div class="color-row">
+      <div>
+        <div class="color-row-label">Férias</div>
+        <div style="font-size:var(--text-xs);color:var(--muted)">Chip, badge e legenda</div>
+      </div>
+      <div class="color-row-preview">
+        <div class="color-swatch">
+          <input type="color" id="cpFerias" />
+          <span class="color-swatch-dot" id="cpFeriasDot"></span>
+        </div>
+      </div>
+    </div>
+    <div class="color-row">
+      <div>
+        <div class="color-row-label">Rodízio 9h</div>
+        <div style="font-size:var(--text-xs);color:var(--muted)">Chip, badge e legenda</div>
+      </div>
+      <div class="color-row-preview">
+        <div class="color-swatch">
+          <input type="color" id="cpRodizio" />
+          <span class="color-swatch-dot" id="cpRodizioDot"></span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" id="colorResetBtn" class="btn btn-ghost btn-sm">Restaurar padrão</button>
+      <button type="button" id="colorCancelBtn" class="btn btn-secondary btn-sm">Cancelar</button>
+      <button type="button" id="colorSaveBtn" class="btn btn-primary btn-sm">Salvar</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTHAoiJoriJvtqMB5LTRolHYBi9hGmz_tZE5UrdsE_WT1HTqQlOOdoCYm_ATKPEZsTTD6629LmiuNRz/pub?output=csv';
 
@@ -717,54 +765,6 @@ document.querySelector('[data-theme-toggle]').addEventListener('click', function
 applyColors(loadSavedColors());
 
 </script>
-
-<!-- Color settings modal -->
-<div id="colorModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-label="Personalizar cores">
-  <div class="modal">
-    <h2>🎨 Personalizar cores</h2>
-    <div class="color-row">
-      <div>
-        <div class="color-row-label">Plantão</div>
-        <div style="font-size:var(--text-xs);color:var(--muted)">Chip, badge e legenda</div>
-      </div>
-      <div class="color-row-preview">
-        <div class="color-swatch">
-          <input type="color" id="cpPlantao" />
-          <span class="color-swatch-dot" id="cpPlantaoDot"></span>
-        </div>
-      </div>
-    </div>
-    <div class="color-row">
-      <div>
-        <div class="color-row-label">Férias</div>
-        <div style="font-size:var(--text-xs);color:var(--muted)">Chip, badge e legenda</div>
-      </div>
-      <div class="color-row-preview">
-        <div class="color-swatch">
-          <input type="color" id="cpFerias" />
-          <span class="color-swatch-dot" id="cpFeriasDot"></span>
-        </div>
-      </div>
-    </div>
-    <div class="color-row">
-      <div>
-        <div class="color-row-label">Rodízio 9h</div>
-        <div style="font-size:var(--text-xs);color:var(--muted)">Chip, badge e legenda</div>
-      </div>
-      <div class="color-row-preview">
-        <div class="color-swatch">
-          <input type="color" id="cpRodizio" />
-          <span class="color-swatch-dot" id="cpRodizioDot"></span>
-        </div>
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button type="button" id="colorResetBtn" class="btn btn-ghost btn-sm">Restaurar padrão</button>
-      <button type="button" id="colorCancelBtn" class="btn btn-secondary btn-sm">Cancelar</button>
-      <button type="button" id="colorSaveBtn" class="btn btn-primary btn-sm">Salvar</button>
-    </div>
-  </div>
-</div>
 
 </body>
 </html>
