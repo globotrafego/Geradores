@@ -82,11 +82,10 @@
     .helper{font-size:var(--text-xs);color:var(--muted)}
     code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.82em;background:var(--soff);padding:.15rem .35rem;border-radius:.35rem}
     .badge{display:inline-flex;align-items:center;gap:var(--sp1);padding:.3rem .65rem;border-radius:var(--rad-full);font-size:var(--text-xs);font-weight:700}
-    .badge-primary{background:var(--c-plantao-bg);color:var(--c-plantao-text)}
+    .badge-primary{background:color-mix(in srgb,var(--primary) 12%,transparent);color:var(--primary)}
     .badge-success{background:var(--success-hl);color:var(--success)}
-    .badge-blue{background:var(--c-ferias-bg);color:var(--c-ferias-text)}
+    .badge-blue{background:var(--blue-hl);color:var(--blue)}
     .badge-warn{background:var(--warn-hl);color:var(--warn)}
-    .badge-purple{background:var(--c-rodizio-bg);color:var(--c-rodizio-text)}
 
     .cal-shell{padding:var(--sp5)}
     .cal-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--sp3);margin-bottom:var(--sp5)}
@@ -107,7 +106,6 @@
     .chip:hover{filter:brightness(.93);transform:translateY(-1px);box-shadow:var(--sh-sm)}
     .chip-plantan{background:var(--c-plantao-bg);border-color:var(--c-plantao-border);color:var(--c-plantao-text);font-weight:600}
     .chip-ferias{background:var(--c-ferias-bg);border-color:var(--c-ferias-border);color:var(--c-ferias-text);font-weight:600}
-    .chip-rodizio{background:var(--c-rodizio-bg);border-color:var(--c-rodizio-border);color:var(--c-rodizio-text);font-weight:600}
     .chip-selected{outline:2px solid var(--success);outline-offset:1px}
     .chip-type{display:block;color:var(--muted);font-size:.7rem;margin-bottom:2px}
     .chip-more{font-size:.72rem;color:var(--muted);padding-left:.55rem}
@@ -133,32 +131,41 @@
     /* Notify button separator */
     .btn-notify{background:color-mix(in srgb,var(--warn) 10%,var(--surf));border-color:color-mix(in srgb,var(--warn) 30%,var(--border));color:var(--warn);font-weight:700}
     .btn-notify:hover{background:color-mix(in srgb,var(--warn) 18%,var(--surf))}
-  
-    /* ── Type color tokens (light defaults) ── */
-    :root, [data-theme="light"] {
+
+    :root,[data-theme="light"]{
       --c-plantao:#52b96a; --c-plantao-bg:#d4f0da; --c-plantao-border:#52b96a; --c-plantao-text:#0f5c1f;
-      --c-ferias:#e07030;  --c-ferias-bg:#fde8d4;  --c-ferias-border:#e07030;  --c-ferias-text:#7a2c00;
-      --c-rodizio:#a050e0; --c-rodizio-bg:#ecdcf8;  --c-rodizio-border:#a050e0; --c-rodizio-text:#521a8a;
+      --c-ferias:#e07030; --c-ferias-bg:#fde8d4; --c-ferias-border:#e07030; --c-ferias-text:#7a2c00;
+      --c-rodizio:#a050e0; --c-rodizio-bg:#ecdcf8; --c-rodizio-border:#a050e0; --c-rodizio-text:#521a8a;
+      --c-cobertura:#b35a1f; --c-cobertura-bg:#f7e2d1; --c-cobertura-border:#b35a1f; --c-cobertura-text:#6a2d00;
+      --c-selected:#ffcc00;
     }
-    [data-theme="dark"] {
+    [data-theme="dark"]{
       --c-plantao:#6dd68a; --c-plantao-bg:#1a3a22; --c-plantao-border:#3d8c52; --c-plantao-text:#9eedb2;
-      --c-ferias:#f08040;  --c-ferias-bg:#3a1e0a;  --c-ferias-border:#c05c18;  --c-ferias-text:#fdb080;
+      --c-ferias:#f08040; --c-ferias-bg:#3a1e0a; --c-ferias-border:#c05c18; --c-ferias-text:#fdb080;
       --c-rodizio:#c070f0; --c-rodizio-bg:#2a1040; --c-rodizio-border:#8030c0; --c-rodizio-text:#e0a8ff;
+      --c-cobertura:#d08a55; --c-cobertura-bg:#3a2214; --c-cobertura-border:#9a4f1d; --c-cobertura-text:#ffd2b0;
+      --c-selected:#ffd84d;
     }
-    /* ── Color settings modal ── */
+    .chip-plantan{background:var(--c-plantao-bg);border-color:var(--c-plantao-border);color:var(--c-plantao-text);font-weight:600}
+    .chip-ferias{background:var(--c-ferias-bg);border-color:var(--c-ferias-border);color:var(--c-ferias-text);font-weight:600}
+    .chip-rodizio{background:var(--c-rodizio-bg);border-color:var(--c-rodizio-border);color:var(--c-rodizio-text);font-weight:600}
+    .chip-cobertura{background:var(--c-cobertura-bg);border-color:var(--c-cobertura-border);color:var(--c-cobertura-text);font-weight:600}
+    .chip-selected{outline:3px solid var(--success);outline-offset:2px;box-shadow:0 0 0 3px color-mix(in srgb,var(--success) 25%,transparent)}
+    .badge-primary{background:var(--c-plantao-bg);color:var(--c-plantao-text)}
+    .badge-blue{background:var(--c-ferias-bg);color:var(--c-ferias-text)}
+    .badge-purple{background:var(--c-rodizio-bg);color:var(--c-rodizio-text)}
+    .badge-cobertura{background:var(--c-cobertura-bg);color:var(--c-cobertura-text)}
     .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;display:flex;align-items:center;justify-content:center;padding:var(--sp4)}
     .modal-backdrop.hidden{display:none}
-    .modal{background:var(--surf);border:1px solid var(--border);border-radius:var(--rad-xl);padding:var(--sp6);width:100%;max-width:480px;box-shadow:var(--sh-lg);display:grid;gap:var(--sp4)}
+    .modal{background:var(--surf);border:1px solid var(--border);border-radius:var(--rad-xl);padding:var(--sp6);width:100%;max-width:520px;box-shadow:var(--sh-lg);display:grid;gap:var(--sp4)}
     .modal h2{font-size:var(--text-base);font-weight:700;margin:0}
     .color-row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:var(--sp3);padding:var(--sp3);background:var(--surf2);border-radius:var(--rad-md);border:1px solid var(--border)}
     .color-row-label{font-size:var(--text-sm);font-weight:600}
-    .color-row-preview{display:flex;gap:var(--sp2);align-items:center}
-    .color-swatch{width:36px;height:36px;border-radius:var(--rad-md);border:2px solid var(--border);cursor:pointer;padding:2px;background:var(--surf2)}
+    .color-row-preview{display:flex;align-items:center;gap:var(--sp2)}
+    .color-swatch{width:40px;height:40px;border-radius:var(--rad-md);border:2px solid var(--border);padding:2px;background:var(--surf2)}
     .color-swatch input[type=color]{width:100%;height:100%;border:none;padding:0;background:none;cursor:pointer;border-radius:calc(var(--rad-md) - 2px)}
-    .color-swatch-dot{display:none}
     .modal-actions{display:flex;gap:var(--sp2);justify-content:flex-end;flex-wrap:wrap}
-
-    </style>
+  </style>
 </head>
 <body>
 <a href="#main" class="sr-only">Pular para o conteúdo</a>
@@ -176,12 +183,12 @@
       </svg>
       <div class="brand-text">
         <h1>Escala de Tráfego</h1>
-        <p>Plantões, férias e rodízios — sincronizado com Google Sheets</p>
+        <p>Plantões e férias — sincronizado com Google Sheets</p>
       </div>
     </div>
     <div class="topbar-right">
       <button id="reloadBtn" class="btn btn-secondary btn-sm">↻ Atualizar</button>
-      <button type="button" id="colorSettingsBtn" class="btn btn-ghost btn-sm" aria-label="Personalizar cores">🎨</button>
+      <button id="colorSettingsBtn" type="button" class="btn btn-ghost btn-sm" aria-label="Personalizar cores">🎨</button>
       <button data-theme-toggle class="btn btn-ghost btn-sm" aria-label="Alternar tema">🌙</button>
     </div>
   </header>
@@ -205,6 +212,7 @@
             <option value="Plantão">Plantão</option>
             <option value="Férias">Férias</option>
             <option value="Rodizio">Rodízio 9h</option>
+            <option value="Cobertura">Cobertura Férias</option>
           </select>
         </div>
         <div class="field">
@@ -246,9 +254,10 @@ Atenciosamente,</textarea>
           <div>
             <div class="cal-title" id="calTitle">Calendário</div>
             <div class="legend">
-              <span class="legend-item"><span class="legend-dot" style="background:#52b96a"></span>Plantão</span>
-              <span class="legend-item"><span class="legend-dot" style="background:#e07030"></span>Férias</span>
-              <span class="legend-item"><span class="legend-dot" style="background:#a050e0"></span>Rodízio 9h</span>
+              <span class="legend-item"><span class="legend-dot" style="background:var(--c-plantao-border)"></span>Plantão</span>
+              <span class="legend-item"><span class="legend-dot" style="background:var(--c-ferias-border)"></span>Férias</span>
+              <span class="legend-item"><span class="legend-dot" style="background:var(--c-rodizio-border)"></span>Rodízio</span>
+              <span class="legend-item"><span class="legend-dot" style="background:var(--c-cobertura-border)"></span>Cobertura</span>
               <span class="legend-item"><span class="legend-dot" style="background:var(--success)"></span>Selecionado</span>
             </div>
           </div>
@@ -305,42 +314,10 @@ Atenciosamente,</textarea>
 <div id="colorModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-label="Personalizar cores">
   <div class="modal">
     <h2>🎨 Personalizar cores</h2>
-    <div class="color-row">
-      <div>
-        <div class="color-row-label">Plantão</div>
-        <div style="font-size:var(--text-xs);color:var(--muted)">Chip, badge e legenda</div>
-      </div>
-      <div class="color-row-preview">
-        <div class="color-swatch">
-          <input type="color" id="cpPlantao" />
-          <span class="color-swatch-dot" id="cpPlantaoDot"></span>
-        </div>
-      </div>
-    </div>
-    <div class="color-row">
-      <div>
-        <div class="color-row-label">Férias</div>
-        <div style="font-size:var(--text-xs);color:var(--muted)">Chip, badge e legenda</div>
-      </div>
-      <div class="color-row-preview">
-        <div class="color-swatch">
-          <input type="color" id="cpFerias" />
-          <span class="color-swatch-dot" id="cpFeriasDot"></span>
-        </div>
-      </div>
-    </div>
-    <div class="color-row">
-      <div>
-        <div class="color-row-label">Rodízio 9h</div>
-        <div style="font-size:var(--text-xs);color:var(--muted)">Chip, badge e legenda</div>
-      </div>
-      <div class="color-row-preview">
-        <div class="color-swatch">
-          <input type="color" id="cpRodizio" />
-          <span class="color-swatch-dot" id="cpRodizioDot"></span>
-        </div>
-      </div>
-    </div>
+    <div class="color-row"><div><div class="color-row-label">Plantão</div><div style="font-size:var(--text-xs);color:var(--muted)">Chip, badge e legenda</div></div><div class="color-row-preview"><div class="color-swatch"><input type="color" id="cpPlantao"></div></div></div>
+    <div class="color-row"><div><div class="color-row-label">Férias</div><div style="font-size:var(--text-xs);color:var(--muted)">Chip, badge e legenda</div></div><div class="color-row-preview"><div class="color-swatch"><input type="color" id="cpFerias"></div></div></div>
+    <div class="color-row"><div><div class="color-row-label">Rodízio 9h</div><div style="font-size:var(--text-xs);color:var(--muted)">Chip, badge e legenda</div></div><div class="color-row-preview"><div class="color-swatch"><input type="color" id="cpRodizio"></div></div></div>
+    <div class="color-row"><div><div class="color-row-label">Cobertura Férias</div><div style="font-size:var(--text-xs);color:var(--muted)">Chip, badge e legenda</div></div><div class="color-row-preview"><div class="color-swatch"><input type="color" id="cpCobertura"></div></div></div>
     <div class="modal-actions">
       <button type="button" id="colorResetBtn" class="btn btn-ghost btn-sm">Restaurar padrão</button>
       <button type="button" id="colorCancelBtn" class="btn btn-secondary btn-sm">Cancelar</button>
@@ -455,11 +432,14 @@ async function loadData() {
 function applyFilters() {
   const person = els.personFilter.value.trim().toLowerCase();
   const tipo = els.tipoFilter.value;
+  const norm = (v) => String(v || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const tipoNorm = norm(tipo);
   state.view = els.viewMode.value;
-  state.filtered = state.events.filter(e =>
-    (!person || e.pessoa.toLowerCase().includes(person)) &&
-    (!tipo || e.tipo === tipo)
-  );
+  state.filtered = state.events.filter(e => {
+    const eNorm = norm(e.tipo);
+    const tipoMatch = !tipo || (tipoNorm === 'cobertura' ? eNorm === 'cobertura' : eNorm === tipoNorm);
+    return (!person || e.pessoa.toLowerCase().includes(person)) && tipoMatch;
+  });
   renderCalendar();
 }
 
@@ -513,8 +493,9 @@ function renderCalendar() {
     const MAX = 3;
     events.slice(0, MAX).forEach(ev => {
       const btn = document.createElement('button');
-      const tipoNorm = ev.tipo.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-      const cls = tipoNorm==='ferias' ? 'chip-ferias' : tipoNorm==='rodizio' ? 'chip-rodizio' : 'chip-plantan';
+      const norm = v => String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+      const eNorm = norm(ev.tipo);
+      const cls = eNorm==='cobertura' ? 'chip-cobertura' : eNorm==='ferias' ? 'chip-ferias' : eNorm==='rodizio' ? 'chip-rodizio' : 'chip-plantan';
       const sel = state.selected&&state.selected.id===ev.id ? ' chip-selected' : '';
       btn.className = `chip ${cls}${sel}`;
       btn.innerHTML = `<span class="chip-type">${escHtml(ev.tipo)}</span>${escHtml(ev.pessoa)}`;
@@ -547,9 +528,10 @@ function selectEvent(ev) {
   els.outlookCalBtn.disabled = false;
   els.outlookEmailBtn.disabled = false;
   // Notify button only enabled for Plantão
-  const tipoNormS = ev.tipo.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-    els.notifyTeamBtn.disabled = tipoNormS !== 'plantao';
-  const badgeCls = tipoNorm==='ferias' ? 'badge-blue' : tipoNorm==='rodizio' ? 'badge-purple' : 'badge-primary';
+  els.notifyTeamBtn.disabled = ev.tipo !== 'Plantão';
+  const norm = v => String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+  const eNorm = norm(ev.tipo);
+  const badgeCls = eNorm==='cobertura' ? 'badge-cobertura' : eNorm==='ferias' ? 'badge-blue' : eNorm==='rodizio' ? 'badge-purple' : 'badge-primary';
   els.detailContent.innerHTML = `
     <div class="dl-row"><span class="dl-label">Pessoa</span><span>${escHtml(ev.pessoa)}</span></div>
     <div class="dl-row"><span class="dl-label">Tipo</span><span><span class="badge ${badgeCls}">${escHtml(ev.tipo)}</span></span></div>
@@ -615,8 +597,7 @@ function sendEmail() {
 }
 
 function notifyTeam() {
-  const ev = state.selected; const tipoNormN = ev.tipo.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-    if (!ev || tipoNormN !== 'plantao') return;
+  const ev = state.selected; if (!ev || ev.tipo !== 'Plantão') return;
   const subject = `Plantonista tráfego - ${fmt(ev.inicio)} e ${fmt(ev.fim)}`;
   const body = `A pessoa plantonista deste final de semana será ${ev.pessoa}: ${ev.telefone || '(telefone não informado)'}`;
   const url = buildOutlookUrl('https://outlook.office.com/mail/deeplink/compose', {
@@ -646,95 +627,67 @@ els.outlookCalBtn.addEventListener('click', addToOutlook);
 els.outlookEmailBtn.addEventListener('click', sendEmail);
 els.notifyTeamBtn.addEventListener('click', notifyTeam);
 
-loadData();
-
 // ── COLOR CUSTOMIZATION ──────────────────────────────────────────────────
 const COLOR_DEFAULTS = {
-  plantao: { light: '#52b96a', dark: '#6dd68a' },
-  ferias:  { light: '#e07030', dark: '#f08040' },
-  rodizio: { light: '#a050e0', dark: '#c070f0' },
+  plantao:   { light: '#52b96a', dark: '#6dd68a' },
+  ferias:    { light: '#e07030', dark: '#f08040' },
+  rodizio:   { light: '#a050e0', dark: '#c070f0' },
+  cobertura: { light: '#b35a1f', dark: '#d08a55' },
 };
 const LS_KEY = 'escala-colors';
 
-function hexToRgb(hex) {
-  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
-  return {r,g,b};
-}
-function lighten(hex, amt) {
-  amt = amt === undefined ? 0.85 : amt;
-  const c = hexToRgb(hex);
-  return 'rgb('+Math.round(c.r+(255-c.r)*amt)+','+Math.round(c.g+(255-c.g)*amt)+','+Math.round(c.b+(255-c.b)*amt)+')';
-}
-function darken(hex, amt) {
-  amt = amt === undefined ? 0.7 : amt;
-  const c = hexToRgb(hex);
-  return 'rgb('+Math.round(c.r*(1-amt))+','+Math.round(c.g*(1-amt))+','+Math.round(c.b*(1-amt))+')';
-}
-function textOnLight(hex) {
-  const c = hexToRgb(hex);
-  return 'rgb('+Math.round(c.r*0.3)+','+Math.round(c.g*0.3)+','+Math.round(c.b*0.3)+')';
-}
-function textOnDark(hex) {
-  const c = hexToRgb(hex);
-  return 'rgb('+Math.round(c.r+(255-c.r)*0.5)+','+Math.round(c.g+(255-c.g)*0.5)+','+Math.round(c.b+(255-c.b)*0.5)+')';
-}
-
-function loadSavedColors() {
-  try { return JSON.parse(localStorage.getItem(LS_KEY)) || {}; } catch(e) { return {}; }
-}
+const hexToRgb = h => ({ r: parseInt(h.slice(1,3),16), g: parseInt(h.slice(3,5),16), b: parseInt(h.slice(5,7),16) });
+const lighten = (h, a=.85) => { const c=hexToRgb(h); return `rgb(${Math.round(c.r+(255-c.r)*a)},${Math.round(c.g+(255-c.g)*a)},${Math.round(c.b+(255-c.b)*a)})`; };
+const darken  = (h, a=.7)  => { const c=hexToRgb(h); return `rgb(${Math.round(c.r*(1-a))},${Math.round(c.g*(1-a))},${Math.round(c.b*(1-a))})`; };
+const textOnLight = h => { const c=hexToRgb(h); return `rgb(${Math.round(c.r*.3)},${Math.round(c.g*.3)},${Math.round(c.b*.3)})`; };
+const textOnDark  = h => { const c=hexToRgb(h); return `rgb(${Math.round(c.r+(255-c.r)*.5)},${Math.round(c.g+(255-c.g)*.5)},${Math.round(c.b+(255-c.b)*.5)})`; };
+const loadSavedColors = () => { try { return JSON.parse(localStorage.getItem(LS_KEY)) || {}; } catch(e) { return {}; } };
 
 function applyColors(saved) {
-  var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  var root = document.documentElement;
-  ['plantao','ferias','rodizio'].forEach(function(key) {
-    var hex = (saved && saved[key]) ? saved[key] : COLOR_DEFAULTS[key][isDark ? 'dark' : 'light'];
-    var bg  = isDark ? darken(hex, 0.75) : lighten(hex, 0.85);
-    var brd = isDark ? darken(hex, 0.3)  : hex;
-    var txt = isDark ? textOnDark(hex)   : textOnLight(hex);
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const root = document.documentElement;
+  ['plantao','ferias','rodizio','cobertura'].forEach(key => {
+    const hex = (saved && saved[key]) ? saved[key] : COLOR_DEFAULTS[key][isDark ? 'dark' : 'light'];
     root.style.setProperty('--c-'+key, hex);
-    root.style.setProperty('--c-'+key+'-bg', bg);
-    root.style.setProperty('--c-'+key+'-border', brd);
-    root.style.setProperty('--c-'+key+'-text', txt);
+    root.style.setProperty('--c-'+key+'-bg',     isDark ? darken(hex,.75)  : lighten(hex,.85));
+    root.style.setProperty('--c-'+key+'-border',  isDark ? darken(hex,.3)   : hex);
+    root.style.setProperty('--c-'+key+'-text',    isDark ? textOnDark(hex)  : textOnLight(hex));
   });
   updateLegendDots();
 }
 
 function updateLegendDots() {
-  var s = getComputedStyle(document.documentElement);
-  document.querySelectorAll('.legend-item').forEach(function(item) {
-    var dot = item.querySelector('.legend-dot');
-    var txt = item.textContent.trim();
+  const s = getComputedStyle(document.documentElement);
+  document.querySelectorAll('.legend-item').forEach(item => {
+    const dot = item.querySelector('.legend-dot');
+    const txt = item.textContent.trim();
     if (!dot) return;
-    if (txt.indexOf('Plantão') !== -1) dot.style.background = s.getPropertyValue('--c-plantao').trim();
-    else if (txt.indexOf('Férias') !== -1) dot.style.background = s.getPropertyValue('--c-ferias').trim();
-    else if (txt.indexOf('Rodízio') !== -1) dot.style.background = s.getPropertyValue('--c-rodizio').trim();
+    if (txt.includes('Cobertura Férias'))    dot.style.background = s.getPropertyValue('--c-cobertura').trim();
+    else if (txt.includes('Plantão'))        dot.style.background = s.getPropertyValue('--c-plantao').trim();
+    else if (txt.includes('Férias'))         dot.style.background = s.getPropertyValue('--c-ferias').trim();
+    else if (txt.includes('Rodízio'))        dot.style.background = s.getPropertyValue('--c-rodizio').trim();
   });
 }
 
 function syncPickerInputs(saved) {
-  var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  ['plantao','ferias','rodizio'].forEach(function(key) {
-    var hex = (saved && saved[key]) ? saved[key] : COLOR_DEFAULTS[key][isDark ? 'dark' : 'light'];
-    var inputId = key === 'plantao' ? 'cpPlantao' : key === 'ferias' ? 'cpFerias' : 'cpRodizio';
-    var inp = document.getElementById(inputId);
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  ['plantao','ferias','rodizio','cobertura'].forEach(key => {
+    const hex = (saved && saved[key]) ? saved[key] : COLOR_DEFAULTS[key][isDark ? 'dark' : 'light'];
+    const id  = key==='plantao' ? 'cpPlantao' : key==='ferias' ? 'cpFerias' : key==='rodizio' ? 'cpRodizio' : 'cpCobertura';
+    const inp = document.getElementById(id);
     if (inp) inp.value = hex;
   });
 }
 
-function openColorModal() {
-  syncPickerInputs(loadSavedColors());
-  document.getElementById('colorModal').classList.remove('hidden');
-}
-
-function closeColorModal() {
-  document.getElementById('colorModal').classList.add('hidden');
-}
+function openColorModal()  { syncPickerInputs(loadSavedColors()); document.getElementById('colorModal').classList.remove('hidden'); }
+function closeColorModal() { document.getElementById('colorModal').classList.add('hidden'); }
 
 function saveColors() {
-  var saved = {
-    plantao: document.getElementById('cpPlantao').value,
-    ferias:  document.getElementById('cpFerias').value,
-    rodizio: document.getElementById('cpRodizio').value,
+  const saved = {
+    plantao:   document.getElementById('cpPlantao').value,
+    ferias:    document.getElementById('cpFerias').value,
+    rodizio:   document.getElementById('cpRodizio').value,
+    cobertura: document.getElementById('cpCobertura').value,
   };
   localStorage.setItem(LS_KEY, JSON.stringify(saved));
   applyColors(saved);
@@ -753,18 +706,12 @@ document.getElementById('colorSettingsBtn').addEventListener('click', openColorM
 document.getElementById('colorCancelBtn').addEventListener('click', closeColorModal);
 document.getElementById('colorSaveBtn').addEventListener('click', saveColors);
 document.getElementById('colorResetBtn').addEventListener('click', resetColors);
-
-document.getElementById('colorModal').addEventListener('click', function(e) {
-  if (e.target.id === 'colorModal') closeColorModal();
-});
-
-document.querySelector('[data-theme-toggle]').addEventListener('click', function() {
-  setTimeout(function() { applyColors(loadSavedColors()); renderCalendar(); }, 30);
-});
+document.getElementById('colorModal').addEventListener('click', e => { if (e.target.id === 'colorModal') closeColorModal(); });
+document.querySelector('[data-theme-toggle]').addEventListener('click', () => { setTimeout(() => { applyColors(loadSavedColors()); renderCalendar(); }, 30); });
 
 applyColors(loadSavedColors());
 
+loadData();
 </script>
-
 </body>
 </html>
