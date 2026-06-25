@@ -209,7 +209,7 @@
             <option value="Plantão">Plantão</option>
             <option value="Férias">Férias</option>
             <option value="Rodizio">Rodízio 9h</option>
-            <option value="CoberturaFerias">Cobertura Férias</option>
+            <option value="Cobertura">Cobertura Férias</option>
           </select>
         </div>
         <div class="field">
@@ -532,7 +532,7 @@ function renderCalendar() {
     events.slice(0, MAX).forEach(ev => {
       const btn = document.createElement('button');
       const tipoNorm = ev.tipo.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-      const cls = tipoNorm==='coberturaferias' || tipoNorm==='ferias' ? 'chip-cobertura' : tipoNorm==='rodizio' ? 'chip-rodizio' : 'chip-plantan';
+      const cls = tipoNorm==='cobertura' || tipoNorm==='ferias' ? 'chip-cobertura' : tipoNorm==='rodizio' ? 'chip-rodizio' : 'chip-plantan';
       const sel = state.selected&&state.selected.id===ev.id ? ' chip-selected' : '';
       btn.className = `chip ${cls}${sel}`;
       btn.innerHTML = `<span class="chip-type">${escHtml(ev.tipo)}</span>${escHtml(ev.pessoa)}`;
@@ -567,7 +567,7 @@ function selectEvent(ev) {
   // Notify button only enabled for Plantão
   const tipoNormS = ev.tipo.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
     els.notifyTeamBtn.disabled = tipoNormS !== 'plantao';
-  const badgeCls = tipoNorm==='coberturaferias' || tipoNorm==='ferias' ? 'badge-cobertura' : tipoNorm==='rodizio' ? 'badge-purple' : 'badge-primary';
+  const badgeCls = tipoNorm==='cobertura' || tipoNorm==='ferias' ? 'badge-cobertura' : tipoNorm==='rodizio' ? 'badge-purple' : 'badge-primary';
   els.detailContent.innerHTML = `
     <div class="dl-row"><span class="dl-label">Pessoa</span><span>${escHtml(ev.pessoa)}</span></div>
     <div class="dl-row"><span class="dl-label">Tipo</span><span><span class="badge ${badgeCls}">${escHtml(ev.tipo)}</span></span></div>
@@ -671,7 +671,7 @@ const COLOR_DEFAULTS = {
   plantao: { light: '#52b96a', dark: '#6dd68a' },
   ferias:  { light: '#e07030', dark: '#f08040' },
   rodizio: { light: '#a050e0', dark: '#c070f0' },
-  coberturaferias: { light: '#b35a1f', dark: '#d08a55' },
+  cobertura: { light: '#b35a1f', dark: '#d08a55' },
 };
 const LS_KEY = 'escala-colors';
 
@@ -705,7 +705,7 @@ function loadSavedColors() {
 function applyColors(saved) {
   var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   var root = document.documentElement;
-  ['plantao','ferias','rodizio','coberturaferias'].forEach(function(key) {
+  ['plantao','ferias','rodizio','cobertura'].forEach(function(key) {
     var hex = (saved && saved[key]) ? saved[key] : COLOR_DEFAULTS[key][isDark ? 'dark' : 'light'];
     var bg  = isDark ? darken(hex, 0.75) : lighten(hex, 0.85);
     var brd = isDark ? darken(hex, 0.3)  : hex;
@@ -733,7 +733,7 @@ function updateLegendDots() {
 
 function syncPickerInputs(saved) {
   var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  ['plantao','ferias','rodizio','coberturaferias'].forEach(function(key) {
+  ['plantao','ferias','rodizio','cobertura'].forEach(function(key) {
     var hex = (saved && saved[key]) ? saved[key] : COLOR_DEFAULTS[key][isDark ? 'dark' : 'light'];
     var inputId = key === 'plantao' ? 'cpPlantao' : key === 'ferias' ? 'cpFerias' : key === 'rodizio' ? 'cpRodizio' : 'cpCobertura';
     var inp = document.getElementById(inputId);
@@ -755,7 +755,7 @@ function saveColors() {
     plantao: document.getElementById('cpPlantao').value,
     ferias: document.getElementById('cpFerias').value,
     rodizio: document.getElementById('cpRodizio').value,
-    coberturaferias: document.getElementById('cpCobertura').value,
+    cobertura: document.getElementById('cpCobertura').value,
   };
   localStorage.setItem(LS_KEY, JSON.stringify(saved));
   applyColors(saved);
