@@ -387,8 +387,9 @@
                 <p>O Gerador de Afiliadas foi atualizado com novas melhorias:</p>
                 <ul>
                     <li><strong>Nova opção de Ad Unit:</strong> Agora você pode selecionar Globoplay dentro de Site para Video.</li>
-                    <li><strong>Alteração em valores:</strong> Nos campos Entrega Determinada e Desconto agora é aceito apenas números sem separadores ou decimais</li>
+                    <li><strong>Alteração em valores:</strong> Nos campos Entrega Determinada e Desconto agora é aceito apenas números sem separadores ou decimais.</li>
                     <li><strong>Melhorias de Sistema:</strong> Foram aplicados diversos ajustes no backend e na estrutura de código para garantir maior estabilidade.</li>
+                    <li><strong>Segmentação de interesses:</strong> Removida opção para segmentação de interesses por conta de instabilidades. Está opção será reintroduzida em uma futura versão.</li>
                 </ul>
             </div>
             <div class="modal-footer">
@@ -631,9 +632,9 @@
             dropdownData.potencialConsumo = getColumn(segRows, 6); // Col G
             mappings.potencial_permutive = buildMap(segRows, 6, 7);// Col G→H
             mappings.potencial_audience = buildMap(segRows, 6, 8); // Col G→I
-            dropdownData.interesses = getColumn(segRows, 9);       // Col J
-            mappings.interesse_permutive = buildMap(segRows, 9, 10);// Col J→K
-            mappings.interesse_audience = buildMap(segRows, 9, 11); // Col J→L
+            // dropdownData.interesses = getColumn(segRows, 9);       // Col J
+            // mappings.interesse_permutive = buildMap(segRows, 9, 10);// Col J→K
+            // mappings.interesse_audience = buildMap(segRows, 9, 11); // Col J→L
 
             // --- Site sheet ---
             const siteRows = XLSX.utils.sheet_to_json(wb.Sheets['Site'], { header: 1 });
@@ -642,7 +643,7 @@
             console.log('Base data loaded:', { dropdownData, mappings });
         }
 
-        const fieldsWithAll = ['formatos', 'posicao', 'sites', 'geolocalizacao', 'idades', 'generos', 'potencialConsumo', 'interesses'];
+        const fieldsWithAll = ['formatos', 'posicao', 'sites', 'geolocalizacao', 'idades', 'generos', 'potencialConsumo' /*, 'interesses'*/];
 
         const commonSearchOpts = {
             searchEnabled: true,
@@ -834,7 +835,7 @@
                 } else if (field === 'idades') { available = dropdownData.idades; }
                 else if (field === 'generos') { available = dropdownData.generos; }
                 else if (field === 'potencialConsumo') { available = dropdownData.potencialConsumo; }
-                else if (field === 'interesses') { available = dropdownData.interesses; }
+                // else if (field === 'interesses') { available = dropdownData.interesses; }
                 else if (field === 'sites') { available = dropdownData.sites; }
                 else if (field === 'geolocalizacao') { available = dropdownData.geolocalizacao; }
                 else if (field === 'posicao') { available = dropdownData.posicao; }
@@ -1053,7 +1054,7 @@
                 
                 ${buildMultiGroup("Potencial de Consumo", "potencialConsumo", itemId)}
                 
-                ${buildMultiGroup("Interesse", "interesses", itemId)}
+                <!-- ${buildMultiGroup("Interesse", "interesses", itemId)} -->
 
                 <div class="form-group">
                     <label>Observações</label>
@@ -1097,8 +1098,8 @@
                 { id: 'programarDisponivel', data: dropdownData.programarDisponivel },
                 { id: 'idades', data: dropdownData.idades },
                 { id: 'generos', data: dropdownData.generos },
-                { id: 'potencialConsumo', data: dropdownData.potencialConsumo },
-                { id: 'interesses', data: dropdownData.interesses }
+                { id: 'potencialConsumo', data: dropdownData.potencialConsumo }
+                // { id: 'interesses', data: dropdownData.interesses }
             ];
 
             multiSetup.forEach(m => {
@@ -1330,7 +1331,7 @@
 
         // --- CHANGELOG MODAL LOGIC ---
         // Altere o texto no HTML acima (id="changelog-text") e MUDE esta versão para mostrar novamente o modal.
-        const CHANGELOG_VERSION = "v1.1.1";
+        const CHANGELOG_VERSION = "v1.1.2";
 
         function checkChangelog() {
             const lastSeen = localStorage.getItem('changelogVersion');
@@ -1391,7 +1392,7 @@
                 'Entrega Determinada', 'Valor Unitário (R$)', 'Total Tabela (R$)',
                 'Desconto (%)', 'Total Negociado (R$)', 'Site', 'Editoria / Programa',
                 'Geolocalização', 'Caso Under, programar o disponível?', 'Cidades',
-                'Idade', 'Gênero', 'Potencial de Consumo', 'Interesse', 'Observações'
+                'Idade', 'Gênero', 'Potencial de Consumo', /* 'Interesse', */ 'Observações'
             ];
 
             let aoa = [];
@@ -1419,7 +1420,7 @@
                     const idadeMapped = mapValues(getMultipleChoicesValue(`idades-${id}`), isDAI ? mappings.idade_audience : mappings.idade_permutive);
                     const generoMapped = mapValues(getMultipleChoicesValue(`generos-${id}`), isDAI ? mappings.genero_audience : mappings.genero_permutive);
                     const potencialMapped = mapValues(getMultipleChoicesValue(`potencialConsumo-${id}`), isDAI ? mappings.potencial_audience : mappings.potencial_permutive);
-                    const interesseMapped = mapValues(getMultipleChoicesValue(`interesses-${id}`), isDAI ? mappings.interesse_audience : mappings.interesse_permutive);
+                    // const interesseMapped = mapValues(getMultipleChoicesValue(`interesses-${id}`), isDAI ? mappings.interesse_audience : mappings.interesse_permutive);
 
                     let rowArr = [
                         el('lineItemName'),
@@ -1444,7 +1445,7 @@
                         idadeMapped,
                         generoMapped,
                         potencialMapped,
-                        interesseMapped,
+                        // interesseMapped,
                         el('observacoes')
                     ];
                     aoa.push(rowArr);
@@ -1486,7 +1487,7 @@
             }
 
             // 3. Copy other Choices.js instances in dependent order
-            const choiceFields = ['propriedade', 'posicaoVideo', 'skip', 'posicao', 'sites', 'geolocalizacao', 'programarDisponivel', 'idades', 'generos', 'potencialConsumo', 'interesses'];
+            const choiceFields = ['propriedade', 'posicaoVideo', 'skip', 'posicao', 'sites', 'geolocalizacao', 'programarDisponivel', 'idades', 'generos', 'potencialConsumo' /*, 'interesses'*/];
             choiceFields.forEach(f => {
                 const srcChoice = choicesInstances.find(c => c.id === `${f}-${sourceId}`);
                 const dstChoice = choicesInstances.find(c => c.id === `${f}-${newId}`);
