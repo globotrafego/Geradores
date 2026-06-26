@@ -150,7 +150,7 @@
     .chip-ferias{background:var(--c-ferias-bg);border-color:var(--c-ferias-border);color:var(--c-ferias-text);font-weight:600}
     .chip-rodizio{background:var(--c-rodizio-bg);border-color:var(--c-rodizio-border);color:var(--c-rodizio-text);font-weight:600}
     .chip-cobertura{background:var(--c-cobertura-bg);border-color:var(--c-cobertura-border);color:var(--c-cobertura-text);font-weight:600}
-    .chip-selected{outline:3px solid var(--success);outline-offset:2px;box-shadow:0 0 0 3px color-mix(in srgb,var(--success) 25%,transparent)}
+    .chip-selected{outline:3px solid var(--c-selected);outline-offset:2px;box-shadow:0 0 0 3px color-mix(in srgb,var(--c-selected) 25%,transparent)}
     .badge-primary{background:var(--c-plantao-bg);color:var(--c-plantao-text)}
     .badge-blue{background:var(--c-ferias-bg);color:var(--c-ferias-text)}
     .badge-purple{background:var(--c-rodizio-bg);color:var(--c-rodizio-text)}
@@ -254,10 +254,8 @@ Atenciosamente,</textarea>
           <div>
             <div class="cal-title" id="calTitle">Calendário</div>
             <div class="legend">
-              <span class="legend-item"><span class="legend-dot" style="background:var(--c-plantao-border)"></span>Plantão</span>
-              <span class="legend-item"><span class="legend-dot" style="background:var(--c-ferias-border)"></span>Férias</span>
-              <span class="legend-item"><span class="legend-dot" style="background:var(--c-rodizio-border)"></span>Rodízio</span>
-              <span class="legend-item"><span class="legend-dot" style="background:var(--c-cobertura-border)"></span>Cobertura</span>
+              <span class="legend-item"><span class="legend-dot" style="background:var(--primary)"></span>Plantão</span>
+              <span class="legend-item"><span class="legend-dot" style="background:var(--blue)"></span>Férias</span>
               <span class="legend-item"><span class="legend-dot" style="background:var(--success)"></span>Selecionado</span>
             </div>
           </div>
@@ -450,6 +448,11 @@ const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','A
 function sameDay(a, b) { return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate(); }
 function dateInRange(d, s, e) { const t=d.getTime(); return t>=s.getTime()&&t<=e.getTime(); }
 
+function isWeekend(d) {
+  const day = d.getDay();
+  return day === 0 || day === 6;
+}
+
 function renderCalendar() {
   els.weekdayRow.innerHTML = DAYS.map(d=>`<div class="weekday">${d}</div>`).join('');
   els.calGrid.innerHTML = '';
@@ -474,8 +477,12 @@ function renderCalendar() {
   while (c <= end) { days.push(new Date(c)); c.setDate(c.getDate()+1); }
 
   function eventsOnDay(day) {
-    return state.filtered.filter(ev => dateInRange(day, ev.inicio, ev.fim))
-      .sort((a,b) => a.tipo.localeCompare(b.tipo));
+    return state.filtered.filter(ev => {
+      if (!dateInRange(day, ev.inicio, ev.fim)) return false;
+      const tipoNorm = String(ev.tipo || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+      const blockWeekend = ['cobertura', 'ferias', 'rodizio'].includes(tipoNorm);
+      return !(blockWeekend && isWeekend(day));
+    }).sort((a,b) => a.tipo.localeCompare(b.tipo));
   }
 
   const hasAny = days.some(d => eventsOnDay(d).length > 0);
