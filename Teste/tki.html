@@ -950,10 +950,54 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
             addText(slide, "Onde mudar de modo produziria resultado diferente?", 2.65, 6.42, 8.9, .4, { fontSize: 20, bold: true, color: C.tealDark });
           }
 
-          // 7 — guia situacional
+          // 7–11 — referência completa dos cinco modos
+          {
+            const modeOrder = ["competindo", "colaborando", "conciliando", "evitando", "concedendo"];
+            const modeTitles = {
+              competindo: "Competindo dá direção quando rapidez importa",
+              colaborando: "Colaborando constrói ganhos mútuos",
+              conciliando: "Conciliando viabiliza acordos possíveis",
+              evitando: "Evitando cria espaço — quando há retorno",
+              concedendo: "Concedendo fortalece relações com intenção"
+            };
+
+            modeOrder.forEach((key, index) => {
+              const slide = pptx.addSlide();
+              const style = styles[key];
+              const score = scores[key];
+              const page = 7 + index;
+              addHeader(slide, `Modo ${index + 1} de 5`, modeTitles[key], page);
+
+              slide.addShape(shape.roundRect, {
+                x: .78, y: 1.9, w: 2.55, h: 4.72, rectRadius: .08,
+                fill: { color: style.color.replace("#", "") },
+                line: { color: style.color.replace("#", "") }
+              });
+              addText(slide, style.name, 1.04, 2.2, 2.03, .38, { fontSize: 22, bold: true, color: "FFFFFF", align: "center" });
+              addText(slide, String(score), 1.02, 2.76, 2.08, .9, { fontFace: "Aptos Display", fontSize: 58, bold: true, color: "FFFFFF", align: "center" });
+              addText(slide, "DE 12 PONTOS", 1.02, 3.64, 2.08, .25, { fontSize: 10, bold: true, color: "FFFFFF", align: "center", charSpacing: 1.5 });
+              addText(slide, getBand(key, score).label, 1.02, 4.14, 2.08, .34, { fontSize: 15, bold: true, color: "FFFFFF", align: "center" });
+              addText(slide, style.core, 1.04, 4.82, 2.02, 1.2, { fontSize: 16, color: "FFFFFF", align: "center", valign: "mid" });
+
+              addText(slide, "BOM PARA", 3.74, 2.02, 2.5, .3, { fontSize: 15, bold: true, color: C.tealDark, charSpacing: 1.35 });
+              addText(slide, "SE FALTAR", 6.62, 2.02, 2.5, .3, { fontSize: 15, bold: true, color: C.gold, charSpacing: 1.35 });
+              addText(slide, "SE HOUVER EXCESSO", 9.5, 2.02, 2.75, .3, { fontSize: 15, bold: true, color: C.coral, charSpacing: 1.2 });
+              addBulletList(slide, style.good, 3.76, 2.53, 2.55, 3.05, C.ink, 16);
+              addBulletList(slide, style.lack, 6.64, 2.53, 2.55, 3.05, C.ink, 16);
+              addBulletList(slide, style.excess, 9.52, 2.53, 2.73, 3.05, C.ink, 16);
+
+              slide.addShape(shape.roundRect, {
+                x: 3.7, y: 5.86, w: 8.55, h: .7, rectRadius: .04,
+                fill: { color: C.mint }, line: { color: C.mint }
+              });
+              addText(slide, style.prompt, 4.02, 6.01, 7.92, .38, { fontSize: 18, bold: true, italic: true, color: C.tealDark, align: "center" });
+            });
+          }
+
+          // 12 — guia situacional
           {
             const slide = pptx.addSlide();
-            addHeader(slide, "Guia situacional", "Escolha pelo que o conflito exige", 7);
+            addHeader(slide, "Guia situacional", "Escolha pelo que o conflito exige", 12);
             const scenarios = [
               ["Crise, urgência, decisão impopular", "Rapidez e direção", "Competindo", C.coral],
               ["Problema complexo, relação importante", "Ganhos mútuos", "Colaborando", C.teal],
@@ -974,7 +1018,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
             });
           }
 
-          // 8 — fechamento
+          // 13 — fechamento
           {
             const slide = pptx.addSlide();
             slide.background = { color: C.ink };
@@ -991,7 +1035,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
               addText(slide, question, 1.55, y - .04, 9.65, .55, { fontSize: 22, bold: true, color: "FFFFFF" });
             });
             addText(slide, "Perfil descreve tendência. Desenvolvimento amplia opções.", .88, 6.62, 8.3, .3, { fontSize: 14, color: "9FB5B1" });
-            addText(slide, "08", 12.04, 6.62, .5, .3, { fontSize: 12, bold: true, color: "9FB5B1", align: "right" });
+            addText(slide, "13", 12.04, 6.62, .5, .3, { fontSize: 12, bold: true, color: "9FB5B1", align: "right" });
           }
 
           const safeName = normalize(participant).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 45) || "perfil";
