@@ -386,13 +386,10 @@
             <div class="modal-body" id="changelog-text">
                 <p>O Gerador de Afiliadas foi atualizado com novas melhorias:</p>
                 <ul>
-                    <li><strong>Novo Botão Copiar Linha:</strong> Agora você pode duplicar qualquer linha existente!
-                        Basta clicar em "Copiar Linha" no cabeçalho da linha desejada e todas as informações serão
-                        replicadas para uma nova linha instantaneamente.</li>
-                    <li><strong>Melhorias de Sistema:</strong> Foram aplicados diversos ajustes no backend e na
-                        estrutura de código para garantir maior estabilidade.</li>
-                    <li><strong>Validação de Data:</strong> O calendário agora bloqueia automaticamente a seleção de
-                        datas passadas (anteriores ao dia de hoje) na Data de Início e Data Fim.</li>
+                    <li><strong>Nova opção de Ad Unit:</strong> Agora você pode selecionar Globoplay dentro de Site para Video.</li>
+                    <li><strong>Alteração em valores:</strong> Nos campos Entrega Determinada e Desconto agora é aceito apenas números sem separadores ou decimais.</li>
+                    <li><strong>Melhorias de Sistema:</strong> Foram aplicados diversos ajustes no backend e na estrutura de código para garantir maior estabilidade.</li>
+                    <li><strong>Segmentação de interesses:</strong> Opção restaurada com base de dados dedicada para IDs Permutive e Audience.</li>
                 </ul>
             </div>
             <div class="modal-footer">
@@ -573,6 +570,7 @@
         });
 
         const BASE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjRYT6xv7g-svK5_ScKZitolkns29Bbls5xAcMs8NONGY-p5xFa9Yz3tRJIwuhWOm4_FEY6vV0Ig1Z/pub?output=xlsx';
+        const INTEREST_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1gmW4brvAZrIcDmZ8WU7WQdseirN7nocofXOGAYDlhtM/export?format=xlsx';
 
         let dropdownData = {};
         let mappings = {};
@@ -598,9 +596,19 @@
         }
 
         async function loadBaseData() {
-            const resp = await fetch(BASE_SHEET_URL);
-            const buf = await resp.arrayBuffer();
+            const [resp, interestResp] = await Promise.all([
+                fetch(BASE_SHEET_URL),
+                fetch(INTEREST_SHEET_URL)
+            ]);
+            if (!resp.ok) throw new Error(`Falha ao carregar base principal: HTTP ${resp.status}`);
+            if (!interestResp.ok) throw new Error(`Falha ao carregar base de interesses: HTTP ${interestResp.status}`);
+
+            const [buf, interestBuf] = await Promise.all([
+                resp.arrayBuffer(),
+                interestResp.arrayBuffer()
+            ]);
             const wb = XLSX.read(buf, { type: 'array' });
+            const interestWb = XLSX.read(interestBuf, { type: 'array' });
 
             // --- Afiliada sheet (each column is an independent list) ---
             const afRows = XLSX.utils.sheet_to_json(wb.Sheets['Afiliada'], { header: 1 });
@@ -635,9 +643,14 @@
             dropdownData.potencialConsumo = getColumn(segRows, 6); // Col G
             mappings.potencial_permutive = buildMap(segRows, 6, 7);// Col G→H
             mappings.potencial_audience = buildMap(segRows, 6, 8); // Col G→I
-            // dropdownData.interesses = getColumn(segRows, 9);       // Col J
-            // mappings.interesse_permutive = buildMap(segRows, 9, 10);// Col J→K
-            // mappings.interesse_audience = buildMap(segRows, 9, 11); // Col J→L
+            // --- Separate Interests sheet ---
+            // First tab: Col A = Name, Col B = Permutive ID, Col C = Audience ID
+            const interestSheet = interestWb.Sheets[interestWb.SheetNames[0]];
+            if (!interestSheet) throw new Error('A base de interesses não possui nenhuma aba.');
+            const interestRows = XLSX.utils.sheet_to_json(interestSheet, { header: 1 });
+            dropdownData.interesses = getColumn(interestRows, 0);
+            mappings.interesse_permutive = buildMap(interestRows, 0, 1);
+            mappings.interesse_audience = buildMap(interestRows, 0, 2);
 
             // --- Site sheet ---
             const siteRows = XLSX.utils.sheet_to_json(wb.Sheets['Site'], { header: 1 });
@@ -646,7 +659,7 @@
             console.log('Base data loaded:', { dropdownData, mappings });
         }
 
-        const fieldsWithAll = ['formatos', 'posicao', 'sites', 'geolocalizacao', 'idades', 'generos', 'potencialConsumo' /*, 'interesses'*/];
+        const fieldsWithAll = ['formatos', 'posicao', 'sites', 'geolocalizacao', 'idades', 'generos', 'potencialConsumo', 'interesses'];
 
         const commonSearchOpts = {
             searchEnabled: true,
@@ -811,9 +824,7 @@
             afSelect.addEventListener('change', () => {
                 updateCampaignName();
                 for (let i = 1; i <= lineItemCount; i++) {
-                    if (document.getElementById(`line-item-${i}`)) {
-                        updateSitesForDAI(i);
-                    }
+                    updateSitesForDAI(i);
                 }
             });
             updateCampaignName();
@@ -838,7 +849,7 @@
                 } else if (field === 'idades') { available = dropdownData.idades; }
                 else if (field === 'generos') { available = dropdownData.generos; }
                 else if (field === 'potencialConsumo') { available = dropdownData.potencialConsumo; }
-                // else if (field === 'interesses') { available = dropdownData.interesses; }
+                else if (field === 'interesses') { available = dropdownData.interesses; }
                 else if (field === 'sites') { available = dropdownData.sites; }
                 else if (field === 'geolocalizacao') { available = dropdownData.geolocalizacao; }
                 else if (field === 'posicao') { available = dropdownData.posicao; }
@@ -1057,7 +1068,7 @@
                 
                 ${buildMultiGroup("Potencial de Consumo", "potencialConsumo", itemId)}
                 
-                <!-- ${buildMultiGroup("Interesse", "interesses", itemId)} -->
+                ${buildMultiGroup("Interesse", "interesses", itemId)}
 
                 <div class="form-group">
                     <label>Observações</label>
@@ -1101,8 +1112,8 @@
                 { id: 'programarDisponivel', data: dropdownData.programarDisponivel },
                 { id: 'idades', data: dropdownData.idades },
                 { id: 'generos', data: dropdownData.generos },
-                { id: 'potencialConsumo', data: dropdownData.potencialConsumo }
-                // { id: 'interesses', data: dropdownData.interesses }
+                { id: 'potencialConsumo', data: dropdownData.potencialConsumo },
+                { id: 'interesses', data: dropdownData.interesses }
             ];
 
             multiSetup.forEach(m => {
@@ -1334,7 +1345,7 @@
 
         // --- CHANGELOG MODAL LOGIC ---
         // Altere o texto no HTML acima (id="changelog-text") e MUDE esta versão para mostrar novamente o modal.
-        const CHANGELOG_VERSION = "v1.1.0";
+        const CHANGELOG_VERSION = "v1.1.3";
 
         function checkChangelog() {
             const lastSeen = localStorage.getItem('changelogVersion');
@@ -1395,7 +1406,7 @@
                 'Entrega Determinada', 'Valor Unitário (R$)', 'Total Tabela (R$)',
                 'Desconto (%)', 'Total Negociado (R$)', 'Site', 'Editoria / Programa',
                 'Geolocalização', 'Caso Under, programar o disponível?', 'Cidades',
-                'Idade', 'Gênero', 'Potencial de Consumo', /* 'Interesse', */ 'Observações'
+                'Idade', 'Gênero', 'Potencial de Consumo', 'Interesse', 'Observações'
             ];
 
             let aoa = [];
@@ -1423,7 +1434,7 @@
                     const idadeMapped = mapValues(getMultipleChoicesValue(`idades-${id}`), isDAI ? mappings.idade_audience : mappings.idade_permutive);
                     const generoMapped = mapValues(getMultipleChoicesValue(`generos-${id}`), isDAI ? mappings.genero_audience : mappings.genero_permutive);
                     const potencialMapped = mapValues(getMultipleChoicesValue(`potencialConsumo-${id}`), isDAI ? mappings.potencial_audience : mappings.potencial_permutive);
-                    // const interesseMapped = mapValues(getMultipleChoicesValue(`interesses-${id}`), isDAI ? mappings.interesse_audience : mappings.interesse_permutive);
+                    const interesseMapped = mapValues(getMultipleChoicesValue(`interesses-${id}`), isDAI ? mappings.interesse_audience : mappings.interesse_permutive);
 
                     let rowArr = [
                         el('lineItemName'),
@@ -1448,7 +1459,7 @@
                         idadeMapped,
                         generoMapped,
                         potencialMapped,
-                        // interesseMapped,
+                        interesseMapped,
                         el('observacoes')
                     ];
                     aoa.push(rowArr);
@@ -1490,7 +1501,7 @@
             }
 
             // 3. Copy other Choices.js instances in dependent order
-            const choiceFields = ['propriedade', 'posicaoVideo', 'skip', 'posicao', 'sites', 'geolocalizacao', 'programarDisponivel', 'idades', 'generos', 'potencialConsumo' /*, 'interesses'*/];
+            const choiceFields = ['propriedade', 'posicaoVideo', 'skip', 'posicao', 'sites', 'geolocalizacao', 'programarDisponivel', 'idades', 'generos', 'potencialConsumo', 'interesses'];
             choiceFields.forEach(f => {
                 const srcChoice = choicesInstances.find(c => c.id === `${f}-${sourceId}`);
                 const dstChoice = choicesInstances.find(c => c.id === `${f}-${newId}`);
