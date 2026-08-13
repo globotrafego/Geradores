@@ -1472,6 +1472,20 @@
             }
 
             const worksheet = XLSX.utils.aoa_to_sheet(aoa);
+            worksheet['!protect'] = {
+                password: 'SeAlterarJaViu',
+                formatCells: true,
+                formatColumns: true,
+                formatRows: true,
+                insertColumns: true,
+                insertRows: true,
+                insertHyperlinks: true,
+                deleteColumns: true,
+                deleteRows: true,
+                sort: true,
+                autoFilter: true,
+                pivotTables: true
+            };
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "Campanha");
             XLSX.writeFile(workbook, `Campanha_${nomeCampanha}.xlsx`);
