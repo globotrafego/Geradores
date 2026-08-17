@@ -147,6 +147,19 @@
             margin-bottom: 10px;
         }
 
+        .field-link {
+            align-self: flex-end;
+            color: var(--primary);
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-decoration: none;
+        }
+
+        .field-link:hover {
+            text-decoration: underline;
+        }
+
         label {
             font-size: 0.9rem;
             font-weight: 500;
@@ -945,13 +958,17 @@
             el('totalNegociado').value = totalNegociado.toFixed(2);
         }
 
-        function buildMultiGroup(label, id, itemId, isHidden = false, isRequired = false) {
+        function buildMultiGroup(label, id, itemId, isHidden = false, isRequired = false, link = null) {
             const hiddenClass = isHidden ? "hidden" : "";
             const requiredAttr = isRequired ? "required" : "";
             const requiredMark = isRequired ? " *" : "";
+            const linkHtml = link
+                ? `<a class="field-link" href="${link.url}" target="_blank" rel="noopener noreferrer">${link.text}</a>`
+                : "";
             return `
             <div class="form-group ${hiddenClass}" id="fg-${id}-${itemId}">
                 <label>${label}${requiredMark}</label>
+                ${linkHtml}
                 <select id="${id}-${itemId}" multiple ${requiredAttr}></select>
             </div>
         `;
@@ -1068,7 +1085,10 @@
                 
                 ${buildMultiGroup("Potencial de Consumo", "potencialConsumo", itemId)}
                 
-                ${buildMultiGroup("Interesse", "interesses", itemId)}
+                ${buildMultiGroup("Interesse", "interesses", itemId, false, false, {
+                    text: "Lista de Segmentos",
+                    url: "https://app.powerbi.com/view?r=eyJrIjoiMzExYzVjMDEtMzA5OC00NTAwLTk4YTctYzQzNWU0ODY2OWViIiwidCI6ImE3Y2RjNDQ3LTNiMjktNGI0MS1iNzNlLThhMmNiNTRiMDZjNiIsImMiOjR9"
+                })}
 
                 <div class="form-group">
                     <label>Observações</label>
@@ -1472,20 +1492,6 @@
             }
 
             const worksheet = XLSX.utils.aoa_to_sheet(aoa);
-            worksheet['!protect'] = {
-                password: 'SeAlterarJaViu',
-                formatCells: true,
-                formatColumns: true,
-                formatRows: true,
-                insertColumns: true,
-                insertRows: true,
-                insertHyperlinks: true,
-                deleteColumns: true,
-                deleteRows: true,
-                sort: true,
-                autoFilter: true,
-                pivotTables: true
-            };
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "Campanha");
             XLSX.writeFile(workbook, `Campanha_${nomeCampanha}.xlsx`);
