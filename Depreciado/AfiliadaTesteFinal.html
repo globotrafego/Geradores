@@ -147,12 +147,22 @@
             margin-bottom: 10px;
         }
 
+        .field-header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .field-header label,
+        .field-header .field-link {
+            margin-bottom: 8px;
+        }
+
         .field-link {
-            align-self: flex-end;
             color: var(--primary);
             font-size: 0.85rem;
             font-weight: 600;
-            margin-bottom: 8px;
             text-decoration: none;
         }
 
@@ -962,13 +972,12 @@
             const hiddenClass = isHidden ? "hidden" : "";
             const requiredAttr = isRequired ? "required" : "";
             const requiredMark = isRequired ? " *" : "";
-            const linkHtml = link
-                ? `<a class="field-link" href="${link.url}" target="_blank" rel="noopener noreferrer">${link.text}</a>`
-                : "";
+            const labelHtml = link
+                ? `<div class="field-header"><label>${label}${requiredMark}</label><a class="field-link" href="${link.url}" target="_blank" rel="noopener noreferrer">${link.text}</a></div>`
+                : `<label>${label}${requiredMark}</label>`;
             return `
             <div class="form-group ${hiddenClass}" id="fg-${id}-${itemId}">
-                <label>${label}${requiredMark}</label>
-                ${linkHtml}
+                ${labelHtml}
                 <select id="${id}-${itemId}" multiple ${requiredAttr}></select>
             </div>
         `;
