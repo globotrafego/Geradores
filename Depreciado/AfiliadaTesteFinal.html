@@ -594,6 +594,7 @@
 
         const BASE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjRYT6xv7g-svK5_ScKZitolkns29Bbls5xAcMs8NONGY-p5xFa9Yz3tRJIwuhWOm4_FEY6vV0Ig1Z/pub?output=xlsx';
         const INTEREST_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1gmW4brvAZrIcDmZ8WU7WQdseirN7nocofXOGAYDlhtM/export?format=xlsx';
+        const EXCEL_PROTECTION_PASSWORD = 'EuSeiOQueVoceFez';
 
         let dropdownData = {};
         let mappings = {};
@@ -750,20 +751,50 @@
             else field.removeAttribute('required');
         }
 
+        function isPreRoll(value) {
+            return String(value || '')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/[\s_-]/g, '')
+                .toUpperCase() === 'PREROLL';
+        }
+
+        function updateGloboplayField(itemId) {
+            const group = document.getElementById(`fg-globoplay-${itemId}`);
+            const field = document.getElementById(`globoplay-${itemId}`);
+            const tipoLinha = document.getElementById(`tipoLinha-${itemId}`);
+            const formatos = document.getElementById(`formatos-${itemId}`);
+            const posicaoVideo = document.getElementById(`posicaoVideo-${itemId}`);
+            if (!group || !field || !tipoLinha || !formatos || !posicaoVideo) return;
+
+            const selectedFormats = Array.from(formatos.selectedOptions || []).map(option => option.value.toUpperCase());
+            const shouldShow = tipoLinha.value === 'VIDEO'
+                && selectedFormats.includes('VIDEO')
+                && !selectedFormats.includes('DAI')
+                && isPreRoll(posicaoVideo.value);
+
+            group.classList.toggle('hidden', !shouldShow);
+            setConditionalRequired(itemId, 'globoplay', shouldShow);
+            if (!shouldShow) field.value = '';
+        }
+
         function validateRequiredLineFields() {
             const items = document.querySelectorAll('#line-items-container .line-item');
             for (let index = 0; index < items.length; index++) {
-                const itemId = index + 1;
+                const idMatch = items[index].id.match(/line-item-container-(\d+)/);
+                if (!idMatch) continue;
+                const itemId = idMatch[1];
+                const lineNumber = index + 1;
                 const checks = [
-                    { id: `propriedade-${itemId}`, message: `Preencha o campo obrigatório Propriedades na Linha ${itemId}.` },
-                    { id: `tipoLinha-${itemId}`, message: `Preencha o campo obrigatório Tipo de Linha na Linha ${itemId}.` },
-                    { id: `formatos-${itemId}`, message: `Selecione ao menos um Formato na Linha ${itemId}.`, isMulti: true },
-                    { id: `dataInicio-${itemId}`, message: `Preencha Data de Início na Linha ${itemId}.` },
-                    { id: `dataFim-${itemId}`, message: `Preencha Data Fim na Linha ${itemId}.` },
-                    { id: `entregaDeterminada-${itemId}`, message: `Preencha Entrega Determinada na Linha ${itemId}.` },
-                    { id: `valorUnitario-${itemId}`, message: `Preencha Valor Unitário (R$) na Linha ${itemId}.` },
-                    { id: `desconto-${itemId}`, message: `Preencha Desconto (%) na Linha ${itemId}.` },
-                    { id: `sites-${itemId}`, message: `Selecione ao menos um Site na Linha ${itemId}.`, isMulti: true }
+                    { id: `propriedade-${itemId}`, message: `Preencha o campo obrigatório Propriedades na Linha ${lineNumber}.` },
+                    { id: `tipoLinha-${itemId}`, message: `Preencha o campo obrigatório Tipo de Linha na Linha ${lineNumber}.` },
+                    { id: `formatos-${itemId}`, message: `Selecione ao menos um Formato na Linha ${lineNumber}.`, isMulti: true },
+                    { id: `dataInicio-${itemId}`, message: `Preencha Data de Início na Linha ${lineNumber}.` },
+                    { id: `dataFim-${itemId}`, message: `Preencha Data Fim na Linha ${lineNumber}.` },
+                    { id: `entregaDeterminada-${itemId}`, message: `Preencha Entrega Determinada na Linha ${lineNumber}.` },
+                    { id: `valorUnitario-${itemId}`, message: `Preencha Valor Unitário (R$) na Linha ${lineNumber}.` },
+                    { id: `desconto-${itemId}`, message: `Preencha Desconto (%) na Linha ${lineNumber}.` },
+                    { id: `sites-${itemId}`, message: `Selecione ao menos um Site na Linha ${lineNumber}.`, isMulti: true }
                 ];
 
                 for (const check of checks) {
@@ -782,20 +813,27 @@
                 const posicaoGroup = document.getElementById(`fg-posicao-${itemId}`);
                 const posVideo = document.getElementById(`posicaoVideo-${itemId}`);
                 const skip = document.getElementById(`skip-${itemId}`);
+                const globoplayGroup = document.getElementById(`fg-globoplay-${itemId}`);
+                const globoplay = document.getElementById(`globoplay-${itemId}`);
                 const posicao = document.getElementById(`posicao-${itemId}`);
 
                 if (posVideoGroup && !posVideoGroup.classList.contains('hidden') && posVideo && !String(posVideo.value).trim()) {
-                    alert(`Preencha Posição Vídeo na Linha ${itemId}.`);
+                    alert(`Preencha Posição Vídeo na Linha ${lineNumber}.`);
                     posVideo.focus();
                     return false;
                 }
                 if (skipGroup && !skipGroup.classList.contains('hidden') && skip && !String(skip.value).trim()) {
-                    alert(`Preencha Skip na Linha ${itemId}.`);
+                    alert(`Preencha Skip na Linha ${lineNumber}.`);
                     skip.focus();
                     return false;
                 }
+                if (globoplayGroup && !globoplayGroup.classList.contains('hidden') && globoplay && !String(globoplay.value).trim()) {
+                    alert(`Preencha Globoplay na Linha ${lineNumber}.`);
+                    globoplay.focus();
+                    return false;
+                }
                 if (posicaoGroup && !posicaoGroup.classList.contains('hidden') && posicao && posicao.selectedOptions.length === 0) {
-                    alert(`Selecione ao menos uma Posição na Linha ${itemId}.`);
+                    alert(`Selecione ao menos uma Posição na Linha ${lineNumber}.`);
                     posicao.focus();
                     return false;
                 }
@@ -943,13 +981,16 @@
                 const posVid = hasDAI ? "DAI" : el('posicaoVideo').value;
                 if (posVid) nameParts.push(posVid);
 
-                if (!(hasDAI && !hasVideo)) {
+                if (!hasDAI) {
                     const skipVal = el('skip').value;
                     if (skipVal) nameParts.push(skipVal);
                 }
             }
 
-            nameParts.push(site, dInicio, dFim, itemId);
+            const itemContainer = document.getElementById(`line-item-container-${itemId}`);
+            const orderedItems = Array.from(document.querySelectorAll('#line-items-container .line-item'));
+            const lineNumber = itemContainer ? orderedItems.indexOf(itemContainer) + 1 : itemId;
+            nameParts.push(site, dInicio, dFim, lineNumber);
 
             const name = nameParts.filter(Boolean).join('_');
             el('lineItemName').value = name;
@@ -987,6 +1028,7 @@
             lineItemCount++;
             const itemId = lineItemCount;
             const container = document.getElementById('line-items-container');
+            const lineNumber = container.querySelectorAll('.line-item').length + 1;
 
             // Get today's date in YYYY-MM-DD format for min attribute
             const todayDate = new Date();
@@ -1000,7 +1042,7 @@
 
             itemDiv.innerHTML = `
             <div class="line-item-header">
-                <span class="line-item-title">Linha ${itemId}</span>
+                <span class="line-item-title">Linha ${lineNumber}</span>
                 <div>
                     <button type="button" class="btn btn-secondary" style="margin-right: 10px;" onclick="copyLineItem(${itemId})">Copiar Linha</button>
                     <button type="button" class="btn btn-danger" onclick="removeLineItem(${itemId})">Remover Linha</button>
@@ -1033,6 +1075,15 @@
                 <div class="form-group hidden" id="fg-skip-${itemId}">
                     <label>Skip *</label>
                     <select id="skip-${itemId}" required><option value="">Selecione...</option></select>
+                </div>
+
+                <div class="form-group hidden" id="fg-globoplay-${itemId}">
+                    <label>Globoplay *</label>
+                    <select id="globoplay-${itemId}">
+                        <option value="">Selecione...</option>
+                        <option value="Sim">Sim</option>
+                        <option value="Não">Não</option>
+                    </select>
                 </div>
 
                 ${buildMultiGroup("Posição", "posicao", itemId, true, true)}
@@ -1246,6 +1297,7 @@
 
                 choiceFormatos.setChoices(formatChoices(availableFormatos), 'value', 'label', true);
                 updateSitesForDAI(itemId);
+                updateGloboplayField(itemId);
                 formatLineName(itemId);
             });
 
@@ -1258,6 +1310,14 @@
                 const fgSkip = document.getElementById(`fg-skip-${itemId}`);
                 const posVideoSelect = el('posicaoVideo');
                 const skipSelect = el('skip');
+
+                // A format change invalidates the previous video-position/skip pair.
+                choiceSkip.clearStore();
+                choiceSkip.setChoices(
+                    dropdownData.skip.map(opt => ({ value: opt, label: opt })),
+                    'value', 'label', true
+                );
+                skipSelect.value = '';
 
                 if (hasVideo && !hasDAI) {
                     // Show Posição Vídeo WITHOUT the DAI option
@@ -1290,6 +1350,7 @@
                     setConditionalRequired(itemId, 'skip', false);
                     posVideoSelect.value = '';
                 }
+                updateGloboplayField(itemId);
                 formatLineName(itemId);
                 updateSitesForDAI(itemId);
             });
@@ -1304,6 +1365,7 @@
                     fgSkip.classList.add('hidden');
                     setConditionalRequired(itemId, 'skip', false);
                 }
+                updateGloboplayField(itemId);
             });
 
             ['entregaDeterminada', 'valorUnitario', 'desconto'].forEach(id => {
@@ -1346,27 +1408,11 @@
         function reorderLines() {
             const container = document.getElementById('line-items-container');
             const items = container.querySelectorAll('.line-item');
-            lineItemCount = items.length;
 
             items.forEach((item, index) => {
-                const newId = index + 1;
-                const oldId = parseInt(item.id.replace('line-item-container-', ''));
-                item.querySelector('.line-item-title').textContent = `Linha ${newId}`;
-                item.querySelector('.btn-danger').setAttribute('onclick', `removeLineItem(${newId})`);
-                item.id = `line-item-container-${newId}`;
-
-                const elementsWithIds = item.querySelectorAll('[id]');
-                elementsWithIds.forEach(el => {
-                    el.id = el.id.replace(`-${oldId}`, `-${newId}`);
-                });
-
-                choicesInstances.forEach(c => {
-                    if (c.id.endsWith(`-${oldId}`)) {
-                        c.id = c.id.replace(`-${oldId}`, `-${newId}`);
-                    }
-                });
-
-                formatLineName(newId);
+                const itemId = parseInt(item.id.replace('line-item-container-', ''));
+                item.querySelector('.line-item-title').textContent = `Linha ${index + 1}`;
+                formatLineName(itemId);
             });
 
             updateLineItemAddButtons();
@@ -1431,7 +1477,7 @@
 
             const headers = [
                 'Nome da Linha', 'Propriedades', 'Tipo de Linha', 'Formatos',
-                'Posição Vídeo', 'Skip', 'Posição', 'Data de Início', 'Data Fim',
+                'Posição Vídeo', 'Skip', 'Globoplay', 'Posição', 'Data de Início', 'Data Fim',
                 'Entrega Determinada', 'Valor Unitário (R$)', 'Total Tabela (R$)',
                 'Desconto (%)', 'Total Negociado (R$)', 'Site', 'Editoria / Programa',
                 'Geolocalização', 'Caso Under, programar o disponível?', 'Cidades',
@@ -1456,7 +1502,16 @@
                     const el = field => document.getElementById(`${field}-${id}`) ? document.getElementById(`${field}-${id}`).value : "";
 
                     const formatRaw = getMultipleChoicesValue(`formatos-${id}`);
-                    const isDAI = formatRaw.toUpperCase().includes("DAI");
+                    const selectedFormats = formatRaw.split(',').map(value => value.trim().toUpperCase()).filter(Boolean);
+                    const isDAI = selectedFormats.includes("DAI");
+                    const isVideo = selectedFormats.includes("VIDEO");
+                    const tipoLinha = el('tipoLinha');
+                    const exportGloboplay = tipoLinha === 'VIDEO'
+                        && isVideo
+                        && !isDAI
+                        && isPreRoll(el('posicaoVideo'))
+                        ? el('globoplay').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                        : '';
 
                     const formatMapped = mapValues(formatRaw, mappings.formatos);
 
@@ -1468,11 +1523,12 @@
                     let rowArr = [
                         el('lineItemName'),
                         el('propriedade'),
-                        el('tipoLinha'),
+                        tipoLinha,
                         formatMapped,
-                        isDAI ? 'DAI' : el('posicaoVideo'),
-                        isDAI ? 'Sem Skip' : el('skip'),
-                        getMultipleChoicesValue(`posicao-${id}`),
+                        isDAI ? 'DAI' : (isVideo ? el('posicaoVideo') : ''),
+                        isDAI ? 'Sem Skip' : (isVideo ? el('skip') : ''),
+                        exportGloboplay,
+                        tipoLinha === 'DISPLAY' ? getMultipleChoicesValue(`posicao-${id}`) : '',
                         el('dataInicio'),
                         el('dataFim'),
                         el('entregaDeterminada'),
@@ -1501,6 +1557,9 @@
             }
 
             const worksheet = XLSX.utils.aoa_to_sheet(aoa);
+            worksheet['!protect'] = {
+                password: EXCEL_PROTECTION_PASSWORD
+            };
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "Campanha");
             XLSX.writeFile(workbook, `Campanha_${nomeCampanha}.xlsx`);
@@ -1548,7 +1607,7 @@
             });
 
             // 4. Copy standard inputs
-            const fields = ['dataInicio', 'dataFim', 'entregaDeterminada', 'valorUnitario', 'desconto', 'editoria', 'cidades', 'observacoes'];
+            const fields = ['globoplay', 'dataInicio', 'dataFim', 'entregaDeterminada', 'valorUnitario', 'desconto', 'editoria', 'cidades', 'observacoes'];
             fields.forEach(f => {
                 const src = document.getElementById(`${f}-${sourceId}`);
                 const dst = document.getElementById(`${f}-${newId}`);
