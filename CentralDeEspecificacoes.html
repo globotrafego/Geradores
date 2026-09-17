@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Central de Especificações)</title>
+<title>Catálogo de Tráfego — Premium (Bootstrap)</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
 <style>
   :root{
@@ -262,6 +262,45 @@
   .composed-preview.show{display:block}
   .composed-preview-title{margin:0 0 10px;font-size:13px;font-weight:700;letter-spacing:.02em;color:var(--brand)}
   .composed-preview-title span{font-weight:400;color:var(--muted)}
+  .composed-preview-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+  .composed-preview-head .composed-preview-title{margin:0}
+  .composed-expand-btn{
+    display:inline-flex;align-items:center;gap:5px;flex-shrink:0;
+    padding:5px 10px;border-radius:8px;border:1px solid var(--line);
+    background:var(--bs-tertiary-bg);color:var(--ink);font-size:11.5px;font-weight:600;cursor:pointer;
+  }
+  .composed-expand-btn:hover{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .composed-expand-btn svg{width:13px;height:13px}
+
+  .expand-modal{position:fixed;inset:0;z-index:10000;display:none;align-items:center;justify-content:center;padding:20px}
+  .expand-modal.show{display:flex}
+  .expand-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.78)}
+  .expand-modal-box{
+    position:relative;background:#0b0b12;border-radius:12px;padding:14px;
+    box-shadow:0 20px 60px rgba(0,0,0,.5);
+    max-width:calc(100vw - 40px);max-height:calc(100vh - 40px);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .expand-modal-close{
+    position:absolute;top:-14px;right:-14px;width:30px;height:30px;border-radius:50%;
+    border:2px solid #0b0b12;background:#fff;color:#0b0b12;font-size:16px;line-height:1;
+    cursor:pointer;z-index:2;display:flex;align-items:center;justify-content:center;font-weight:700;
+  }
+  .expand-modal-stage{position:relative;overflow:hidden;border-radius:8px;flex-shrink:0}
+  .expand-modal-stage .composed-preview-frame{width:100%!important;height:100%!important;max-width:none!important}
+  .expand-modal-stage .composed-preview-frame.carousel-frame{max-height:none!important}
+  .expand-modal-stage .media-frame{width:100%!important;height:100%!important;display:block!important}
+  .expand-modal-stage .media-frame img,
+  .expand-modal-stage .media-frame video{width:100%!important;height:100%!important;object-fit:cover!important}
+  .expand-modal-stage .media-frame .html5-frame{width:100%!important;height:100%!important}
+  .media-expand-btn{
+    position:absolute;top:8px;right:8px;z-index:3;
+    display:inline-flex;align-items:center;justify-content:center;
+    width:28px;height:28px;border-radius:8px;border:1px solid rgba(255,255,255,.4);
+    background:rgba(0,0,0,.55);color:#fff;cursor:pointer;
+  }
+  .media-expand-btn:hover{background:var(--brand);border-color:var(--brand)}
+  .media-expand-btn svg{width:14px;height:14px}
   .composed-preview-frame{
     position:relative;width:640px;max-width:100%;
     background:repeating-conic-gradient(var(--bs-secondary-bg) 0% 25%, var(--bs-tertiary-bg) 0% 50%) 50%/16px 16px;
@@ -294,6 +333,18 @@
   .composed-preview-frame.carousel-frame .composed-slot.active-tab{display:flex;align-items:center;justify-content:center}
   .composed-preview-frame.carousel-frame .composed-slot img,
   .composed-preview-frame.carousel-frame .composed-slot video{width:auto;height:auto;max-width:100%;max-height:100%;object-fit:contain}
+
+  .composed-slot.reserved-zone.empty{background:rgba(239,68,68,.35)}
+  .composed-slot.reserved-zone{box-shadow:0 0 0 2px rgba(153,27,27,.85) inset;box-sizing:border-box}
+  .composed-slot.reserved-zone.empty::after{color:#fff;font-weight:700}
+  .reserve-zone-box{
+    position:absolute;background:rgba(239,68,68,.35);box-shadow:0 0 0 2px rgba(153,27,27,.85) inset;box-sizing:border-box;
+    display:flex;align-items:flex-end;justify-content:center;padding:6px;
+  }
+  .reserve-zone-label{
+    font-size:10.5px;font-weight:700;color:#fff;background:rgba(153,27,27,.9);
+    padding:3px 9px;border-radius:999px;text-align:center;white-space:nowrap;
+  }
 
   .position-picker{
     display:flex;flex-direction:column;gap:10px;
@@ -394,6 +445,15 @@
   }
   .media-frame{position:relative;display:inline-block;flex-shrink:0}
   .media-frame img{display:block}
+  .html5-frame{display:none;border:0;background:#fff;width:100%;height:100%;position:absolute;inset:0}
+  .media-frame.html5-active img{visibility:hidden}
+  .media-frame.html5-active .html5-frame{display:block}
+  .html5-click-hint{
+    display:none;position:absolute;left:50%;bottom:8px;transform:translateX(-50%);z-index:2;
+    background:rgba(0,0,0,.7);color:#fff;font-size:10.5px;font-weight:600;
+    padding:4px 10px;border-radius:999px;pointer-events:none;white-space:nowrap;
+  }
+  .media-frame.html5-active .html5-click-hint{display:block}
   .safe-area-overlay{
     position:absolute;inset:0;display:none;border-radius:10px;overflow:hidden;pointer-events:none;
   }
@@ -526,20 +586,20 @@
       </button>
     </div>
 
-    <section class="menu-section" id="formats-section">
+    <section class="menu-section collapsed" id="formats-section">
       <button class="menu-title" type="button"><span>Formatos</span><span class="chevron">⌄</span></button>
       <div class="menu-content" id="formats-menu"></div>
     </section>
 
-    <section class="menu-section" id="editorias-section">
+    <section class="menu-section collapsed" id="editorias-section">
       <button class="menu-title" type="button"><span>Editorias</span><span class="chevron">⌄</span></button>
       <div class="menu-content" id="editorias-menu"></div>
     </section>
 
-    <section class="menu-section" id="diarias-section">
+    <section class="menu-section collapsed" id="diarias-section">
       <button class="menu-title" type="button"><span>Diárias</span><span class="chevron">⌄</span></button>
       <div class="menu-content" id="diarias-menu">
-        <button class="menu-item" data-type="diarias-seletor" data-value="">Consultar diárias</button>
+        <button class="menu-item" data-type="diarias-seletor" data-value="">Mapa de diárias</button>
       </div>
     </section>
 
@@ -592,8 +652,6 @@ const SHEETS_CONFIG = {
   }
 };
 
-/* Parser de CSV simples e robusto (lida com aspas, vírgulas e
-   quebras de linha dentro de campos). */
 function parseCSV(text){
   const rows = [];
   let row = [];
@@ -794,6 +852,7 @@ function initMenu(){
       updateSidebarCollapsedState();
     });
   });
+  updateSidebarCollapsedState();
 
   document.querySelector('.sidebar').addEventListener('click', event=>{
     const item = event.target.closest('.menu-item');
@@ -895,7 +954,7 @@ function mimeToExt(mime){
 
 function matchesFileType(ext, types){
   if(!ext) return false;
-  const aliases = { jpg:['jpg','jpeg'], jpeg:['jpg','jpeg'] };
+  const aliases = { jpg:['jpg','jpeg'], jpeg:['jpg','jpeg'], zip:['zip','html5'] };
   const candidates = aliases[ext] || [ext];
   return types.some(t => candidates.includes(t));
 }
@@ -918,6 +977,13 @@ function checkIcon(kind){
    "Peso X" e "Tipo de Arquivo X" para X em Imagem, Logo, Vídeo e QR
    Code. Uma peça só existe para o formato se sua coluna "Dimensão X"
    estiver preenchida e não disser explicitamente "não tem". */
+
+const ZIP_ASSET_MIME = {
+  png:'image/png', jpg:'image/jpeg', jpeg:'image/jpeg', gif:'image/gif', svg:'image/svg+xml', webp:'image/webp',
+  js:'text/javascript', css:'text/css', json:'application/json',
+  woff:'font/woff', woff2:'font/woff2', ttf:'font/ttf', otf:'font/otf', eot:'application/vnd.ms-fontobject',
+  mp4:'video/mp4', mp3:'audio/mpeg', ogg:'audio/ogg', wav:'audio/wav',
+};
 
 const ASSET_TYPES = [
   { key: 'Imagem', kind: 'image', label: null },
@@ -950,17 +1016,23 @@ function buildPieces(item){
   if(!raw.length){
     raw.push({ kind: 'image', rawLabel: null, specs: { dims: [], weightLimit: null, types: [] } });
   }
+  // Pause Ad Takeover: campo de vídeo apenas para conferência no preview,
+  // sem regras de validação (dimensão/peso/tipo livres)
+  if(item.Formato === PAUSEAD_TAKEOVER_FORMAT && !raw.some(p => p.kind === 'video')){
+    raw.push({ kind: 'video', rawLabel: 'Vídeo', specs: { dims: [], weightLimit: null, types: [] } });
+  }
   const multi = raw.length > 1;
   return raw.map(p => ({ kind: p.kind, label: multi ? (p.rawLabel || 'Imagem') : null, specs: p.specs }));
 }
 
 function assetFieldsMarkup({ dims, weightLimit, types }, rulesLabel, kind, safeArea){
   const isVideo = kind === 'video';
+  const acceptsHtml5 = !isVideo && types.some(t => /html5/i.test(t));
   const dimsLabel = dims.length ? dims.map(d => `${d.w}×${d.h}px`).join(' ou ') : 'não informado';
   const weightLabel = weightLimit ? `até ${weightLimit}KB` : 'não informado';
   const typesLabel = types.length ? types.join(', ') : 'não informado';
-  const accept = isVideo ? 'video/*' : 'image/*';
-  const dropLabel = isVideo ? 'Solte o vídeo aqui' : 'Solte a peça aqui';
+  const accept = isVideo ? 'video/*' : (acceptsHtml5 ? 'image/*,.zip,application/zip,application/x-zip-compressed' : 'image/*');
+  const dropLabel = isVideo ? 'Solte o vídeo aqui' : (acceptsHtml5 ? 'Solte a imagem ou o .zip do HTML5 aqui' : 'Solte a peça aqui');
   const dropIcon = isVideo
     ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="15" height="14" rx="2"></rect><path d="M22 8.5l-5 3.5 5 3.5v-7z"></path></svg>'
     : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M12 4l-4 4M12 4l4 4"></path><path d="M20 16.5A3.5 3.5 0 0016.5 13H15a5 5 0 10-9.9 1.1A3.5 3.5 0 006 20.5h13a3.5 3.5 0 001-4z"></path></svg>';
@@ -969,15 +1041,19 @@ function assetFieldsMarkup({ dims, weightLimit, types }, rulesLabel, kind, safeA
     : '<img data-preview-media alt="Pré-visualização" />';
 
   const useSafeArea = !!safeArea && !isVideo;
-  const mediaMarkup = useSafeArea
-    ? `<div class="media-frame" data-media-frame>
+  const mediaMarkup = `<div class="media-frame" data-media-frame>
         ${previewTag}
+        ${acceptsHtml5 ? '<iframe data-preview-html5 class="html5-frame" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" title="Preview do HTML5" scrolling="no"></iframe>' : ''}
+        ${acceptsHtml5 ? '<span class="html5-click-hint" data-html5-click-hint>Clique para testar o clickTag ↗</span>' : ''}
+        ${useSafeArea ? `
         <div class="safe-area-overlay" data-safe-area>
           <div class="safe-zone" data-safe-zone><span class="safe-area-badge safe" data-safe-badge>Área segura</span></div>
           <div class="reserved-zone" data-reserved-zone><span class="safe-area-badge reserved">Área reservada CTA</span></div>
-        </div>
-      </div>`
-    : previewTag;
+        </div>` : ''}
+        <button type="button" class="media-expand-btn" data-media-expand title="Ampliar preview">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"></path><path d="M9 21H3v-6"></path><path d="M21 3l-7 7"></path><path d="M3 21l7-7"></path></svg>
+        </button>
+      </div>`;
 
   return `
     <p class="validator-sub">${esc(rulesLabel)}: <b>${esc(dimsLabel)}</b> · peso ${esc(weightLabel)} · tipos ${esc(typesLabel)}</p>
@@ -993,6 +1069,8 @@ function assetFieldsMarkup({ dims, weightLimit, types }, rulesLabel, kind, safeA
       <p><strong>${esc(dropLabel)}</strong> ou clique para selecionar</p>
       <input type="file" accept="${accept}" data-file-input />
     </label>
+
+    ${acceptsHtml5 ? `<p class="validator-sub" style="margin-top:-6px">O .zip do HTML5 deve conter um arquivo .html com a tag <code>&lt;meta name="ad.size" content="width=X,height=Y"&gt;</code> para a dimensão ser conferida automaticamente.</p>` : ''}
 
     ${isVideo ? `
     <div class="url-input-wrap" data-url-wrap>
@@ -1055,6 +1133,7 @@ function positionPickerMarkup(divOptions){
 }
 
 const TOUCHPOINT_SAFE_AREA_FORMAT = 'TOUCH POINT BOTTOM IMAGERY';
+const PAUSEAD_TAKEOVER_FORMAT = 'PAUSE AD TAKEOVER';
 const TOUCHPOINT_DESKTOP_WIDTH = 1920;
 const TOUCHPOINT_MOBILE_WIDTH = 430;
 const TOUCHPOINT_SAFE_AREA_DESKTOP_PX = 742;
@@ -1128,7 +1207,91 @@ const COMPOSED_LAYOUTS = {
   'SCAN QRCODE': {
     type: 'carousel', tabs: ['Imagem', 'QR Code']
   },
+
+  // imagem de fundo inteira + zonas que serão cobertas por vídeo/QR Code
+  // (posição e tamanho vêm da especificação de segurança do formato)
+  'PAUSE AD TAKEOVER': {
+    type: 'canvas-overlay', w: 1920, h: 1080,
+    base: 'Imagem',
+    overlays: [
+      { pieceLabel: 'Vídeo', label: 'Thumb (vídeo)', x: 0, y: 1080 - 472, w: 840, h: 472 },
+    ],
+    markers: [
+      { label: 'QR Code', x: 1920 - 265, y: 1080 - 375, w: 265, h: 375 },
+    ]
+  },
 };
+
+function expandButtonMarkup(){
+  return `<button type="button" class="composed-expand-btn" data-composed-expand title="Ampliar preview">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"></path><path d="M9 21H3v-6"></path><path d="M21 3l-7 7"></path><path d="M3 21l7-7"></path></svg>
+    Ampliar
+  </button>`;
+}
+
+const EXPAND_MODAL_MAX_W = 907;
+const EXPAND_MODAL_MAX_H = 509;
+let expandOriginalParent = null;
+let expandOriginalNext = null;
+let expandedNode = null;
+
+function ensureExpandModal(){
+  let modal = document.getElementById('expand-modal');
+  if(modal) return modal;
+  modal = document.createElement('div');
+  modal.id = 'expand-modal';
+  modal.className = 'expand-modal';
+  modal.innerHTML = `
+    <div class="expand-modal-backdrop" data-expand-close></div>
+    <div class="expand-modal-box">
+      <button type="button" class="expand-modal-close" data-expand-close>&times;</button>
+      <div class="expand-modal-stage" data-expand-stage></div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.querySelectorAll('[data-expand-close]').forEach(el => el.addEventListener('click', closeExpandModal));
+  document.addEventListener('keydown', e => { if(e.key === 'Escape') closeExpandModal(); });
+  return modal;
+}
+
+function openExpandModal(frameNode){
+  const modal = ensureExpandModal();
+  const stage = modal.querySelector('[data-expand-stage]');
+
+  let ratio = EXPAND_MODAL_MAX_W / EXPAND_MODAL_MAX_H;
+  const arStyle = frameNode.style.aspectRatio;
+  if(arStyle){
+    const parts = arStyle.split('/').map(s => parseFloat(s));
+    if(parts.length === 2 && parts[0] > 0 && parts[1] > 0) ratio = parts[0] / parts[1];
+  } else {
+    const rect = frameNode.getBoundingClientRect();
+    if(rect.width > 0 && rect.height > 0) ratio = rect.width / rect.height;
+  }
+
+  const w = Math.min(EXPAND_MODAL_MAX_W, EXPAND_MODAL_MAX_H * ratio);
+  const h = Math.min(EXPAND_MODAL_MAX_H, EXPAND_MODAL_MAX_W / ratio);
+  stage.style.width = w + 'px';
+  stage.style.height = h + 'px';
+
+  expandOriginalParent = frameNode.parentNode;
+  expandOriginalNext = frameNode.nextSibling;
+  expandedNode = frameNode;
+  frameNode.classList.add('expanded-in-modal');
+  stage.appendChild(frameNode);
+
+  modal.classList.add('show');
+}
+
+function closeExpandModal(){
+  const modal = document.getElementById('expand-modal');
+  if(!modal || !modal.classList.contains('show')) return;
+  modal.classList.remove('show');
+  if(expandedNode && expandOriginalParent){
+    expandedNode.classList.remove('expanded-in-modal');
+    if(expandOriginalNext) expandOriginalParent.insertBefore(expandedNode, expandOriginalNext);
+    else expandOriginalParent.appendChild(expandedNode);
+  }
+  expandedNode = null; expandOriginalParent = null; expandOriginalNext = null;
+}
 
 function composedPreviewMarkup(layout){
   if(layout.type === 'overlay'){
@@ -1142,7 +1305,10 @@ function composedPreviewMarkup(layout){
     const canvasEmptyLabel = `${layout.canvasLabel} (${layout.w}×${layout.h}px)`;
     return `
       <div class="composed-preview" data-composed-preview>
-        <h4 class="composed-preview-title">Preview montado <span>(${layout.w}×${layout.h}px)</span></h4>
+        <div class="composed-preview-head">
+          <h4 class="composed-preview-title">Preview montado <span>(${layout.w}×${layout.h}px)</span></h4>
+          ${expandButtonMarkup()}
+        </div>
         <div class="composed-preview-frame" style="aspect-ratio:${layout.w}/${layout.h}">
           <div class="composed-slot empty" data-composed-slot="0" data-piece-label="${esc(layout.canvasLabel)}" data-empty-label="${esc(canvasEmptyLabel)}" style="left:0;top:0;width:100%;height:100%"></div>
           ${overlaysHtml}
@@ -1156,12 +1322,47 @@ function composedPreviewMarkup(layout){
     const slotsHtml = layout.tabs.map((t, i) => `<div class="composed-slot empty ${i === 0 ? 'active-tab' : ''}" data-composed-slot="${i}" data-piece-label="${esc(t)}" data-empty-label="${esc(t)}"></div>`).join('');
     return `
       <div class="composed-preview" data-composed-preview>
-        <h4 class="composed-preview-title">Preview das peças</h4>
+        <div class="composed-preview-head">
+          <h4 class="composed-preview-title">Preview das peças</h4>
+          ${expandButtonMarkup()}
+        </div>
         <div class="composed-tabs" data-composed-tabs>${tabsHtml}</div>
         <div class="composed-preview-frame carousel-frame" data-composed-carousel-frame>
           ${slotsHtml}
         </div>
         <p class="composed-preview-hint">As peças deste formato se alternam — use as abas para ver cada uma.</p>
+      </div>`;
+  }
+
+  if(layout.type === 'canvas-overlay'){
+    const baseEmptyLabel = `${layout.base} (${layout.w}×${layout.h}px)`;
+    const overlaysHtml = layout.overlays.map((o, i) => {
+      const left = (o.x / layout.w * 100).toFixed(3) + '%';
+      const top = (o.y / layout.h * 100).toFixed(3) + '%';
+      const width = (o.w / layout.w * 100).toFixed(3) + '%';
+      const height = (o.h / layout.h * 100).toFixed(3) + '%';
+      const emptyLabel = `${o.label} (${o.w}×${o.h}px)`;
+      return `<div class="composed-slot reserved-zone empty" data-composed-slot="${i + 1}" data-piece-label="${esc(o.pieceLabel)}" data-empty-label="${esc(emptyLabel)}" style="left:${left};top:${top};width:${width};height:${height}"></div>`;
+    }).join('');
+    const markersHtml = (layout.markers || []).map(m => {
+      const left = (m.x / layout.w * 100).toFixed(3) + '%';
+      const top = (m.y / layout.h * 100).toFixed(3) + '%';
+      const width = (m.w / layout.w * 100).toFixed(3) + '%';
+      const height = (m.h / layout.h * 100).toFixed(3) + '%';
+      return `<div class="reserve-zone-box" style="left:${left};top:${top};width:${width};height:${height}"><span class="reserve-zone-label">${esc(m.label)} (${m.w}×${m.h}px)</span></div>`;
+    }).join('');
+    return `
+      <div class="composed-preview" data-composed-preview>
+        <div class="composed-preview-head">
+          <h4 class="composed-preview-title">Preview montado <span>(${layout.w}×${layout.h}px)</span></h4>
+          ${expandButtonMarkup()}
+        </div>
+        <div class="composed-preview-frame" style="aspect-ratio:${layout.w}/${layout.h}">
+          <div class="composed-slot empty" data-composed-slot="0" data-piece-label="${esc(layout.base)}" data-empty-label="${esc(baseEmptyLabel)}" style="left:0;top:0;width:100%;height:100%"></div>
+          ${overlaysHtml}
+          ${markersHtml}
+        </div>
+        <p class="composed-preview-hint">As áreas destacadas em vermelho serão cobertas pelo vídeo/QR Code — evite conteúdo importante nelas. O vídeo é só para conferência, sem validação de peso/tipo/dimensão.</p>
       </div>`;
   }
 
@@ -1176,7 +1377,10 @@ function composedPreviewMarkup(layout){
   }).join('');
   return `
     <div class="composed-preview" data-composed-preview>
-      <h4 class="composed-preview-title">Preview do banner montado <span>(${layout.w}×${layout.h}px)</span></h4>
+      <div class="composed-preview-head">
+        <h4 class="composed-preview-title">Preview do banner montado <span>(${layout.w}×${layout.h}px)</span></h4>
+        ${expandButtonMarkup()}
+      </div>
       <div class="composed-preview-frame" style="aspect-ratio:${layout.w}/${layout.h}">
         ${slotsHtml}
       </div>
@@ -1291,6 +1495,11 @@ function attachValidator(root, item, specs, label, positionCtx, kind, onMediaCha
   const verdict = root.querySelector('[data-verdict]');
   const checklist = root.querySelector('[data-checklist]');
   const safeAreaOverlay = root.querySelector('[data-safe-area]');
+  const mediaFrame = root.querySelector('[data-media-frame]');
+  const mediaExpandBtn = root.querySelector('[data-media-expand]');
+  if(mediaExpandBtn && mediaFrame){
+    mediaExpandBtn.addEventListener('click', () => openExpandModal(mediaFrame));
+  }
   const safeZone = root.querySelector('[data-safe-zone]');
   const reservedZone = root.querySelector('[data-reserved-zone]');
   const safeAreaLegend = root.querySelector('[data-safe-area-legend]');
@@ -1299,6 +1508,9 @@ function attachValidator(root, item, specs, label, positionCtx, kind, onMediaCha
   if(!dropzone || !input) return;
 
   const { dims, weightLimit, types } = specs;
+  const acceptsHtml5 = !isVideo && types.some(t => /html5/i.test(t));
+  const html5Frame = root.querySelector('[data-preview-html5]');
+  let html5ObjectUrl = null;
 
   function reset(){
     previewWrap.classList.remove('show');
@@ -1308,6 +1520,10 @@ function attachValidator(root, item, specs, label, positionCtx, kind, onMediaCha
     input.value = '';
     if(safeAreaOverlay) safeAreaOverlay.classList.remove('show');
     if(safeAreaLegend) safeAreaLegend.classList.remove('show');
+    if(mediaFrame) mediaFrame.style.aspectRatio = '';
+    if(mediaFrame) mediaFrame.classList.remove('html5-active');
+    if(html5Frame) html5Frame.removeAttribute('src');
+    if(html5ObjectUrl){ URL.revokeObjectURL(html5ObjectUrl); html5ObjectUrl = null; }
     if(isVideo){
       try{ previewMedia.pause(); }catch(e){}
       previewMedia.removeAttribute('src');
@@ -1323,19 +1539,23 @@ function attachValidator(root, item, specs, label, positionCtx, kind, onMediaCha
     if(onMediaChange) onMediaChange(null);
   }
 
-  function finalize({ realW, realH, sizeKB, ext, mediaUrl, displayName }){
+  function finalize({ realW, realH, sizeKB, ext, mediaUrl, displayName, isHtml5, clickTagUrl }){
     const checks = [];
 
     let dimOk = null;
     if(dims.length){
-      dimOk = dims.some(d => d.w === realW && d.h === realH);
-      checks.push({
-        kind: dimOk ? 'ok' : 'bad',
-        title: 'Dimensão',
-        value: `arquivo ${realW}×${realH}px — esperado ${dims.map(d=>`${d.w}×${d.h}px`).join(' ou ')}`
-      });
+      if(realW == null || realH == null){
+        checks.push({ kind:'warn', title:'Dimensão', value:`não foi possível confirmar automaticamente pelo arquivo — esperado ${dims.map(d=>`${d.w}×${d.h}px`).join(' ou ')}. Confira manualmente no preview.` });
+      } else {
+        dimOk = dims.some(d => d.w === realW && d.h === realH);
+        checks.push({
+          kind: dimOk ? 'ok' : 'bad',
+          title: 'Dimensão',
+          value: `arquivo ${realW}×${realH}px — esperado ${dims.map(d=>`${d.w}×${d.h}px`).join(' ou ')}`
+        });
+      }
     } else {
-      checks.push({ kind:'warn', title:'Dimensão', value:`arquivo ${realW}×${realH}px — spec não informa dimensão exata` });
+      checks.push({ kind:'warn', title:'Dimensão', value:`${realW != null ? `arquivo ${realW}×${realH}px — ` : ''}spec não informa dimensão exata` });
     }
 
     if(sizeKB != null){
@@ -1375,6 +1595,14 @@ function attachValidator(root, item, specs, label, positionCtx, kind, onMediaCha
       checks.push({ kind:'warn', title:'Tipo de arquivo', value:`arquivo .${ext || '??'} — spec não informa tipos aceitos` });
     }
 
+    if(isHtml5){
+      if(clickTagUrl){
+        checks.push({ kind:'ok', title:'ClickTag', value:`detectado no arquivo: ${clickTagUrl} — clique no preview abaixo para confirmar o redirecionamento` });
+      } else {
+        checks.push({ kind:'warn', title:'ClickTag', value:'não encontrei uma variável clickTag automaticamente no HTML — clique no preview abaixo para confirmar manualmente se a peça é clicável e redireciona corretamente' });
+      }
+    }
+
     checklist.innerHTML = checks.map(c => `
       <div class="check-item ${c.kind}">
         ${checkIcon(c.kind)}
@@ -1390,11 +1618,19 @@ function attachValidator(root, item, specs, label, positionCtx, kind, onMediaCha
       : `${checkIcon('ok')} ${pieceName} aprovada para o formato ${esc(item.Formato)}`;
 
     fname.textContent = displayName;
-    fmeta.textContent = `${realW}×${realH}px${sizeKB != null ? ' · ' + sizeKB.toFixed(1) + 'KB' : ''} · .${ext || '??'}`;
-    previewMedia.src = mediaUrl;
-    if(isVideo) previewMedia.load();
+    fmeta.textContent = `${realW != null ? `${realW}×${realH}px` : 'dimensão não confirmada'}${sizeKB != null ? ' · ' + sizeKB.toFixed(1) + 'KB' : ''} · .${ext || '??'}`;
+    if(isHtml5){
+      if(mediaFrame) mediaFrame.classList.add('html5-active');
+      if(html5Frame) html5Frame.src = mediaUrl;
+    } else {
+      if(mediaFrame) mediaFrame.classList.remove('html5-active');
+      if(html5Frame) html5Frame.removeAttribute('src');
+      previewMedia.src = mediaUrl;
+      if(isVideo) previewMedia.load();
+    }
     previewWrap.classList.add('show');
     if(onMediaChange) onMediaChange({ url: mediaUrl, isVideo });
+    if(mediaFrame && realW > 0 && realH > 0) mediaFrame.style.aspectRatio = `${realW} / ${realH}`;
 
     if(safeAreaOverlay){
       if(!isVideo && realW > 0){
@@ -1423,6 +1659,9 @@ function attachValidator(root, item, specs, label, positionCtx, kind, onMediaCha
   }
 
   function runValidation(file){
+    const isZip = acceptsHtml5 && (/\.zip$/i.test(file.name) || /zip/i.test(file.type));
+    if(isZip){ runHtml5Validation(file); return; }
+
     const url = URL.createObjectURL(file);
     if(isVideo){
       const probe = document.createElement('video');
@@ -1450,6 +1689,84 @@ function attachValidator(root, item, specs, label, positionCtx, kind, onMediaCha
         verdict.innerHTML = `${checkIcon('bad')} Não foi possível ler esta imagem.`;
       };
       img.src = url;
+    }
+  }
+
+  async function runHtml5Validation(file){
+    verdict.classList.remove('show','pass','fail');
+    checklist.classList.remove('show');
+    checklist.innerHTML = '';
+    fname.textContent = 'Lendo o .zip…';
+    fmeta.textContent = '';
+    previewWrap.classList.add('show');
+
+    try{
+      if(typeof JSZip === 'undefined') throw new Error('biblioteca de leitura de .zip não carregou (verifique a conexão)');
+      const zip = await JSZip.loadAsync(file);
+      const htmlEntries = Object.values(zip.files).filter(f => !f.dir && /\.html?$/i.test(f.name));
+      if(!htmlEntries.length) throw new Error('nenhum arquivo .html encontrado dentro do .zip');
+      let indexEntry = htmlEntries.find(f => /(^|\/)index\.html?$/i.test(f.name));
+      if(!indexEntry){
+        indexEntry = htmlEntries.length === 1
+          ? htmlEntries[0]
+          : [...htmlEntries].sort((a, b) => a.name.length - b.name.length)[0];
+      }
+
+      let htmlText = await indexEntry.async('text');
+
+      let realW = null, realH = null;
+      const adSizeMatch = /<meta[^>]*name=["']ad\.size["'][^>]*content=["']([^"']*)["']/i.exec(htmlText)
+        || /<meta[^>]*content=["']([^"']*)["'][^>]*name=["']ad\.size["']/i.exec(htmlText);
+      if(adSizeMatch){
+        const wMatch = /width\s*=\s*(\d+)/i.exec(adSizeMatch[1]);
+        const hMatch = /height\s*=\s*(\d+)/i.exec(adSizeMatch[1]);
+        if(wMatch && hMatch){ realW = parseInt(wMatch[1], 10); realH = parseInt(hMatch[1], 10); }
+      }
+
+      let clickTagUrl = null;
+      const clickTagVarMatch = /(?:var\s+|window\.)?clickTag\d*\s*=\s*["']([^"']+)["']/i.exec(htmlText);
+      if(clickTagVarMatch){
+        clickTagUrl = clickTagVarMatch[1];
+      } else {
+        const clickTagMetaMatch = /<meta[^>]*name=["']clickTag["'][^>]*content=["']([^"']*)["']/i.exec(htmlText)
+          || /<meta[^>]*content=["']([^"']*)["'][^>]*name=["']clickTag["']/i.exec(htmlText);
+        if(clickTagMetaMatch) clickTagUrl = clickTagMetaMatch[1];
+      }
+
+      const baseDir = indexEntry.name.includes('/') ? indexEntry.name.slice(0, indexEntry.name.lastIndexOf('/') + 1) : '';
+      const otherFiles = Object.values(zip.files).filter(f => !f.dir && f.name !== indexEntry.name);
+      for(const f of otherFiles){
+        const relName = f.name.startsWith(baseDir) ? f.name.slice(baseDir.length) : f.name;
+        const baseName = f.name.split('/').pop();
+        const extension = (f.name.split('.').pop() || '').toLowerCase();
+        const mime = ZIP_ASSET_MIME[extension] || 'application/octet-stream';
+        let dataUri;
+        try{
+          const base64 = await f.async('base64');
+          dataUri = `data:${mime};base64,${base64}`;
+        } catch(e){ continue; }
+        [f.name, relName, baseName]
+          .filter((v, i, arr) => v && arr.indexOf(v) === i)
+          .forEach(name => { htmlText = htmlText.split(name).join(dataUri); });
+      }
+
+      if(html5ObjectUrl) URL.revokeObjectURL(html5ObjectUrl);
+      const blob = new Blob([htmlText], { type: 'text/html' });
+      html5ObjectUrl = URL.createObjectURL(blob);
+
+      finalize({
+        realW, realH,
+        sizeKB: file.size / 1024,
+        ext: 'zip',
+        mediaUrl: html5ObjectUrl,
+        displayName: file.name,
+        isHtml5: true,
+        clickTagUrl
+      });
+    } catch(err){
+      previewWrap.classList.remove('show');
+      verdict.classList.add('show', 'fail');
+      verdict.innerHTML = `${checkIcon('bad')} Não foi possível processar o .zip: ${esc(err && err.message ? err.message : 'erro desconhecido')}`;
     }
   }
 
@@ -1492,8 +1809,10 @@ function attachValidator(root, item, specs, label, positionCtx, kind, onMediaCha
   }));
   dropzone.addEventListener('drop', e => {
     const file = e.dataTransfer.files && e.dataTransfer.files[0];
+    if(!file) return;
     const prefix = isVideo ? 'video/' : 'image/';
-    if(file && file.type.startsWith(prefix)) runValidation(file);
+    const isZipFile = acceptsHtml5 && (/\.zip$/i.test(file.name) || /zip/i.test(file.type));
+    if(file.type.startsWith(prefix) || isZipFile) runValidation(file);
   });
 
   if(isVideo){
@@ -1555,7 +1874,7 @@ function bindValidator(container, item){
             anyFilled = true;
             el.classList.remove('empty');
             el.innerHTML = media.isVideo
-              ? `<video src="${esc(media.url)}" muted loop autoplay playsinline></video>`
+              ? `<video src="${esc(media.url)}" controls muted loop autoplay playsinline></video>`
               : `<img src="${esc(media.url)}" alt="" />`;
           } else {
             el.classList.add('empty');
@@ -1582,6 +1901,12 @@ function bindValidator(container, item){
             slotEls.forEach(el => el.classList.toggle('active-tab', el.dataset.composedSlot === btn.dataset.composedTab));
           });
         });
+      }
+
+      const expandBtn = composedRoot ? composedRoot.querySelector('[data-composed-expand]') : null;
+      const frameToExpand = composedRoot ? composedRoot.querySelector('.composed-preview-frame') : null;
+      if(expandBtn && frameToExpand){
+        expandBtn.addEventListener('click', () => openExpandModal(frameToExpand));
       }
     } else {
       pieces.forEach((p, i) => {
@@ -1960,6 +2285,7 @@ initMenu();
 renderFormats();
 }
 </script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
