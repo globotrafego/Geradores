@@ -1935,7 +1935,7 @@ function formatCard(item, showOpenLink){
 
   const details = Object.entries(item)
     .filter(([header, value]) => {
-      if(header === 'Formato' || header === 'Descrição' || header === 'Categoria') return false;
+      if(header === 'Formato' || header === 'Descrição' || header === 'Categoria' || header === 'Afiliada') return false;
       const raw = String(value ?? '').trim();
       if(!raw) return false;
       if(LOGO_FIELDS.includes(header) && !hasLogo) return false;
