@@ -293,6 +293,7 @@
   .expand-modal-stage .media-frame img,
   .expand-modal-stage .media-frame video{width:100%!important;height:100%!important;object-fit:cover!important}
   .expand-modal-stage .media-frame .html5-frame{width:100%!important;height:100%!important}
+  .expand-modal-stage .media-expand-btn,.expand-modal-stage [data-expand-btn],.expand-modal-stage [data-composed-expand]{display:none!important}
   .media-expand-btn{
     position:absolute;top:8px;right:8px;z-index:3;
     display:inline-flex;align-items:center;justify-content:center;
@@ -1214,10 +1215,10 @@ const COMPOSED_LAYOUTS = {
     type: 'canvas-overlay', w: 1920, h: 1080,
     base: 'Imagem',
     overlays: [
-      { pieceLabel: 'Vídeo', label: 'Thumb (vídeo)', x: 96, y: 1080 - 472 - 105, w: 840, h: 472 },
+      { pieceLabel: 'Vídeo', label: 'Thumb (vídeo)', x: 85, y: 1080 - 472 - 85, w: 840, h: 472 },
     ],
     markers: [
-      { label: 'QR Code', x: 1920 - 265, y: 1080 - 375, w: 265, h: 375 },
+      { label: 'QR Code', x: 1920 - 265 - 85, y: 1080 - 295 - 85, w: 265, h: 295 },
     ]
   },
 };
@@ -1254,6 +1255,7 @@ function ensureExpandModal(){
 }
 
 function openExpandModal(frameNode){
+  if(expandedNode || (frameNode && frameNode.closest && frameNode.closest('#expand-modal'))){ return; }
   const modal = ensureExpandModal();
   const stage = modal.querySelector('[data-expand-stage]');
 
