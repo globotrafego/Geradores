@@ -439,6 +439,36 @@
   .ps-pause-ad{position:absolute;right:32px;top:176px;width:355px}
   .ps-pause-ad .ps-img .ps-ph{font-size:13px}
   .ps-pause-label{margin-top:12px;text-align:right;color:#fff;font:400 14px Arial,sans-serif}
+  .ps-stage.pause{background:#000}
+  .ps-stage.pause .ps-close{top:134px;right:28px;z-index:5}
+  .pp-scene{position:absolute;inset:0}
+  .pp-wall{position:absolute;left:0;right:0;top:34px;height:300px;background:linear-gradient(180deg,#8a867c 0%,#cfcabd 40%,#b9b4a6 100%)}
+  .pp-leaf{position:absolute;top:110px;height:330px;width:300px;background:radial-gradient(ellipse at 40% 50%,#2f4a2a 0%,#1d3320 55%,transparent 72%)}
+  .pp-leaf.l{left:-60px}.pp-leaf.r{right:-40px;width:420px;background:radial-gradient(ellipse at 60% 45%,#243d25 0%,#17291a 55%,transparent 75%)}
+  .pp-floor{position:absolute;left:0;right:0;top:300px;bottom:34px;background:linear-gradient(180deg,#5d5f59 0%,#2f322f 100%)}
+  .pp-big{position:absolute;left:30px;font:900 120px/1 'Arial Narrow',Impact,Arial,sans-serif;color:rgba(235,235,235,.82)}
+  .pp-big.a{top:150px}.pp-big.b{top:292px;font-size:128px}
+  .pp-bar{position:absolute;left:0;right:0;height:34px;background:#000}.pp-bar.t{top:0}.pp-bar.b{bottom:0}
+  .ps-stage.pause::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.35)}
+  .ps-stage.pause .ps-pause-ad{z-index:5}
+  .ps-stage.binge{width:1442px;height:586px;background:#000}
+  .pb-player{position:absolute;left:0;top:6px;width:948px;height:574px;overflow:hidden;background:linear-gradient(135deg,#2a0c10 0%,#4a0d14 55%,#1c0608 100%)}
+  .pb-glow{position:absolute;left:-60px;top:-80px;width:520px;height:420px;background:radial-gradient(ellipse,rgba(160,40,40,.45),transparent 70%)}
+  .pb-player .ps-credits{left:60px;top:116px;width:260px;transform:scale(1)}
+  .pb-player .ps-credits.c2{left:360px;top:130px;width:290px}
+  .pb-player .ps-credits.c3{left:660px;top:128px;width:260px}
+  .pb-player .ps-next{left:40px;bottom:68px}
+  .pb-player .ps-next div{width:210px;height:120px;position:relative;background:linear-gradient(120deg,#3a3236,#1d1a1d);margin-top:10px}
+  .pb-ring{position:absolute;left:50%;top:50%;width:56px;height:56px;margin:-28px 0 0 -28px;border:4px solid #d81e2c;border-radius:50%;display:flex;align-items:center;justify-content:center}
+  .pb-player .ps-close{top:44px;right:42px;left:auto}
+  .pb-player .ps-binge-ad{width:540px;right:32px;top:54%;transform:translateY(-50%) scale(.73);transform-origin:right center}
+  .pb-side{position:absolute;left:964px;top:0;width:478px;height:586px;overflow:hidden;color:#fff;font-family:'Open Sans',Arial,sans-serif;padding:0 14px 0 0}
+  .pb-side-h{display:flex;gap:26px;align-items:center;height:42px;padding:0 6px 0 14px;font-size:18px}
+  .pb-side-h span{font-size:15px;color:#bbb;font-weight:600}
+  .pb-ep{display:flex;gap:16px;align-items:center;height:113px;margin:0 0 13px;padding:0 14px;background:#1a1a1a;border-radius:10px;font-size:18px}
+  .pb-ep small{font-size:14px;color:#aaa;font-weight:600}.pb-ep b{font-size:18px}
+  .pb-th{position:relative;width:150px;height:88px;border-radius:6px;background:linear-gradient(120deg,#35383d,#14161a);flex:none}
+  .pb-th i{position:absolute;right:6px;bottom:6px;background:rgba(0,0,0,.6);border-radius:4px;padding:2px 6px;font:700 12px Arial,sans-serif;font-style:normal}
 
   /* ===== SIMULAÇÃO: PAUSE AD TAKEOVER (editoria vs Globoplay) ===== */
   .to-themes{display:flex;gap:8px;margin:0 0 10px}
@@ -462,6 +492,11 @@
   .to-stage.gp .to-close{position:absolute;width:203.7px;height:50.4px;min-width:88px;min-height:24px;background:#fff;top:67px;right:66.8px;border-radius:33.57px}
   .to-stage.gp .to-close span{font:600 16.8px 'Open Sans',Arial,sans-serif;color:#000}
   .to-stage.gp .to-cta{display:none}
+  .to-stage > .to-thumb{position:absolute;z-index:3;width:auto;aspect-ratio:auto}
+  .to-zone{position:absolute;z-index:4;box-sizing:border-box;pointer-events:none;border:5px dashed #ff4d4d;background:rgba(255,60,60,.10);border-radius:10px}
+  .to-zone.qr{background:rgba(255,60,60,.22);border-radius:6px}
+  .to-zone span{position:absolute;left:0;top:0;transform:translateY(-100%);background:#ff4d4d;color:#fff;font:700 24px Arial,sans-serif;padding:4px 12px;border-radius:6px 6px 0 0;white-space:nowrap}
+  .to-zone.qr span{left:auto;right:0}
 
   /* variante Especial Publicitário (layout largo, logo no canto superior direito) */
   .cv-stage.ep{width:930px;height:270px}
@@ -872,11 +907,28 @@
   .fa-bar{position:absolute;left:36px;right:36px;bottom:30px;height:8px;background:rgba(255,255,255,.25);border-radius:4px}
   .fa-bar i{display:block;width:34%;height:100%;background:#fff;border-radius:4px}
   .fa-img{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
-  .fa-ph{position:absolute;left:0;top:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#e9e9e9;color:#888;font:600 52px Arial,sans-serif}
+  .fa-ph{position:absolute;left:0;top:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:transparent;border:6px dashed #b5b5b5;box-sizing:border-box;color:#8a8a8a;text-shadow:0 0 6px #fff;font:600 52px Arial,sans-serif}
   .fa-guide{position:absolute;left:0;top:0;width:1280px;height:720px;border:6px dashed #e11d48;box-sizing:border-box}
   .fa-guide span{display:inline-block;background:#e11d48;color:#fff;font:700 28px Arial,sans-serif;padding:6px 14px}
   /* Insert Text */
   .it-gp{width:520px;background:#0e0e10;font-family:'Inter Custom','Inter',system-ui,sans-serif}
+  .it-gp-hero2{position:relative;width:777px;height:536px;overflow:hidden;color:#fff}
+  .gh-bg{position:absolute;inset:0;background:linear-gradient(90deg,#000 0%,rgba(0,0,0,.92) 38%,rgba(0,0,0,.2) 70%,rgba(0,0,0,0) 100%),radial-gradient(ellipse at 62% 30%,#3d5a3a 0%,#2a3d2a 30%,transparent 60%),linear-gradient(180deg,#3a2f26 0%,#1f2a1f 45%,#0d140d 100%)}
+  .gh-bg::after{content:"";position:absolute;right:0;top:0;width:90px;height:100%;background:linear-gradient(90deg,transparent,#d8d4c8 60%,#9aa0a8);opacity:.85}
+  .gh-in{position:absolute;left:32px;top:56px;width:560px}
+  .gh-title{font:900 54px/.95 'Arial Narrow',Impact,Arial,sans-serif;letter-spacing:-1px;text-transform:uppercase}
+  .gh-sub{margin-top:6px;font:700 13px Arial,sans-serif;letter-spacing:.2px;color:#ddd}
+  .gh-new{display:inline-block;margin-top:18px;background:#3a3a3a;border-radius:4px;padding:2px 6px;font:600 13px Arial,sans-serif;color:#ddd}
+  .gh-meta{display:flex;align-items:center;gap:10px;margin-top:18px;font:600 13px Arial,sans-serif}
+  .gh-meta b{font:700 12px Arial,sans-serif;border-radius:4px;padding:5px 7px}
+  .gh-al{background:#15a34a;color:#fff}.gh-4k{background:#2a2a2a;border:1px solid #666;color:#ddd}
+  .gh-desc{margin:18px 0 12px;width:430px;height:48px;overflow:hidden;font:400 19px/24px 'Inter Custom','Inter',system-ui,sans-serif}
+  .it-gp-hero2 .it-prem{padding:0;height:50px;margin-top:8px;color:#fff;gap:26px}
+  .gh-btns{display:flex;gap:14px;margin-top:38px}
+  .gh-btns span{display:inline-flex;align-items:center;justify-content:center;height:52px;border-radius:8px;font:700 17px Arial,sans-serif}
+  .gh-b1{background:#fff;color:#111;width:148px}.gh-b2{background:#2a2a2a;color:#eee;width:182px}
+  .gh-dots{position:absolute;right:62px;bottom:42px;display:flex;gap:8px}
+  .gh-dots i{width:26px;height:4px;border-radius:2px;background:rgba(255,255,255,.4)}.gh-dots i.on{background:#fff}
   .it-gp-hero{height:70px;background:linear-gradient(120deg,#2b2f3a,#12141a);display:flex;align-items:center;padding:0 24px;color:#6b7280;font:600 13px Arial,sans-serif}
   .it-prem{display:flex;align-items:center;gap:8px;height:50px;padding:0 24px;font-weight:400;font-size:15px;line-height:150%;color:#ccc;overflow:hidden}
   .it-pt{white-space:nowrap}
@@ -1004,6 +1056,11 @@
   .ld-ctx-t{font-weight:700;font-size:15px;margin-bottom:6px;color:#333}
   .ld-ctx-side p{margin:0;font-size:13px;line-height:1.5;color:#555}
   .to-themes.ns-toggle{flex-wrap:wrap}
+  .to-themes-wrap{flex-wrap:wrap;align-items:flex-start;gap:10px 24px;max-width:100%}
+  .to-grp{display:flex;flex-direction:column;align-items:flex-start;gap:5px;min-width:0}
+  .to-cap{font-size:12px;font-weight:600;color:var(--muted)}
+  .to-btns{display:flex;flex-wrap:wrap;gap:8px}
+  .to-themes-wrap .composed-tab{padding:5px 11px;white-space:nowrap}
   .to-themes.ns-toggle .composed-tab{padding:5px 11px;white-space:nowrap}
   /* ---- Palavra Contextualizada (Dito) ---- */
   .dto{width:100%;box-sizing:border-box;border-bottom:1px solid #EBEDEF;padding:12px 18px;background:#fff;color:#000;font-family:'Open Sans',Arial,sans-serif;display:flex;flex-direction:column;align-items:center}
@@ -1741,6 +1798,7 @@ const COMPOSED_LAYOUTS = {
   // imagem de fundo inteira + zonas que serão cobertas por vídeo/QR Code
   // (posição e tamanho vêm da especificação de segurança do formato)
   'PAUSE AD TAKEOVER': {
+    hidden: true, // sem "Preview montado": as zonas seguras ficam na simulação do native
     type: 'canvas-overlay', w: 1920, h: 1080,
     base: 'Imagem',
     overlays: [
@@ -2163,6 +2221,7 @@ const PLAYER_SIM = {
   'PAUSE AD': { kind: 'pause', name: 'Pause Ad' },
 };
 const PS_W = 960, PS_H = 540;
+const PS_BINGE_W = 1442, PS_BINGE_H = 586;
 
 function playerSimPieces(item){
   return buildPieces(item).slice().sort((a, b) => (a.label === 'Logo' ? 1 : 0) - (b.label === 'Logo' ? 1 : 0));
@@ -2178,23 +2237,31 @@ function playerSimMarkup(item){
         ${assetFieldsMarkup(p.specs, multi ? 'Regras desta peça' : 'Regras deste formato', p.kind, false)}
       </div>`).join('');
   const logoDims = pieces.find(p => p.label === 'Logo');
-  const credits = `<div class="ps-credits">Assistência de Fotografia<b>WILLIAM GAVIÃO</b><b>ANSELMO MARINHO</b><b>RODRIGO SANABIO</b><br><br>Equipe de Iluminação<b>LEONARDO CARDOZO</b><b>LUIZ CLAUDIO</b></div>`;
+  const credits = `<div class="ps-credits">Assistência de Fotografia<b>WILLIAM GAVIÃO</b><b>ANSELMO MARINHO</b><b>RODRIGO SANABIO</b><b>EMÍLIA SAUAIA</b><br><br>Câmera<b>MARCONE COUTO</b><b>TITO CAMPOS</b><b>THALISSA OLIVEIRA</b></div><div class="ps-credits c2">Equipe de Iluminação<b>LEONARDO CARDOZO</b><b>LUIZ CLAUDIO</b><b>CARLOS HENRIQUE</b><b>MARCO PAULO</b><b>JOSÉ CARLOS COOKE</b><b>MÁRCIO GONÇALVES</b><b>THIAGO DAS GRAÇAS</b></div><div class="ps-credits c3">Equipe de Captação de Imagem<b>MATHEUS MALOHE</b><b>MAGNUM SANTOS</b><b>GABRIEL CARDOSO</b><b>MAGNUM SILVA</b></div>`;
   const inner = v.kind === 'binge'
-    ? `${credits}
-       <div class="ps-next">Próximo vídeo<div></div></div>
-       <div class="ps-close">✕</div>
-       <div class="ps-binge-ad">
-         <div class="ps-tag"><div class="ps-tag-logo" data-ps-logo><div class="ps-logo-ph">Logo</div></div><div class="ps-tag-text"><span>Anúncio</span></div></div>
-         <div class="ps-img" data-ps-image><div class="ps-ph">Imagem 996×640</div></div>
+    ? `<div class="pb-player">
+         <div class="pb-glow"></div>
+         ${credits}
+         <div class="ps-next">Próximo vídeo<div><span class="pb-ring"><svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></span></div></div>
+         <div class="ps-close">✕</div>
+         <div class="ps-binge-ad">
+           <div class="ps-tag"><div class="ps-tag-logo" data-ps-logo><div class="ps-logo-ph">Logo</div></div><div class="ps-tag-text"><span>Anúncio</span></div></div>
+           <div class="ps-img" data-ps-image><div class="ps-ph">Imagem 996×640</div></div>
+         </div>
+       </div>
+       <div class="pb-side">
+         <div class="pb-side-h"><b>Capítulos</b><span>1ª Temporada ⌄</span></div>
+         ${[1,2,3,4].map(n => `<div class="pb-ep"><div class="pb-th"><i>8 min</i></div><div><small>Episódio ${n}</small><br><b>Capítulo ${n}</b></div></div>`).join('')}
        </div>`
-    : `<div class="ps-close">✕</div>
+    : `<div class="pp-scene"><div class="pp-wall"></div><div class="pp-leaf l"></div><div class="pp-leaf r"></div><div class="pp-floor"></div><div class="pp-big a">TÍTULO</div><div class="pp-big b">DO VÍDEO</div><div class="pp-bar t"></div><div class="pp-bar b"></div></div>
+       <div class="ps-close">✕</div>
        <div class="ps-pause-ad">
          <div class="ps-img" data-ps-image><div class="ps-ph">Imagem 996×640</div></div>
          <div class="ps-pause-label">Publicidade</div>
        </div>`;
   const hint = v.kind === 'binge'
-    ? 'O Binge Ad aparece nos créditos do vídeo, à direita do player, com o logo e a etiqueta "Anúncio" acima da arte. A arte deve ter fundo transparente.'
-    : 'O Pause Ad aparece à direita do player quando o vídeo é pausado, com a etiqueta "Publicidade" abaixo. A arte deve ter fundo transparente. Layout aproximado a partir do print (arquivo HTML/CSS deste formato veio vazio).';
+    ? 'Simulação a partir do print: o Binge Ad aparece nos créditos do vídeo, à direita do player (ao lado da lista de capítulos), com o logo e a etiqueta "Anúncio" acima da arte e o "Próximo vídeo" no canto inferior esquerdo. A arte deve ter fundo transparente.'
+    : 'Simulação a partir do print: o Pause Ad aparece à direita do player quando o vídeo é pausado, com o botão de fechar acima e a etiqueta "Publicidade" abaixo da arte. A arte deve ter fundo transparente. O vídeo ao fundo é ilustrativo.';
   return `
   <div class="validator" data-format="${esc(item.Formato)}" data-player-sim>
     <div class="validator-head">
@@ -2208,7 +2275,7 @@ function playerSimMarkup(item){
         <h4 class="composed-preview-title">Simulação no player <span>(${esc(v.name)})</span></h4>
         ${expandButtonMarkup()}
       </div>
-      <div class="native-preview-frame" data-native-frame style="aspect-ratio:${PS_W}/${PS_H};background:#000">
+      <div class="native-preview-frame" data-native-frame style="aspect-ratio:${v.kind === 'binge' ? PS_BINGE_W : PS_W}/${v.kind === 'binge' ? PS_BINGE_H : PS_H};background:#000">
         <div class="ps-stage ${v.kind}" data-ps-stage>${inner}</div>
       </div>
       <p class="composed-preview-hint">${esc(hint)}</p>
@@ -2220,16 +2287,34 @@ function playerSimMarkup(item){
    PAUSE AD TAKEOVER — simulação com o layout real (editoria x Globoplay)
    ============================================================ */
 const TO_W = 1920, TO_H = 1080;
+/* zonas seguras em % do quadro 1920×1080, medidas nos prints do native de cada tema */
+const TO_ZONES = {
+  editoria: { video: { x: 1.87, y: 50.78, w: 46.15, h: 46.29 } },
+  gp: { video: { x: 5.54, y: 46.26, w: 43.95, h: 43.59 } },
+};
+const TO_QR = { x: 81.77, y: 64.81, w: 13.80, h: 27.31 }; /* 265×295px, a 85px das bordas */
 function takeoverSimMarkup(){
   return `
     <div class="composed-preview show" data-takeover-sim>
       <div class="composed-preview-head">
-        <h4 class="composed-preview-title">Simulação do formato <span>(layout real do native style)</span></h4>
+        <h4 class="composed-preview-title">Preview do native <span>(Pause Ad Takeover · 1920×1080)</span></h4>
         ${expandButtonMarkup()}
       </div>
-      <div class="to-themes">
-        <button type="button" class="composed-tab active" data-to-theme="editoria">Editorias</button>
-        <button type="button" class="composed-tab" data-to-theme="globoplay">Globoplay</button>
+      <div class="to-themes to-themes-wrap">
+        <div class="to-grp">
+          <span class="to-cap">Ambiente</span>
+          <div class="to-btns">
+            <button type="button" class="composed-tab active" data-to-theme="editoria">Editorias</button>
+            <button type="button" class="composed-tab" data-to-theme="globoplay">Globoplay</button>
+          </div>
+        </div>
+        <div class="to-grp">
+          <span class="to-cap">Zona segura</span>
+          <div class="to-btns">
+            <button type="button" class="composed-tab active" data-to-zones="on">Mostrar</button>
+            <button type="button" class="composed-tab" data-to-zones="off">Ocultar</button>
+          </div>
+        </div>
       </div>
       <div class="native-preview-frame" data-native-frame style="aspect-ratio:${TO_W}/${TO_H};background:#000">
         <div class="to-stage" data-to-stage></div>
@@ -3090,16 +3175,14 @@ function nsFrameAdMarkup(item){
     <p class="validator-sub">O Frame Ad reduz o player e destaca o banner do anunciante em volta do vídeo. A arte é uma imagem de tela cheia (1920×1080) clicável; se for PNG com a área do vídeo transparente, o vídeo aparece por trás dela.</p>
     <div class="asset-group">${nsBlock('Imagem', sp, 'image')}</div>
     <div class="native-text-group"><div class="native-summary" data-native-summary></div></div>
-    ${nsPreviewMarkup('Preview do native', '(Frame Ad)', 1920, 1080).replace('<!--OPTS-->', `
-      <div class="ns-opt-row"><span class="ns-opt-label">Vídeo ao fundo</span>${nsToggleMarkup('vid', [['on', 'Mostrar'], ['off', 'Ocultar']], 'on')}
-      <span class="ns-opt-label">Guia</span>${nsToggleMarkup('guide', [['off', 'Sem guia'], ['on', 'Área do vídeo']], 'off')}</div>`)}
+    ${nsPreviewMarkup('Preview do native', '(Frame Ad)', 1920, 1080).replace('<!--OPTS-->', '')}
   </div>`;
 }
 function nsBindFrameAd(root, item){
   const S = nsStage(root, 1920, 1080);
   const hint = root.querySelector('[data-ns-hint]');
   const summary = root.querySelector('[data-native-summary]');
-  const st = {};
+  const st = { vid: 'on' };
   let img = null;
   const pos = { getSelectedDiv: () => null, getUrl: () => '' };
   attachValidator(root.querySelector('[data-ns-piece="image"]'), item, getAssetSpecsFromColumns(item, 'Imagem'), 'Imagem', pos, 'image', m => { img = m; render(); });
@@ -3107,13 +3190,11 @@ function nsBindFrameAd(root, item){
     S.stage.innerHTML = `<div class="fa">
       ${st.vid === 'on' ? '<div class="fa-vid"><span class="fa-lbl">Vídeo em reprodução</span><span class="fa-play">▶</span><div class="fa-bar"><i></i></div></div>' : ''}
       ${img ? `<img class="fa-img" src="${esc(img.url)}" alt="" />` : '<div class="fa-ph">Imagem 1920×1080</div>'}
-      ${st.guide === 'on' ? '<div class="fa-guide"><span>Área do vídeo (≈ 1280×720, estimada a partir do exemplo)</span></div>' : ''}
     </div>`;
     S.setSize(1920, 1080);
-    hint.textContent = 'O native só exibe a imagem em tela cheia (100% da largura e altura), com clique para o destino. O vídeo ao fundo e a guia da área do vídeo são ilustrativos: use PNG com a janela do vídeo transparente para o conteúdo continuar visível.';
+    hint.textContent = 'O native só exibe a imagem em tela cheia (100% da largura e altura), com clique para o destino. O vídeo ao fundo é ilustrativo: use PNG com a janela do vídeo transparente para o conteúdo continuar visível.';
     nsChips(summary, [['Imagem', img ? 'ok' : '', img ? 'enviada' : 'pendente']]);
   }
-  nsBindToggles(root, st, () => render());
   render();
 }
 
@@ -3147,7 +3228,7 @@ function nsInsertMarkup(item){
       ${nsFieldMarkup('alt', 'Texto alternativo (TEXT_ALT)', { max: aMax, hint: `opcional · até ${aMax} caracteres · quando preenchido, rola como letreiro no lugar do texto` })}
       <div class="native-summary" data-native-summary></div>
     </div>
-    ${nsPreviewMarkup('Preview do native', `(Insert Text · ${v.name})`, v.kind === 'slim' ? 578 : 520, 120).replace('<!--OPTS-->', '')}
+    ${nsPreviewMarkup('Preview do native', `(Insert Text · ${v.name})`, v.kind === 'slim' ? 578 : 777, v.kind === 'slim' ? 120 : 536).replace('<!--OPTS-->', '')}
   </div>`;
 }
 function nsInsertGe(barHtml){
@@ -3172,7 +3253,7 @@ function nsBindInsert(root, item){
   const v = NS_INSERT[item.Formato];
   const tMax = parseInt(root.dataset.tMax, 10) || 17;
   const aMax = parseInt(root.dataset.aMax, 10) || 150;
-  const S = nsStage(root, v.kind === 'slim' ? 578 : 520, 120);
+  const S = nsStage(root, v.kind === 'slim' ? 578 : 777, v.kind === 'slim' ? 120 : 536);
   const hint = root.querySelector('[data-ns-hint]');
   const summary = root.querySelector('[data-native-summary]');
   const fields = nsBindFields(root, () => render());
@@ -3187,12 +3268,21 @@ function nsBindInsert(root, item){
     let html;
     if(v.kind === 'prem'){
       const t = txt || 'Patrocinado por';
-      html = `<div class="it-gp">
-        <div class="it-gp-hero"><span class="it-gp-ph">Globoplay · destaque</span></div>
-        <div class="it-prem">${alt ? mq(alt) : `<span class="it-pt">${esc(t)}</span>`}${logo ? `<img class="it-plogo" src="${esc(logo.url)}" alt="" />` : '<span class="it-logo-ph">Logo</span>'}</div>
+      html = `<div class="it-gp it-gp-hero2">
+        <div class="gh-bg"></div>
+        <div class="gh-in">
+          <div class="gh-title">TÍTULO<br>DA SÉRIE</div>
+          <div class="gh-sub">UM SUBTÍTULO DO CONTEÚDO EM DESTAQUE</div>
+          <span class="gh-new">Novidade</span>
+          <div class="gh-meta"><b class="gh-al">AL</b><b class="gh-4k">4K</b><span>Série</span><span>Documentário</span><span>1 Temporada</span></div>
+          <p class="gh-desc">Descrição do conteúdo em destaque. Veja o 1º episódio grátis e conheça mais sobre a história.</p>
+          <div class="it-prem">${alt ? mq(alt) : `<span class="it-pt">${esc(t)}</span>`}${logo ? `<img class="it-plogo" src="${esc(logo.url)}" alt="" />` : '<span class="it-logo-ph">Logo</span>'}</div>
+          <div class="gh-btns"><span class="gh-b1">Saiba mais</span><span class="gh-b2">▢ Minha Lista</span></div>
+        </div>
+        <div class="gh-dots"><i></i><i class="on"></i><i></i><i></i><i></i></div>
       </div>`;
       S.stage.innerHTML = html;
-      S.setSize(520, 120); S.measure();
+      S.setSize(777, 536);
     } else {
       const t = !txt ? 'Patrocinado por' : (txt.length > tMax ? 'Patrocinado por:' : txt);
       const bar = `<div class="it-slim">${alt ? mq(alt) : `<span class="it-st">${esc(t)}</span>`}${logo ? `<img class="it-slogo" src="${esc(logo.url)}" alt="" />` : '<span class="it-logo-ph">Logo</span>'}</div>`;
@@ -3200,7 +3290,7 @@ function nsBindInsert(root, item){
       S.setSize(578, 336);
     }
     if(v.kind === 'prem'){
-      hint.textContent = 'Layout do Insert Text no Globoplay (destaque premium/degustação): texto e logo lado a lado, fonte Inter 15px em cinza claro, altura de 50px e logo de até 108×50px. Neste layout o native não corta o texto (textos longos entram como letreiro); o limite de 17 caracteres vem da planilha. O fundo é ilustrativo.';
+      hint.textContent = 'Simulação no destaque do Globoplay (conteúdo ilustrativo, a partir do print). Layout do Insert Text (destaque premium/degustação): texto e logo lado a lado, fonte Inter 15px em cinza claro, altura de 50px e logo de até 108×50px. Neste layout o native não corta o texto (textos longos entram como letreiro); o limite de 17 caracteres vem da planilha. O fundo é ilustrativo.';
     } else {
       hint.textContent = 'Layout do Tempo Real (ge): faixa branca de 44px no rodapé do cartão do campinho, com o texto à esquerda e o logo à direita. Se o texto passar de ' + tMax + ' caracteres, o native troca por “Patrocinado por:”. O logo respeita a altura máxima da planilha. O cartão do campinho é ilustrativo.';
     }
@@ -4097,7 +4187,7 @@ function validatorMarkup(item){
       ${positionSection}
       <p class="validator-sub">Este formato usa peças diferentes — valide cada uma no espaço correspondente.</p>
       <div class="asset-group">${blocks}</div>
-      ${layout ? composedPreviewMarkup({ ...layout, name: item.Formato }) : ''}
+      ${layout && !layout.hidden ? composedPreviewMarkup({ ...layout, name: item.Formato }) : ''}
       ${item.Formato === PAUSEAD_TAKEOVER_FORMAT ? takeoverSimMarkup() : ''}
     </div>`;
   }
@@ -4931,7 +5021,7 @@ function bindPlayerSim(validatorRoot, item){
 
   function fitStage(){
     const w = frame.clientWidth || frame.getBoundingClientRect().width;
-    if(w) stage.style.transform = `scale(${w / PS_W})`;
+    if(w) stage.style.transform = `scale(${w / (stage.classList.contains('binge') ? PS_BINGE_W : PS_W)})`;
   }
   if(typeof ResizeObserver !== 'undefined') new ResizeObserver(fitStage).observe(frame);
   window.addEventListener('resize', fitStage);
@@ -4959,6 +5049,7 @@ function bindTakeoverSim(validatorRoot){
   const hint = root.querySelector('[data-to-hint]');
   const themeBtns = [...root.querySelectorAll('[data-to-theme]')];
   let theme = 'editoria';
+  let showZones = true;
   let last = {};
 
   function fitStage(){
@@ -4981,20 +5072,29 @@ function bindTakeoverSim(validatorRoot){
       ? `<div class="to-head"><div class="to-pub">Publicidade</div><button type="button" class="to-close"><span>Fechar anúncio</span></button></div>`
       : `<div class="to-head"><div class="to-pub">Publicidade</div><button type="button" class="to-close">${closeIcon}</button></div>`;
     const thumbMedia = vid && vid.isVideo ? `<video src="${esc(vid.url)}" muted loop autoplay playsinline></video>` : '';
-    const foot = gp
-      ? `<div class="to-foot"></div>`
-      : `<div class="to-foot">
-           <div class="to-thumb">${thumbMedia}<div class="ov"></div><div class="to-play">${playIcon}</div>${thumbMedia ? '' : '<span class="to-thumb-lbl">Thumb do vídeo</span>'}</div>
-           <span class="to-cta">Saiba Mais</span>
-         </div>`;
-    stage.innerHTML = `${bg}<div class="to-inner">${head}${foot}</div>`;
-    hint.textContent = gp
-      ? 'Tema Globoplay: a imagem é exibida inteira (sem corte), com o botão "Fechar anúncio" no topo à direita e "Publicidade" no canto inferior direito. Não há thumb de vídeo nem CTA.'
-      : 'Tema Editorias: a imagem preenche o fundo (pode ser cortada), com a thumb do vídeo embaixo à esquerda e o CTA "Saiba Mais" embaixo à direita. A thumb real vem do vídeo da página; aqui usamos o vídeo enviado acima, se houver.';
+    const Z = TO_ZONES[gp ? 'gp' : 'editoria'], pct = z => `left:${z.x}%;top:${z.y}%;width:${z.w}%;height:${z.h}%`;
+    const px = (z, k) => Math.round((k === 'w' ? TO_W : TO_H) * z[k] / 100);
+    const thumb = `<div class="to-thumb" style="${pct(Z.video)}">${thumbMedia}<div class="ov"></div><div class="to-play">${playIcon}</div>${thumbMedia ? '' : '<span class="to-thumb-lbl">Thumb do vídeo</span>'}</div>`;
+    const foot = `<div class="to-foot">${gp ? '' : '<span class="to-cta">Saiba Mais</span>'}</div>`;
+    const zones = showZones
+      ? `<div class="to-zone" style="${pct(Z.video)}"><span>Zona segura do vídeo (${px(Z.video, 'w')}×${px(Z.video, 'h')}px)</span></div>
+         ${gp ? `<div class="to-zone qr" style="${pct(TO_QR)}"><span>Zona segura do QR Code (${px(TO_QR, 'w')}×${px(TO_QR, 'h')}px)</span></div>` : ''}`
+      : '';
+    stage.innerHTML = `${bg}<div class="to-inner">${head}${foot}</div>${thumb}${zones}`;
+    hint.textContent = (gp
+      ? 'Tema Globoplay: a imagem é exibida inteira (sem corte), com o botão "Fechar anúncio" no topo à direita e "Publicidade" no canto inferior direito; não há CTA. '
+      : 'Tema Editorias: a imagem preenche o fundo (pode ser cortada), com o CTA "Saiba Mais" embaixo à direita. ')
+      + `A thumb do vídeo ocupa a zona segura de cada tema, medida no print do native (${gp ? 'Globoplay' : 'Editorias'}) — ela é diferente entre os dois temas. ${gp ? 'A zona do QR Code (265×295px, embaixo à direita) vale só para o Globoplay; o Editorias não usa QR Code. ' : 'O Editorias não usa QR Code. '}Evite conteúdo importante nessas áreas. A thumb real vem do vídeo da página; aqui usamos o vídeo enviado acima, se houver.`;
   }
   themeBtns.forEach(btn => btn.addEventListener('click', () => {
     theme = btn.dataset.toTheme;
     themeBtns.forEach(b => b.classList.toggle('active', b === btn));
+    render();
+  }));
+  const zoneBtns = [...root.querySelectorAll('[data-to-zones]')];
+  zoneBtns.forEach(btn => btn.addEventListener('click', () => {
+    showZones = btn.dataset.toZones === 'on';
+    zoneBtns.forEach(b => b.classList.toggle('active', b === btn));
     render();
   }));
   const expandBtn = root.querySelector('[data-composed-expand]');
