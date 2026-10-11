@@ -785,8 +785,11 @@ const isAffFormat = name => affNames.some(n => name === n || String(name).starts
 const formatPositions = (formatPositionsSheet ? rowsAsObjects(formatPositionsSheet) : [])
   .filter(r => affOk(r) && isAffFormat(r.Formato));
 const affPositionSet = new Set(formatPositions.map(r => r.Posição));
+/* Se a aba Posicoes tem a coluna "Afiliada", ela decide sozinha quais posições aparecem.
+   Sem a coluna, cai no filtro por formatos (posição com ao menos um formato SIM). */
+const positionsHaveFlag = !!(positionsSheet && positionsSheet.rows[0] && positionsSheet.rows[0].includes('Afiliada'));
 const positions = (positionsSheet ? rowsAsObjects(positionsSheet) : [])
-  .filter(p => affOk(p) && affPositionSet.has(p.Posição));
+  .filter(p => positionsHaveFlag ? isSim(p.Afiliada) : affPositionSet.has(p.Posição));
 
 const editorias = ['Globo.com','G1','Gshow','GE','Cartola','Receitas','Rede Globo'];
 
