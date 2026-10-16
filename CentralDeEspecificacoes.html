@@ -2857,10 +2857,9 @@ function nsBindBigBanner(root, item){
 
 /* ------------------------------------------------------------- WELCOME ADS */
 const WA_SCREENS = {
-  desktop: { label: 'Web Desktop', w: 1440, h: 900, bp: 'desktop', img: 'hd' },
+  desktop: { label: 'Web Desktop', w: 1280, h: 720, bp: 'desktop', img: 'hd' },
   tablet: { label: 'Tablet', w: 768, h: 1024, bp: 'tablet', img: 'hd' },
   mobile: { label: 'Mobile', w: 390, h: 844, bp: 'mobile-l', img: 'mob' },
-  tvhd: { label: 'TV HD', w: 1280, h: 720, bp: 'desktop', img: 'hd' },
   tvfhd: { label: 'TV Full HD', w: 1920, h: 1080, bp: 'widescreen', img: 'fhd' },
 };
 const WA_IMGS = {
@@ -2870,7 +2869,7 @@ const WA_IMGS = {
 };
 /* zonas reservadas (px reais do criativo): as peças devem manter o conteúdo importante fora delas */
 const WA_SAFE = {
-  tvhd: { w: 1280, h: 720, left: 366, bottom: 215 },
+  desktop: { w: 1280, h: 720, left: 366, bottom: 215 }, /* Web Desktop = TV HD */
   tvfhd: { w: 1920, h: 1080, left: 670, bottom: 328 },
   mobile: { w: 600, h: 600, top: 151, bottom: 235 },
 };
@@ -2917,7 +2916,6 @@ function nsWelcomeMarkup(item){
         <span class="ns-opt-label">Tela</span>${nsToggleMarkup('screen', Object.entries(WA_SCREENS).map(([k, v]) => [k, v.label]), 'desktop')}
       </div>
       <div class="ns-opt-row">
-        <span class="ns-opt-label">Interface do Globoplay</span>${nsToggleMarkup('ui', [['on', 'Mostrar'], ['off', 'Ocultar']], 'on')}
         <span class="ns-opt-label">Zona segura</span>${nsToggleMarkup('zone', [['on', 'Mostrar'], ['off', 'Ocultar']], 'off')}
       </div>`)}
   </div>`;
@@ -2988,7 +2986,7 @@ function nsWelcomeZones(screen, W, H, heroH){
 
 function nsBindWelcome(root, item){
   const cfg = nsWelcomeConfig(item);
-  const st = {};
+  const st = { ui: 'on' }; /* a interface do Globoplay sempre aparece */
   const media = { fhd: null, hd: null, mob: null, logo: null };
   const S = nsStage(root, 1440, 900);
   const hint = root.querySelector('[data-ns-hint]');
@@ -3026,10 +3024,9 @@ function nsBindWelcome(root, item){
     const hasZone = !!WA_SAFE[st.screen];
     const zNote = st.zone === 'on' && !hasZone ? ' Esta tela não tem zona segura informada.' : '';
     const base = {
-      desktop: 'Web Desktop (1440×900): imagem em tela cheia com título, subtítulo e assinatura no canto inferior direito.',
+      desktop: 'Web Desktop e TV HD (mesmo layout): imagem em tela cheia com título, subtítulo e assinatura no canto inferior direito. Mantenha o conteúdo importante fora das áreas reservadas (366px à esquerda e 215px embaixo, em 1280×720).',
       tablet: 'Tablet (768×1024): a imagem ocupa 54% da altura e o texto fica centralizado sobre a base dela; os perfis aparecem abaixo.',
       mobile: 'Mobile (390×844): a imagem 600×600 ocupa 52% da altura (cortada nas laterais) e o texto fica centralizado sobre a base dela.',
-      tvhd: 'TV HD (1280×720): mesmo layout do desktop. Mantenha o conteúdo importante fora das áreas reservadas (366px à esquerda e 215px embaixo).',
       tvfhd: 'TV Full HD (1920×1080): mesmo layout do desktop em widescreen. Mantenha o conteúdo importante fora das áreas reservadas (670px à esquerda e 328px embaixo).',
     }[st.screen];
     hint.textContent = base + zNote + ' Título e subtítulo só aparecem se os dois estiverem preenchidos.';
