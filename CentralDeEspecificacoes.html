@@ -785,6 +785,72 @@
   .bb-gp .bb-title{font-size:42px;white-space:normal;padding-bottom:12px;color:#fff}
   .bb-gp .bb-text{font-size:20px;line-height:30px;max-height:90px;max-width:520px;color:#ddd}
   .bb-gp .bb-btn{padding:14px 28px;font-size:16px;border-radius:57.06px;background:#ddd;color:#262626}
+  /* Welcome Ads (CSS do native, escopo .wa) */
+  .wa{--color-text-primary:#fff;--color-text-secondary:#eee;--pad-top:max(1.5cqh, 16px);--pad-right:max(2.5cqw, 24px);--pad-bottom:max(3.5cqh, 24px);--pad-left:max(2.5cqw, 24px);--title-size:clamp(1.5rem, 3.4cqw, 2.75rem);--subtitle-size:clamp(1rem, 2.2cqw, 1.5rem);--sponsor-label-size:clamp(.7rem, 1.2cqw, .85rem);--brand-size:clamp(.8rem, 1.5cqw, 1.05rem);--logo-size:clamp(2rem, 4cqw, 3.25rem);--title-max:min(100%, 48cqw);--subtitle-max:min(100%, 42cqw);--hero-height:100%;box-sizing:border-box;color:var(--color-text-primary);cursor:default;font-feature-settings:"cv03" 1, "cv04" 1, "cv05" 1, "cv06" 1, "cv11" 1;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;isolation:isolate;background-color:#000;font-family:"Inter Custom",Inter,system-ui,sans-serif;text-decoration:none;display:block;position:relative;overflow:hidden;container:welcome-ads/size}
+  .wa,.wa {cursor:default}
+  .wa-hero{z-index:0;position:absolute;inset:0;overflow:hidden}
+  .wa-background{object-fit:cover;object-position:center;pointer-events:none;width:100%;height:100%;position:absolute;inset:0}
+  .wa-hero-fade{display:none}
+  .wa-overlay{z-index:1;pointer-events:none;background:linear-gradient(#0000001a 25.78%,#000 100%),linear-gradient(77.64deg,#000c 0%,#0000000d 54.59%);position:absolute;inset:0}
+  .wa-content{position:contents}
+  .wa-sponsorship{z-index:3;bottom:var(--pad-bottom);right:var(--pad-right);flex-direction:row-reverse;align-items:center;gap:clamp(.45rem,1cqw,.75rem);display:flex;position:absolute}
+  .wa-sponsorship-copy{text-align:right;flex-direction:row;align-items:baseline;gap:.35em;display:flex}
+  .wa-sponsorship-label{font-size:var(--sponsor-label-size);color:var(--color-text-secondary);font-weight:400;line-height:1.2}
+  .wa-brand{font-size:var(--brand-size);color:var(--color-text-primary);font-weight:700;line-height:1.2}
+  .wa-logo{width:var(--logo-size);height:var(--logo-size);object-fit:contain;border-radius:4px;flex-shrink:0}
+  .wa-copy{z-index:2;bottom:calc(var(--pad-bottom) + var(--logo-size) + .5rem);right:var(--pad-right);text-align:right;max-width:min(100% - var(--pad-left) - var(--pad-right), 52cqw);flex-direction:column;align-items:flex-end;gap:0;display:flex;position:absolute}
+  .wa-title{max-width:var(--title-max);font-size:var(--title-size);letter-spacing:0;color:var(--color-text-primary);margin:0;font-weight:700;line-height:1.25}
+  .wa-subtitle{max-width:var(--subtitle-max);font-size:var(--subtitle-size);letter-spacing:0;color:var(--color-text-secondary);margin:0;font-weight:400;line-height:1.5}
+  .wa-title,.wa-subtitle{font-feature-settings:"cv03" 1, "cv04" 1, "cv05" 1, "cv06" 1, "cv11" 1, "lnum" 1, "pnum" 1}
+  .wa[data-bp=desktop]{--pad-top:max(2cqh, 20px);--pad-right:max(5.6cqw, 80px);--pad-bottom:max(7.7cqh, 70px);--pad-left:max(5.6cqw, 80px);--title-size:clamp(1.42rem, 2.222cqw, 2.66rem);--subtitle-size:clamp(1.07rem, 1.667cqw, 2rem);--sponsor-label-size:clamp(.72rem, 1.1cqw, .9rem);--brand-size:clamp(.9rem, 1.35cqw, 1.15rem);--logo-size:52px;--title-max:min(100%, 44cqw);--subtitle-max:min(100%, 40cqw)}
+  .wa[data-bp=desktop] .wa-hero{height:100%;inset:0}
+  .wa[data-bp=desktop] .wa-background{object-fit:cover;object-position:center}
+  .wa[data-bp=desktop] .wa-hero-fade{display:none}
+  .wa[data-bp=desktop] .wa-sponsorship{top:auto;bottom:var(--pad-bottom);right:var(--pad-right)}
+  .wa[data-bp=desktop] .wa-copy{left:auto;right:var(--pad-right);top:auto;bottom:calc(var(--pad-bottom) + var(--logo-size) + .5rem);text-align:right;max-width:min(100% - var(--pad-left) - var(--pad-right), 48cqw);align-items:flex-end}
+  .wa[data-bp=widescreen]{--pad-top:max(2.5cqh, 28px);--pad-right:max(3.5cqw, 48px);--pad-bottom:max(4cqh, 40px);--pad-left:max(3.5cqw, 48px);--title-size:clamp(2rem, 2.6cqw, 3.25rem);--subtitle-size:clamp(1.25rem, 1.7cqw, 1.85rem);--sponsor-label-size:clamp(.8rem, .95cqw, 1.05rem);--brand-size:clamp(1rem, 1.15cqw, 1.35rem);--logo-size:clamp(3rem, 3.2cqw, 4.25rem);--title-max:min(100%, 38cqw);--subtitle-max:min(100%, 34cqw)}
+  .wa[data-bp=widescreen] .wa-hero{height:100%;inset:0}
+  .wa[data-bp=widescreen] .wa-background{object-fit:cover;object-position:center center}
+  .wa[data-bp=widescreen] .wa-hero-fade{display:none}
+  .wa[data-bp=widescreen] .wa-sponsorship{top:auto;bottom:var(--pad-bottom);right:var(--pad-right);gap:clamp(.65rem,1cqw,1rem)}
+  .wa[data-bp=widescreen] .wa-copy{left:auto;right:var(--pad-right);top:auto;bottom:calc(var(--pad-bottom) + var(--logo-size) + .5rem);text-align:right;max-width:min(100% - var(--pad-left) - var(--pad-right), 42cqw);align-items:flex-end}
+  .wa[data-bp=tablet]{--pad-top:max(2cqh, 18px);--pad-right:max(3cqw, 20px);--pad-bottom:max(2.5cqh, 20px);--pad-left:max(3cqw, 20px);--title-size:clamp(1.35rem, 4cqw, 1.75rem);--subtitle-size:clamp(.95rem, 2.8cqw, 1.15rem);--sponsor-label-size:clamp(.75rem, 1.6cqw, .9rem);--brand-size:clamp(.75rem, 1.6cqw, .9rem);--logo-size:clamp(1.75rem, 4.5cqw, 2.25rem);--hero-height:54%;--title-max:100%;--subtitle-max:100%}
+  .wa[data-bp=mobile-l],.wa[data-bp=mobile-s]{--pad-top:max(1.8cqh, 12px);--pad-right:max(5cqw, 16px);--pad-bottom:max(2cqh, 16px);--pad-left:max(5cqw, 16px);--title-size:clamp(1.35rem, 5.8cqw, 1.55rem);--subtitle-size:clamp(.875rem, 3.8cqw, 1rem);--sponsor-label-size:clamp(.8rem, 3.4cqw, .9rem);--brand-size:clamp(.8rem, 3.4cqw, .9rem);--logo-size:clamp(1.5rem, 8cqw, 1.85rem);--hero-height:52%;--title-max:100%;--subtitle-max:100%}
+  .wa[data-bp=mobile-s]{--pad-top:max(1.5cqh, 10px);--pad-right:max(4cqw, 14px);--pad-left:max(4cqw, 14px);--title-size:clamp(1.2rem, 5.6cqw, 1.4rem);--subtitle-size:clamp(.8125rem, 3.6cqw, .9375rem);--logo-size:clamp(1.35rem, 9cqw, 1.65rem);--hero-height:50%}
+  .wa[data-bp=tablet] .wa-hero,.wa[data-bp=mobile-l] .wa-hero,.wa[data-bp=mobile-s] .wa-hero{height:var(--hero-height);inset:0 0 auto}
+  .wa[data-bp=tablet] .wa-background{object-position:center 20%}
+  .wa[data-bp=mobile-l] .wa-background,.wa[data-bp=mobile-s] .wa-background{object-position:center 18%}
+  .wa[data-bp=tablet] .wa-hero-fade,.wa[data-bp=mobile-l] .wa-hero-fade,.wa[data-bp=mobile-s] .wa-hero-fade{z-index:1;pointer-events:none;background:linear-gradient(#0000 0%,#0000008c 42%,#000 100%);height:38%;display:block;position:absolute;inset:auto 0 0}
+  .wa[data-bp=tablet] .wa-content,.wa[data-bp=mobile-l] .wa-content,.wa[data-bp=mobile-s] .wa-content{z-index:2;left:var(--pad-left);right:var(--pad-right);top:auto;bottom:calc(100% - var(--hero-height) + var(--pad-bottom));flex-direction:column;align-items:center;gap:clamp(.85rem,2.4cqh,1.15rem);width:auto;max-width:none;display:flex;position:absolute}
+  .wa[data-bp=tablet] .wa-copy,.wa[data-bp=mobile-l] .wa-copy,.wa[data-bp=mobile-s] .wa-copy{text-align:center;align-items:center;max-width:100%;position:static}
+  .wa[data-bp=tablet] .wa-sponsorship,.wa[data-bp=mobile-l] .wa-sponsorship,.wa[data-bp=mobile-s] .wa-sponsorship{flex-direction:row;justify-content:center;gap:.55rem;position:static}
+  .wa[data-bp=tablet] .wa-sponsorship-copy,.wa[data-bp=mobile-l] .wa-sponsorship-copy,.wa[data-bp=mobile-s] .wa-sponsorship-copy{text-align:center;flex-flow:wrap;justify-content:center;align-items:center;gap:.3em}
+  .wa[data-bp=tablet] .wa-title,.wa[data-bp=mobile-l] .wa-title,.wa[data-bp=mobile-s] .wa-title{max-width:100%;color:var(--color-text-primary);font-weight:700}
+  .wa[data-bp=tablet] .wa-subtitle,.wa[data-bp=mobile-l] .wa-subtitle,.wa[data-bp=mobile-s] .wa-subtitle{max-width:100%;color:var(--color-text-secondary);font-weight:400}
+  .wa[data-bp=tablet] .wa-sponsorship-label,.wa[data-bp=mobile-l] .wa-sponsorship-label,.wa[data-bp=mobile-s] .wa-sponsorship-label{color:var(--color-text-primary)}
+  /* Welcome Ads: interface do app (simulada) e zonas seguras */
+  .wa-ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#3a3f4a,#20232a);color:#9aa0ab;font:600 1.6cqw "Inter Custom",Arial,sans-serif}
+  .wa[data-bp=tablet] .wa-ph,.wa[data-bp^=mobile] .wa-ph{height:var(--hero-height);bottom:auto;font-size:4cqw}
+  .wa-empty{opacity:.45;font-weight:400}
+  .wa-logo-ph{width:var(--logo-size);height:var(--logo-size);box-sizing:border-box;border:1px dashed rgba(255,255,255,.7);border-radius:4px;display:flex;align-items:center;justify-content:center;font:600 .5em "Inter Custom",Arial,sans-serif;color:rgba(255,255,255,.8);flex-shrink:0;font-size:max(9px,calc(var(--logo-size)*.26))}
+  .wa-ctx{position:absolute;inset:0;z-index:4;pointer-events:none;font-family:"Inter Custom",Arial,sans-serif;color:#fff}
+  .wa-ctx .c-brand{position:absolute;font-weight:700;letter-spacing:-.02em;text-shadow:0 1px 6px rgba(0,0,0,.35)}
+  .wa-ctx .c-av{position:absolute;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+  .wa-ctx .c-av i{position:absolute;right:-1%;top:-1%;width:26%;height:26%;border-radius:50%;background:rgba(255,255,255,.85)}
+  .wa-ctx .c-lbl{position:absolute;text-align:center;font-weight:600;transform:translateX(-50%);white-space:nowrap}
+  .wa-ctx .c-pill{position:absolute;border-radius:99px;background:rgba(60,60,64,.9);display:flex;align-items:center;justify-content:center;font-weight:600}
+  .wa-ctx .c-toast{position:absolute;background:rgba(70,72,78,.92);border-radius:.5cqw;padding:.9cqw 1.1cqw;font-size:.85cqw;line-height:1.35;color:#d7d9de}
+  .wa-ctx .c-toast b{display:block;color:#fff;font-weight:600;margin-bottom:.2cqw}
+  .wa-ctx .c-x{position:absolute;border-radius:50%;background:rgba(80,82,88,.95);display:flex;align-items:center;justify-content:center;color:#ddd}
+  .wa-ctx .c-bar{position:absolute;left:0;right:0;background:rgba(48,50,56,.95);border-radius:1.4cqw;padding:1.8cqw 2.4cqw;font-size:2.7cqw;line-height:1.35;color:#d4d6db;display:flex;align-items:center;justify-content:space-between;gap:2cqw}
+  .wa-ctx .c-bar b{background:#3b3d45;border-radius:99px;padding:1cqw 2.2cqw;color:#fff;white-space:nowrap;font-weight:600}
+  .wa-ctx .c-nav{position:absolute;left:0;right:0;bottom:0;height:5%;background:#000;display:flex;justify-content:center;align-items:center;gap:14cqw;color:#e8e8e8;font-size:3.2cqw}
+  .wa-zones{position:absolute;inset:0;z-index:6;pointer-events:none}
+  .wa-zones .zn{position:absolute;box-sizing:border-box;background:rgba(176,104,84,.62);border:2px solid rgba(120,60,44,.9);display:flex;align-items:center;justify-content:center;text-align:center;color:#fff;font:700 max(12px,1.7cqw) "Inter Custom",Arial,sans-serif;text-shadow:0 1px 3px rgba(0,0,0,.45)}
+  .wa-zones .zn small{display:block;font-weight:500;font-size:.8em;opacity:.95}
+  .wa-zones .ok{position:absolute;box-sizing:border-box;border:3px dashed #2fd18b;background:rgba(47,209,139,.10);display:flex;align-items:flex-start;justify-content:flex-start}
+  .wa-zones .ok span{background:#2fd18b;color:#06331f;font:700 max(11px,1.5cqw) "Inter Custom",Arial,sans-serif;padding:3px 8px;border-radius:0 0 .6cqw 0}
+  .wa-hero-box{position:absolute;left:0;right:0;top:0;height:var(--hero-height)}
   /* Branded Card */
   .bc{display:flex;justify-content:space-between;padding:10px 0;background:#fff;width:100%;box-sizing:border-box;font-family:'Globotipo Regular',Arial,sans-serif}
   .bc-content{display:flex;flex-direction:column;padding-left:16px;min-width:0}
@@ -2336,6 +2402,8 @@ const NS_FORMATS = {
   'OUTSTREAM | IN-FEED VÍDEO | NATIVE VIDEO AD': 'vidad',
   'PALAVRA CONTEXTUALIZADA (DITO)': 'dito',
   'PIN': 'pin',
+  'WELCOME ADS': 'welcome',
+  'Welcome Ads': 'welcome',
   'PÓS ESCALAÇÃO': 'pos',
   'PUBLICIDADE EM VÍDEO VERTICAL - DISPLAY': 'vvd',
   'PUBLICIDADE EM VÍDEO VERTICAL - VIDEO': 'vvv',
@@ -2775,6 +2843,196 @@ function nsBindBigBanner(root, item){
 
   nsBindToggles(root, st, name => { if(name === 'version') applyVersion(); render(); });
   applyVersion();
+  render();
+}
+
+/* ------------------------------------------------------------- WELCOME ADS */
+const WA_SCREENS = {
+  desktop: { label: 'Web Desktop', w: 1440, h: 900, bp: 'desktop', img: 'hd' },
+  tablet: { label: 'Tablet', w: 768, h: 1024, bp: 'tablet', img: 'hd' },
+  mobile: { label: 'Mobile', w: 390, h: 844, bp: 'mobile-l', img: 'mob' },
+  tvhd: { label: 'TV HD', w: 1280, h: 720, bp: 'desktop', img: 'hd' },
+  tvfhd: { label: 'TV Full HD', w: 1920, h: 1080, bp: 'widescreen', img: 'fhd' },
+};
+const WA_IMGS = {
+  fhd: { label: 'TV Full HD', w: 1920, h: 1080 },
+  hd: { label: 'TV HD e Desktop', w: 1280, h: 720 },
+  mob: { label: 'Mobile', w: 600, h: 600 },
+};
+/* zonas reservadas (px reais do criativo): as peças devem manter o conteúdo importante fora delas */
+const WA_SAFE = {
+  tvhd: { w: 1280, h: 720, left: 366, bottom: 215 },
+  tvfhd: { w: 1920, h: 1080, left: 670, bottom: 328 },
+  mobile: { w: 600, h: 600, top: 151, bottom: 235 },
+};
+const WA_AV = [['#2aa8f0', '🐱'], ['#8a3df0', '🐶'], ['#ff6fa8', '🙂'], ['#1d9bf0', 'A']];
+
+function nsWelcomeConfig(item){
+  const dimOf = re => {
+    const line = String(item['Dimensão Imagem'] || '').split('\n').find(l => re.test(l)) || '';
+    return parseDimensions(line)[0];
+  };
+  const weight = parseWeightLimitKB(item['Peso Imagem']), types = parseFileTypes(item['Tipo de Arquivo Imagem']);
+  const img = (key, re) => ({ dims: [dimOf(re) || { w: WA_IMGS[key].w, h: WA_IMGS[key].h }], weightLimit: weight, types });
+  const T = item.Textos;
+  return {
+    img: { fhd: img('fhd', /full\s*hd/i), hd: img('hd', /tv\s*hd/i), mob: img('mob', /mobile/i) },
+    logo: { dims: [], ratio: [1, 1], ratioOnly: true, dimLabel: 'proporção 1:1 (quadrado)', weightLimit: parseWeightLimitKB(item['Peso Logo']), types: parseFileTypes(item['Tipo de Arquivo Logo']) },
+    title: nsLimit(T, /t[ií]tulo[^\d\n]*?(\d+)/i, 27),
+    subtitle: nsLimit(T, /subt[ií]tulo[^\d\n]*?(\d+)/i, 35),
+    brand: nsLimit(T, /marca[^\d\n]*?(\d+)/i, 39),
+  };
+}
+
+function nsWelcomeMarkup(item){
+  const c = nsWelcomeConfig(item);
+  return `
+  <div class="validator" data-format="${esc(item.Formato)}" data-ns="welcome">
+    ${NS_HEAD}
+    <p class="validator-sub">O Welcome Ads ocupa a tela de seleção de perfis do Globoplay com imagem de fundo, título, subtítulo e a assinatura “Patrocinado por” + nome e logo da marca. Envie as imagens de cada tela, o logo e os textos.</p>
+    <div class="asset-group">
+      ${nsBlock('Imagem · TV Full HD', c.img.fhd, 'fhd-image')}
+      ${nsBlock('Imagem · TV HD e Web Desktop/Tablet', c.img.hd, 'hd-image')}
+      ${nsBlock('Imagem · Mobile', c.img.mob, 'mob-image')}
+      ${nsBlock('Logo', c.logo, 'logo')}
+    </div>
+    <div class="native-text-group">
+      <h4 class="asset-title">Textos</h4>
+      ${nsFieldMarkup('title', 'Título', { max: c.title, required: true, noCaps: true, hint: `até ${c.title} caracteres · aparece junto com o subtítulo` })}
+      ${nsFieldMarkup('subtitle', 'Subtítulo', { max: c.subtitle, required: true, noCaps: true, hint: `até ${c.subtitle} caracteres · aparece junto com o título` })}
+      ${nsFieldMarkup('brand', 'Nome da marca', { max: c.brand, required: true, noCaps: true })}
+      <div class="native-summary" data-native-summary></div>
+    </div>
+    ${nsPreviewMarkup('Preview do native', '(Welcome Ads)', 1440, 900).replace('<!--OPTS-->', `
+      <div class="ns-opt-row">
+        <span class="ns-opt-label">Tela</span>${nsToggleMarkup('screen', Object.entries(WA_SCREENS).map(([k, v]) => [k, v.label]), 'desktop')}
+      </div>
+      <div class="ns-opt-row">
+        <span class="ns-opt-label">Interface do Globoplay</span>${nsToggleMarkup('ui', [['on', 'Mostrar'], ['off', 'Ocultar']], 'on')}
+        <span class="ns-opt-label">Zona segura</span>${nsToggleMarkup('zone', [['on', 'Mostrar'], ['off', 'Ocultar']], 'off')}
+      </div>`)}
+  </div>`;
+}
+
+function nsWelcomeCtx(screen){
+  const av = (i, x, y, sz, fs, extra) => `<span class="c-av" style="left:${x};top:${y};width:${sz};height:${sz};background:${WA_AV[i][0]};font-size:${fs}">${WA_AV[i][1]}<i></i></span>${extra || ''}`;
+  if(screen === 'desktop' || screen === 'tvhd' || screen === 'tvfhd'){
+    const tv = screen !== 'desktop';
+    return `<div class="wa-ctx">
+      <span class="c-brand" style="left:2.2cqw;top:${tv ? '2.2cqw' : '2.4cqw'};font-size:2.1cqw">globoplay</span>
+      ${av(0, '3.4cqw', '8.2cqw', '5.4cqw', '3cqw')}
+      ${av(1, '3.4cqw', '14.4cqw', '5.4cqw', '3cqw')}
+      ${av(2, '3.4cqw', '20.6cqw', '5.4cqw', '3cqw')}
+      ${av(3, '3.4cqw', '26.8cqw', '5.4cqw', '3cqw')}
+      <span class="c-av" style="left:3.4cqw;top:33cqw;width:5.4cqw;height:5.4cqw;background:#3a3b40;font-size:3.6cqw;font-weight:300">+</span>
+      <span class="c-pill" style="left:3.4cqw;top:40.2cqw;width:5.4cqw;height:1.9cqw;font-size:.95cqw">✎ Editor</span>
+      <span class="c-pill" style="left:5cqw;top:43.2cqw;width:2.2cqw;height:2.2cqw;font-size:1cqw">⏻</span>
+      ${screen === 'desktop' ? `<div class="c-toast" style="right:5.6cqw;top:2.6cqw;width:17cqw"><b>Está é uma conta dependente.</b>Apenas titulares podem criar perfis. Saiba mais em ajuda.globo.com.</div><span class="c-x" style="right:2.6cqw;top:2.6cqw;width:2cqw;height:2cqw;font-size:1.1cqw">✕</span>` : ''}
+    </div>`;
+  }
+  if(screen === 'tablet'){
+    const a = (i, x, y) => av(i, x, y, '14cqw', '8cqw') ;
+    return `<div class="wa-ctx">
+      <span class="c-brand" style="left:0;right:0;top:2.6cqw;text-align:center;font-size:4cqw">globoplay</span>
+      <span class="c-brand" style="left:3cqw;top:2.2cqw;font-size:4.2cqw;font-weight:400">☰</span>
+      ${a(0, '16cqw', '77cqw')}${a(1, '33cqw', '77cqw')}${a(2, '50cqw', '77cqw')}${a(3, '67cqw', '77cqw')}
+      <span class="c-av" style="left:33cqw;top:96cqw;width:14cqw;height:14cqw;background:#e6445a;font-size:8cqw">🤖</span>
+      <span class="c-av" style="left:50cqw;top:96cqw;width:14cqw;height:14cqw;background:#3a3b40;font-size:7cqw">✎</span>
+      <div class="c-bar" style="left:2.5cqw;right:2.5cqw;top:auto;bottom:11.5cqw;font-size:1.9cqw;padding:1.3cqw 2cqw"><span>Está é uma conta dependente. Apenas titulares podem criar perfis. Saiba mais em ajuda.globo.com.</span><b style="font-size:1.8cqw;padding:.8cqw 1.6cqw">Entendi mais</b></div>
+      <div class="c-nav" style="font-size:3cqw">◀ &nbsp;&nbsp;&nbsp; ● &nbsp;&nbsp;&nbsp; ■</div>
+    </div>`;
+  }
+  /* mobile */
+  const a = (i, x, y) => av(i, x, y, '19cqw', '10cqw');
+  return `<div class="wa-ctx">
+    <span class="c-brand" style="left:4cqw;top:3.4cqw;font-size:5cqw;font-weight:400">☰</span>
+    <span class="c-brand" style="left:0;right:0;top:3.2cqw;text-align:center;font-size:5.2cqw">globoplay</span>
+    ${a(0, '12cqw', '112cqw')}${a(1, '40.5cqw', '112cqw')}${a(2, '69cqw', '112cqw')}
+    <span class="c-av" style="left:12cqw;top:138cqw;width:19cqw;height:19cqw;background:#1d9bf0;font-size:10cqw">A<i></i></span>
+    <span class="c-av" style="left:40.5cqw;top:138cqw;width:19cqw;height:19cqw;background:#3a3b40;font-size:11cqw;font-weight:300">+</span>
+    <span class="c-av" style="left:69cqw;top:138cqw;width:19cqw;height:19cqw;background:#3a3b40;font-size:8cqw">✎</span>
+    <div class="c-bar" style="left:3cqw;right:3cqw;top:auto;bottom:19cqw;font-size:3.1cqw;padding:2.4cqw 3cqw"><span>Está é uma conta dependente. Apenas titulares podem criar perfis.</span><b style="font-size:3cqw;padding:1.4cqw 2.6cqw">Entender mais</b></div>
+    <div class="c-nav" style="font-size:4.2cqw">◀ &nbsp;&nbsp;&nbsp; ● &nbsp;&nbsp;&nbsp; ■</div>
+  </div>`;
+}
+
+function nsWelcomeZones(screen, W, H, heroH){
+  const z = WA_SAFE[screen];
+  if(!z) return '';
+  const pc = (v, t) => (v / t * 100).toFixed(4) + '%';
+  if(screen === 'mobile'){
+    /* a imagem 600×600 ocupa o herói (altura do herói × largura da tela, cover) */
+    const hp = `top:0;height:${heroH}%;`;
+    return `<div class="wa-zones">
+      <div style="position:absolute;left:0;right:0;${hp}">
+        <div class="zn" style="left:0;right:0;top:0;height:${pc(z.top, z.h)}">${z.top}px<small>reservado</small></div>
+        <div class="zn" style="left:0;right:0;bottom:0;height:${pc(z.bottom, z.h)}">${z.bottom}px<small>reservado</small></div>
+        <div class="ok" style="left:0;right:0;top:${pc(z.top, z.h)};bottom:${pc(z.bottom, z.h)}"><span>Zona segura · ${z.h - z.top - z.bottom}px de altura</span></div>
+      </div></div>`;
+  }
+  return `<div class="wa-zones">
+    <div class="zn" style="left:0;top:0;width:${pc(z.left, z.w)};height:100%">${z.left}px<small>reservado</small></div>
+    <div class="zn" style="left:${pc(z.left, z.w)};right:0;bottom:0;height:${pc(z.bottom, z.h)}">${z.bottom}px<small>reservado</small></div>
+    <div class="ok" style="left:${pc(z.left, z.w)};right:0;top:0;bottom:${pc(z.bottom, z.h)}"><span>Zona segura · ${z.w - z.left}×${z.h - z.bottom}px</span></div>
+  </div>`;
+}
+
+function nsBindWelcome(root, item){
+  const cfg = nsWelcomeConfig(item);
+  const st = {};
+  const media = { fhd: null, hd: null, mob: null, logo: null };
+  const S = nsStage(root, 1440, 900);
+  const hint = root.querySelector('[data-ns-hint]');
+  const summary = root.querySelector('[data-native-summary]');
+  const fields = nsBindFields(root, () => render());
+  const pos = { getSelectedDiv: () => null, getUrl: () => '' };
+  ['fhd', 'hd', 'mob'].forEach(k => attachValidator(root.querySelector(`[data-ns-piece="${k}-image"]`), item, cfg.img[k], 'Imagem', pos, 'image', m => { media[k] = m; render(); }));
+  attachValidator(root.querySelector('[data-ns-piece="logo"]'), item, cfg.logo, 'Logo', pos, 'image', m => { media.logo = m; render(); });
+  const HERO = { tablet: 54, 'mobile-l': 52 };
+
+  function render(){
+    const sc = WA_SCREENS[st.screen];
+    const imgKey = sc.img, im = media[imgKey];
+    const title = fields.val('title').slice(0, cfg.title);
+    const sub = fields.val('subtitle').slice(0, cfg.subtitle);
+    const brand = fields.val('brand').slice(0, cfg.brand);
+    const both = !!title && !!sub, none = !title && !sub;
+    const copy = both
+      ? `<h1 class="wa-title">${esc(title)}</h1><p class="wa-subtitle">${esc(sub)}</p>`
+      : none ? `<h1 class="wa-title wa-empty">Título</h1><p class="wa-subtitle wa-empty">Subtítulo</p>` : '';
+    const logo = media.logo ? `<img class="wa-logo" src="${esc(media.logo.url)}" alt="" />` : '<span class="wa-logo-ph">Logo</span>';
+    const heroH = HERO[sc.bp] || 100;
+    const ph = `<div class="wa-ph">Imagem ${WA_IMGS[imgKey].w}×${WA_IMGS[imgKey].h}</div>`;
+    S.stage.innerHTML = `<div class="wa" data-bp="${sc.bp}" style="width:${sc.w}px;height:${sc.h}px">
+      <div class="wa-hero">${im ? `<img class="wa-background" src="${esc(im.url)}" alt="" />` : ph}<div class="wa-hero-fade"></div></div>
+      <div class="wa-overlay"></div>
+      <div class="wa-content">
+        <div class="wa-copy">${copy}</div>
+        <div class="wa-sponsorship">${logo}<div class="wa-sponsorship-copy"><span class="wa-sponsorship-label">Patrocinado por</span>${brand ? `<strong class="wa-brand">${esc(brand)}</strong>` : '<strong class="wa-brand wa-empty">Marca</strong>'}</div></div>
+      </div>
+      ${st.ui === 'on' ? nsWelcomeCtx(st.screen) : ''}
+      ${st.zone === 'on' ? nsWelcomeZones(st.screen, sc.w, sc.h, heroH) : ''}
+    </div>`;
+    S.setSize(sc.w, sc.h);
+    const hasZone = !!WA_SAFE[st.screen];
+    const zNote = st.zone === 'on' && !hasZone ? ' Esta tela não tem zona segura informada.' : '';
+    const base = {
+      desktop: 'Web Desktop (1440×900): imagem em tela cheia com título, subtítulo e assinatura no canto inferior direito.',
+      tablet: 'Tablet (768×1024): a imagem ocupa 54% da altura e o texto fica centralizado sobre a base dela; os perfis aparecem abaixo.',
+      mobile: 'Mobile (390×844): a imagem 600×600 ocupa 52% da altura (cortada nas laterais) e o texto fica centralizado sobre a base dela.',
+      tvhd: 'TV HD (1280×720): mesmo layout do desktop. Mantenha o conteúdo importante fora das áreas reservadas (366px à esquerda e 215px embaixo).',
+      tvfhd: 'TV Full HD (1920×1080): mesmo layout do desktop em widescreen. Mantenha o conteúdo importante fora das áreas reservadas (670px à esquerda e 328px embaixo).',
+    }[st.screen];
+    hint.textContent = base + zNote + ' Título e subtítulo só aparecem se os dois estiverem preenchidos.';
+    const needImg = { fhd: 'Imagem Full HD', hd: 'Imagem HD', mob: 'Imagem Mobile' };
+    const chips = ['fhd', 'hd', 'mob'].map(k => [needImg[k], media[k] ? 'ok' : '', media[k] ? 'enviada' : 'pendente']);
+    chips.push(['Logo', media.logo ? 'ok' : '', media.logo ? 'enviado' : 'pendente']);
+    chips.push(nsFieldChip(fields, 'title', 'Título'), nsFieldChip(fields, 'subtitle', 'Subtítulo'), nsFieldChip(fields, 'brand', 'Marca'));
+    if(!!title !== !!sub) chips.push(['Texto', 'bad', 'título e subtítulo juntos']);
+    nsChips(summary, chips);
+  }
+
+  nsBindToggles(root, st, () => render());
   render();
 }
 
@@ -4114,6 +4372,7 @@ function nsBindTouch(root, item){
 function nsMarkup(item){
   const k = NS_FORMATS[item.Formato];
   return k === 'bigbanner' ? nsBigBannerMarkup(item)
+    : k === 'welcome' ? nsWelcomeMarkup(item)
     : k === 'card' ? nsCardMarkup(item)
     : k === 'frame' ? nsFrameMarkup(item)
     : k === 'framead' ? nsFrameAdMarkup(item)
@@ -4133,6 +4392,7 @@ function nsMarkup(item){
 function nsBind(root, item){
   const k = root.dataset.ns;
   if(k === 'bigbanner') nsBindBigBanner(root, item);
+  else if(k === 'welcome') nsBindWelcome(root, item);
   else if(k === 'card') nsBindCard(root, item);
   else if(k === 'frame') nsBindFrame(root, item);
   else if(k === 'framead') nsBindFrameAd(root, item);
@@ -4303,7 +4563,15 @@ function attachValidator(root, item, specs, label, positionCtx, kind, onMediaCha
     const checks = [];
 
     let dimOk = null;
-    if(specs.max){
+    if(specs.ratioOnly){
+      const lbl = specs.dimLabel || `proporção ${specs.ratio[0]}:${specs.ratio[1]}`;
+      if(realW == null || realH == null){
+        checks.push({ kind:'warn', title:'Dimensão', value:`não foi possível confirmar automaticamente pelo arquivo — esperado ${lbl}. Confira manualmente no preview.` });
+      } else {
+        dimOk = Math.abs(realW / realH - specs.ratio[0] / specs.ratio[1]) < 0.01;
+        checks.push({ kind: dimOk ? 'ok' : 'bad', title:'Dimensão', value:`arquivo ${realW}×${realH}px — esperado ${lbl}` });
+      }
+    } else if(specs.max){
       const mx = specs.max;
       const maxLabel = specs.dimLabel || (mx.w && mx.h ? `até ${mx.w}×${mx.h}px` : mx.h ? `altura até ${mx.h}px` : `largura até ${mx.w}px`);
       if(realW == null || realH == null){
