@@ -2388,10 +2388,13 @@ function takeoverSimMarkup(){
    exatamente como o código do native (substring).
    ============================================================ */
 /* aceita variações de escrita vindas da planilha (caixa, espaços, hífen), ex.: "Welcome Ads", "WELCOME ADS", "Welcome Ads - Globoplay" */
-function nsKind(name){
+function nsKind(name, item){
   if(Object.prototype.hasOwnProperty.call(NS_FORMATS, name)) return NS_FORMATS[name];
   const n = String(name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().replace(/[^A-Z0-9]/g, '');
-  return n.startsWith('WELCOMEADS') ? 'welcome' : undefined;
+  if(n.includes('WELCOME')) return 'welcome';
+  /* também reconhece pelo ad unit / expected creatives da planilha (ex.: "WelcomeAds, 1x1") */
+  const extra = item ? [item['Ad unit'], item['Ad manager - Expected creatives'], item['Posições']].join(' ').toUpperCase().replace(/[^A-Z0-9]/g, '') : '';
+  return extra.includes('WELCOMEADS') ? 'welcome' : undefined;
 }
 const NS_FORMATS = {
   'BIG BANNER': 'bigbanner',
@@ -4376,7 +4379,7 @@ function nsBindTouch(root, item){
 }
 
 function nsMarkup(item){
-  const k = nsKind(item.Formato);
+  const k = nsKind(item.Formato, item);
   return k === 'bigbanner' ? nsBigBannerMarkup(item)
     : k === 'welcome' ? nsWelcomeMarkup(item)
     : k === 'card' ? nsCardMarkup(item)
@@ -4417,7 +4420,7 @@ function nsBind(root, item){
 }
 
 function validatorMarkup(item){
-  if(nsKind(item.Formato)) return nsMarkup(item);
+  if(nsKind(item.Formato, item)) return nsMarkup(item);
   if(PLAYER_SIM[item.Formato]) return playerSimMarkup(item);
   if(CV_VARIANTS[item.Formato]) return nativeVideoAdMarkup(item);
   if(item.Formato === NATIVE_CAROUSEL_FORMAT) return nativeCarouselValidatorMarkup(item);
