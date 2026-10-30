@@ -413,7 +413,7 @@
                     <li><strong>Alteração em valores:</strong> Nos campos Entrega Determinada e Desconto agora é aceito apenas números sem separadores ou decimais.</li>
                     <li><strong>Melhorias de Sistema:</strong> Foram aplicados diversos ajustes no backend e na estrutura de código para garantir maior estabilidade.</li>
                     <li><strong>Base unificada:</strong> Opções, formatos, sites e segmentações agora usam uma estrutura normalizada.</li>
-                    <li><strong>Segmentação de interesses:</strong> IDs Permutive e Audience agora vêm da aba Audience da base principal.</li>
+                    <li><strong>Segmentação de interesses:</strong> Opção restaurada com base de dados dedicada para IDs Permutive e Audience.</li>
                 </ul>
             </div>
             <div class="modal-footer">
@@ -584,6 +584,8 @@
 
         const BASE_SHEET_ID = '1ClTgaFfpYFaWbNhvKlyr2JJeyTaoQ4FlvJVbfU2O9cg';
         const BASE_SHEET_URL = `https://docs.google.com/spreadsheets/d/${BASE_SHEET_ID}/export?format=xlsx`;
+        const INTEREST_SHEET_ID = '1gmW4brvAZrIcDmZ8WU7WQdseirN7nocofXOGAYDlhtM';
+        const INTEREST_SHEET_URL = `https://docs.google.com/spreadsheets/d/${INTEREST_SHEET_ID}/export?format=xlsx`;
         const EXCEL_PROTECTION_PASSWORD = 'EuSeiOQueVoceFez';
 
         let dropdownData = {};
@@ -630,20 +632,30 @@
 
         async function loadBaseData() {
             let resp;
+            let interestResp;
             try {
-                resp = await fetch(BASE_SHEET_URL, { cache: 'no-store' });
+                [resp, interestResp] = await Promise.all([
+                    fetch(BASE_SHEET_URL, { cache: 'no-store' }),
+                    fetch(INTEREST_SHEET_URL, { cache: 'no-store' })
+                ]);
             } catch (error) {
-                console.error('Falha de acesso à planilha:', error);
-                throw new Error('Não foi possível acessar a planilha. Publique-a ou use um backend autenticado.');
+                console.error('Falha de acesso às planilhas:', error);
+                throw new Error('Não foi possível acessar as planilhas. Publique-as ou use um backend autenticado.');
             }
             if (!resp.ok) throw new Error(`Falha ao baixar base (${resp.status})`);
+            if (!interestResp.ok) throw new Error(`Falha ao baixar base de interesses (${interestResp.status})`);
 
-            const buf = await resp.arrayBuffer();
+            const [buf, interestBuf] = await Promise.all([resp.arrayBuffer(), interestResp.arrayBuffer()]);
             const signature = new Uint8Array(buf, 0, Math.min(2, buf.byteLength));
             if (signature.length < 2 || signature[0] !== 0x50 || signature[1] !== 0x4B) {
                 throw new Error('A planilha não retornou um XLSX. Verifique compartilhamento/publicação.');
             }
+            const interestSignature = new Uint8Array(interestBuf, 0, Math.min(2, interestBuf.byteLength));
+            if (interestSignature.length < 2 || interestSignature[0] !== 0x50 || interestSignature[1] !== 0x4B) {
+                throw new Error('A base de interesses não retornou um XLSX. Verifique compartilhamento/publicação.');
+            }
             const wb = XLSX.read(buf, { type: 'array' });
+            const interestWb = XLSX.read(interestBuf, { type: 'array' });
 
             const optionRows = readCatalogSheet(wb, 'Options', ['option_group', 'label', 'export_value', 'sort_order']);
             const formatRows = readCatalogSheet(wb, 'Formats', ['format_label', 'export_value', 'line_type', 'inventory_mode', 'sort_order']);
@@ -689,11 +701,10 @@
             const audienceConfig = {
                 AGE: ['idades', 'idade_permutive', 'idade_audience'],
                 GENDER: ['generos', 'genero_permutive', 'genero_audience'],
-                CONSUMPTION: ['potencialConsumo', 'potencial_permutive', 'potencial_audience'],
-                INTEREST: ['interesses', 'interesse_permutive', 'interesse_audience']
+                CONSUMPTION: ['potencialConsumo', 'potencial_permutive', 'potencial_audience']
             };
             const unknownAudienceCategories = [...new Set(audienceRows.map(row => row.category))]
-                .filter(category => !audienceConfig[category]);
+                .filter(category => !audienceConfig[category] && category !== 'INTEREST');
             if (unknownAudienceCategories.length) {
                 throw new Error(`Categorias desconhecidas em Audience: ${unknownAudienceCategories.join(', ')}`);
             }
@@ -710,6 +721,27 @@
                 mappings[permutiveKey] = Object.fromEntries(rows.map(row => [row.label, row.permutive_id]));
                 mappings[audienceKey] = Object.fromEntries(rows.map(row => [row.label, row.audience_id]));
             });
+
+            const interestSheet = interestWb.Sheets[interestWb.SheetNames[0]];
+            if (!interestSheet) throw new Error('A base de interesses não possui nenhuma aba.');
+            const interestRows = XLSX.utils.sheet_to_json(interestSheet, { header: 1, defval: '', raw: false })
+                .slice(1)
+                .map(row => ({
+                    label: cleanCell(row[0]),
+                    permutive_id: cleanCell(row[1]),
+                    audience_id: cleanCell(row[2])
+                }))
+                .filter(row => row.label);
+            if (!interestRows.length) throw new Error('A base de interesses não possui segmentos.');
+            assertUnique(interestRows, 'label', 'Interesses');
+            interestRows.forEach(row => {
+                if (!/^\d+$/.test(row.permutive_id) || !/^\d+$/.test(row.audience_id)) {
+                    throw new Error(`ID inválido na base de interesses: ${row.label}`);
+                }
+            });
+            dropdownData.interesses = interestRows.map(row => row.label);
+            mappings.interesse_permutive = Object.fromEntries(interestRows.map(row => [row.label, row.permutive_id]));
+            mappings.interesse_audience = Object.fromEntries(interestRows.map(row => [row.label, row.audience_id]));
 
             siteRows.sort(bySortOrder);
             assertUnique(siteRows, 'site_label', 'Sites');
