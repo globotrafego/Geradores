@@ -412,7 +412,8 @@
                     <li><strong>Nova opção de Ad Unit:</strong> Agora você pode selecionar Globoplay dentro de Site para Video</li>
                     <li><strong>Alteração em valores:</strong> Nos campos Entrega Determinada e Desconto agora é aceito apenas números sem separadores ou decimais.</li>
                     <li><strong>Melhorias de Sistema:</strong> Foram aplicados diversos ajustes no backend e na estrutura de código para garantir maior estabilidade.</li>
-                    <li><strong>Segmentação de interesses:</strong> Opção restaurada com base de dados dedicada para IDs Permutive e Audience.</li>
+                    <li><strong>Base unificada:</strong> Opções, formatos, sites e segmentações agora usam uma estrutura normalizada.</li>
+                    <li><strong>Segmentação de interesses:</strong> IDs Permutive e Audience agora vêm da aba Audience da base principal.</li>
                 </ul>
             </div>
             <div class="modal-footer">
@@ -538,18 +539,7 @@
                 <div class="form-group">
                     <label>Mês *</label>
                     <select id="cg-mes" required>
-                        <option value="Jan">Janeiro</option>
-                        <option value="Feb">Fevereiro</option>
-                        <option value="Mar">Março</option>
-                        <option value="Apr">Abril</option>
-                        <option value="May">Maio</option>
-                        <option value="Jun">Junho</option>
-                        <option value="Jul">Julho</option>
-                        <option value="Aug">Agosto</option>
-                        <option value="Sep">Setembro</option>
-                        <option value="Oct">Outubro</option>
-                        <option value="Nov">Novembro</option>
-                        <option value="Dec">Dezembro</option>
+                        <option value="">Selecione...</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -592,8 +582,8 @@
             }
         });
 
-        const BASE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjRYT6xv7g-svK5_ScKZitolkns29Bbls5xAcMs8NONGY-p5xFa9Yz3tRJIwuhWOm4_FEY6vV0Ig1Z/pub?output=xlsx';
-        const INTEREST_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1gmW4brvAZrIcDmZ8WU7WQdseirN7nocofXOGAYDlhtM/export?format=xlsx';
+        const BASE_SHEET_ID = '1ClTgaFfpYFaWbNhvKlyr2JJeyTaoQ4FlvJVbfU2O9cg';
+        const BASE_SHEET_URL = `https://docs.google.com/spreadsheets/d/${BASE_SHEET_ID}/export?format=xlsx`;
         const EXCEL_PROTECTION_PASSWORD = 'EuSeiOQueVoceFez';
 
         let dropdownData = {};
@@ -602,85 +592,144 @@
         let choicesInstances = [];
         let displayFormatos = [];
         let videoFormatos = [];
+        let standardSites = [];
+        let daiSiteMappings = {};
 
-        // Helper: extract non-null values from a column in a sheet
-        function getColumn(rows, colIndex) {
-            return rows.slice(1).map(r => r[colIndex]).filter(v => v != null && v !== '').map(v => String(v).replace(/\u00AD/g, ''));
+        const cleanCell = value => String(value ?? '').replace(/\u00AD/g, '').trim();
+        const bySortOrder = (a, b) => Number(a.sort_order) - Number(b.sort_order);
+
+        function readCatalogSheet(workbook, sheetName, requiredColumns) {
+            const sheet = workbook.Sheets[sheetName];
+            if (!sheet) throw new Error(`Aba obrigatória ausente: ${sheetName}`);
+
+            const rows = XLSX.utils.sheet_to_json(sheet, { defval: '', raw: false }).map(row =>
+                Object.fromEntries(Object.entries(row).map(([key, value]) => [cleanCell(key), cleanCell(value)]))
+            );
+            if (!rows.length) throw new Error(`Aba vazia: ${sheetName}`);
+
+            const columns = new Set(Object.keys(rows[0]));
+            const missing = requiredColumns.filter(column => !columns.has(column));
+            if (missing.length) throw new Error(`Colunas ausentes em ${sheetName}: ${missing.join(', ')}`);
+            return rows;
         }
 
-        // Helper: build a key→value map from two columns
-        function buildMap(rows, keyCol, valCol) {
-            const map = {};
-            rows.slice(1).forEach(r => {
-                if (r[keyCol] != null && r[keyCol] !== '' && r[valCol] != null) {
-                    map[String(r[keyCol]).replace(/\u00AD/g, '')] = String(r[valCol]).replace(/\u00AD/g, '');
-                }
+        function assertUnique(rows, key, sheetName) {
+            const seen = new Set();
+            rows.forEach(row => {
+                const value = row[key];
+                if (!value) throw new Error(`Identificador vazio em ${sheetName}.${key}`);
+                if (seen.has(value)) throw new Error(`Identificador duplicado em ${sheetName}.${key}: ${value}`);
+                seen.add(value);
             });
-            return map;
+        }
+
+        function hasSelectedFormatMode(itemId, mode) {
+            const select = document.getElementById(`formatos-${itemId}`);
+            return Array.from(select?.selectedOptions || []).some(option => mappings.formatoModes[option.value] === mode);
         }
 
         async function loadBaseData() {
-            const [resp, interestResp] = await Promise.all([
-                fetch(BASE_SHEET_URL),
-                fetch(INTEREST_SHEET_URL)
-            ]);
-            if (!resp.ok) throw new Error(`Falha ao carregar base principal: HTTP ${resp.status}`);
-            if (!interestResp.ok) throw new Error(`Falha ao carregar base de interesses: HTTP ${interestResp.status}`);
+            let resp;
+            try {
+                resp = await fetch(BASE_SHEET_URL, { cache: 'no-store' });
+            } catch (error) {
+                console.error('Falha de acesso à planilha:', error);
+                throw new Error('Não foi possível acessar a planilha. Publique-a ou use um backend autenticado.');
+            }
+            if (!resp.ok) throw new Error(`Falha ao baixar base (${resp.status})`);
 
-            const [buf, interestBuf] = await Promise.all([
-                resp.arrayBuffer(),
-                interestResp.arrayBuffer()
-            ]);
+            const buf = await resp.arrayBuffer();
+            const signature = new Uint8Array(buf, 0, Math.min(2, buf.byteLength));
+            if (signature.length < 2 || signature[0] !== 0x50 || signature[1] !== 0x4B) {
+                throw new Error('A planilha não retornou um XLSX. Verifique compartilhamento/publicação.');
+            }
             const wb = XLSX.read(buf, { type: 'array' });
-            const interestWb = XLSX.read(interestBuf, { type: 'array' });
 
-            // --- Afiliada sheet (each column is an independent list) ---
-            const afRows = XLSX.utils.sheet_to_json(wb.Sheets['Afiliada'], { header: 1 });
-            dropdownData.afiliadas = getColumn(afRows, 0);        // Col A
-            dropdownData.meses = getColumn(afRows, 1);             // Col B (not used for dropdown but available)
-            dropdownData.propriedades = getColumn(afRows, 2);      // Col C
-            dropdownData.tipoDeLinha = getColumn(afRows, 3);       // Col D
-            dropdownData.posicaoVideo = getColumn(afRows, 4);      // Col E
-            dropdownData.skip = getColumn(afRows, 5);              // Col F
-            dropdownData.posicao = getColumn(afRows, 6);           // Col G
-            dropdownData.geolocalizacao = getColumn(afRows, 7);    // Col H
-            dropdownData.programarDisponivel = getColumn(afRows, 8); // Col I
+            const optionRows = readCatalogSheet(wb, 'Options', ['option_group', 'label', 'export_value', 'sort_order']);
+            const formatRows = readCatalogSheet(wb, 'Formats', ['format_label', 'export_value', 'line_type', 'inventory_mode', 'sort_order']);
+            const audienceRows = readCatalogSheet(wb, 'Audience', ['category', 'label', 'permutive_id', 'audience_id', 'sort_order']);
+            const siteRows = readCatalogSheet(wb, 'Sites', ['site_label', 'inventory_mode', 'affiliate', 'sort_order']);
 
-            // --- BaseFormatos sheet ---
-            const fmtRows = XLSX.utils.sheet_to_json(wb.Sheets['BaseFormatos'], { header: 1 });
-            const allFormatoNames = getColumn(fmtRows, 0);
-            dropdownData.formatos = allFormatoNames;
-            mappings.formatos = buildMap(fmtRows, 0, 1);
+            const optionsFor = group => optionRows
+                .filter(row => row.option_group === group)
+                .sort(bySortOrder);
+            const optionValues = group => {
+                const rows = optionsFor(group);
+                if (!rows.length) throw new Error(`Grupo obrigatório ausente em Options: ${group}`);
+                return rows.map(row => row.export_value || row.label);
+            };
 
-            // Derive display vs video format lists
-            videoFormatos = allFormatoNames.filter(f => ['DAI', 'Video'].includes(f));
-            displayFormatos = allFormatoNames.filter(f => !['DAI', 'Video'].includes(f));
+            dropdownData.afiliadas = optionValues('AFFILIATE');
+            dropdownData.meses = optionsFor('MONTH').map(row => ({ label: row.label, value: row.export_value }));
+            dropdownData.propriedades = optionValues('PROPERTY');
+            dropdownData.tipoDeLinha = optionValues('LINE_TYPE');
+            dropdownData.posicaoVideo = optionValues('VIDEO_POSITION');
+            dropdownData.skip = optionValues('SKIP');
+            dropdownData.globoplay = optionValues('GLOBOPLAY');
+            dropdownData.posicao = optionValues('DISPLAY_POSITION');
+            dropdownData.geolocalizacao = optionValues('GEOLOCATION');
+            dropdownData.programarDisponivel = optionValues('UNDER_DELIVERY');
+            if (!dropdownData.meses.length) throw new Error('Grupo obrigatório ausente em Options: MONTH');
 
-            // --- BaseSegmentacoes sheet ---
-            const segRows = XLSX.utils.sheet_to_json(wb.Sheets['BaseSegmentacoes'], { header: 1 });
-            dropdownData.idades = getColumn(segRows, 0);           // Col A
-            mappings.idade_permutive = buildMap(segRows, 0, 1);    // Col A→B
-            mappings.idade_audience = buildMap(segRows, 0, 2);     // Col A→C
-            dropdownData.generos = getColumn(segRows, 3);          // Col D
-            mappings.genero_permutive = buildMap(segRows, 3, 4);   // Col D→E
-            mappings.genero_audience = buildMap(segRows, 3, 5);    // Col D→F
-            dropdownData.potencialConsumo = getColumn(segRows, 6); // Col G
-            mappings.potencial_permutive = buildMap(segRows, 6, 7);// Col G→H
-            mappings.potencial_audience = buildMap(segRows, 6, 8); // Col G→I
-            // --- Separate Interests sheet ---
-            // First tab: Col A = Name, Col B = Permutive ID, Col C = Audience ID
-            const interestSheet = interestWb.Sheets[interestWb.SheetNames[0]];
-            if (!interestSheet) throw new Error('A base de interesses não possui nenhuma aba.');
-            const interestRows = XLSX.utils.sheet_to_json(interestSheet, { header: 1 });
-            dropdownData.interesses = getColumn(interestRows, 0);
-            mappings.interesse_permutive = buildMap(interestRows, 0, 1);
-            mappings.interesse_audience = buildMap(interestRows, 0, 2);
+            formatRows.sort(bySortOrder);
+            assertUnique(formatRows, 'format_label', 'Formats');
+            formatRows.forEach(row => {
+                const validPair =
+                    (row.line_type === 'DISPLAY' && row.inventory_mode === 'DISPLAY') ||
+                    (row.line_type === 'VIDEO' && ['VIDEO', 'DAI'].includes(row.inventory_mode));
+                if (!validPair) throw new Error(`Identificadores inválidos em Formats: ${row.format_label}`);
+            });
+            mappings.formatos = Object.fromEntries(formatRows.map(row => [row.format_label, row.export_value]));
+            mappings.formatoModes = Object.fromEntries(formatRows.map(row => [row.format_label, row.inventory_mode]));
+            dropdownData.formatos = formatRows.map(row => row.format_label);
+            displayFormatos = formatRows.filter(row => row.line_type === 'DISPLAY').map(row => row.format_label);
+            videoFormatos = formatRows.filter(row => row.line_type === 'VIDEO').map(row => row.format_label);
+            if (!formatRows.some(row => row.inventory_mode === 'DAI')) throw new Error('Formato DAI ausente em Formats');
 
-            // --- Site sheet ---
-            const siteRows = XLSX.utils.sheet_to_json(wb.Sheets['Site'], { header: 1 });
-            dropdownData.sites = getColumn(siteRows, 0);           // Col A
+            const audienceConfig = {
+                AGE: ['idades', 'idade_permutive', 'idade_audience'],
+                GENDER: ['generos', 'genero_permutive', 'genero_audience'],
+                CONSUMPTION: ['potencialConsumo', 'potencial_permutive', 'potencial_audience'],
+                INTEREST: ['interesses', 'interesse_permutive', 'interesse_audience']
+            };
+            const unknownAudienceCategories = [...new Set(audienceRows.map(row => row.category))]
+                .filter(category => !audienceConfig[category]);
+            if (unknownAudienceCategories.length) {
+                throw new Error(`Categorias desconhecidas em Audience: ${unknownAudienceCategories.join(', ')}`);
+            }
+            Object.entries(audienceConfig).forEach(([category, [listKey, permutiveKey, audienceKey]]) => {
+                const rows = audienceRows.filter(row => row.category === category).sort(bySortOrder);
+                if (!rows.length) throw new Error(`Categoria obrigatória ausente em Audience: ${category}`);
+                assertUnique(rows, 'label', `Audience/${category}`);
+                rows.forEach(row => {
+                    if (!/^\d+$/.test(row.permutive_id) || !/^\d+$/.test(row.audience_id)) {
+                        throw new Error(`ID inválido em Audience/${category}: ${row.label}`);
+                    }
+                });
+                dropdownData[listKey] = rows.map(row => row.label);
+                mappings[permutiveKey] = Object.fromEntries(rows.map(row => [row.label, row.permutive_id]));
+                mappings[audienceKey] = Object.fromEntries(rows.map(row => [row.label, row.audience_id]));
+            });
 
-            console.log('Base data loaded:', { dropdownData, mappings });
+            siteRows.sort(bySortOrder);
+            assertUnique(siteRows, 'site_label', 'Sites');
+            standardSites = [];
+            daiSiteMappings = {};
+            siteRows.forEach(row => {
+                if (row.inventory_mode === 'STANDARD') {
+                    standardSites.push(row.site_label);
+                } else if (row.inventory_mode === 'DAI' && row.affiliate) {
+                    (daiSiteMappings[row.affiliate] ||= []).push(row.site_label);
+                } else {
+                    throw new Error(`Site com modo/afiliada inválidos: ${row.site_label}`);
+                }
+            });
+            dropdownData.sites = siteRows.map(row => row.site_label);
+
+            const unknownDaiAffiliates = Object.keys(daiSiteMappings).filter(affiliate => !dropdownData.afiliadas.includes(affiliate));
+            if (unknownDaiAffiliates.length) throw new Error(`Afiliadas DAI ausentes em Options: ${unknownDaiAffiliates.join(', ')}`);
+
+            console.log('Base normalizada carregada:', { dropdownData, mappings, standardSites, daiSiteMappings });
         }
 
         const fieldsWithAll = ['formatos', 'posicao', 'sites', 'geolocalizacao', 'idades', 'generos', 'potencialConsumo'];
@@ -701,8 +750,8 @@
         function initDropdownOptions(selectElement, optionsArray, isMultiple = false) {
             optionsArray.forEach(opt => {
                 const option = document.createElement('option');
-                option.value = opt;
-                option.textContent = opt;
+                option.value = typeof opt === 'object' ? opt.value : opt;
+                option.textContent = typeof opt === 'object' ? opt.label : opt;
                 selectElement.appendChild(option);
             });
         }
@@ -720,30 +769,6 @@
             const result = `${rp}_${af}_${order}_${cliente}_${agencia}_${mesAno}_TVGLOBO`;
             document.getElementById('cg-nome-campanha').value = result;
         }
-        const daiSiteMappings = {
-            "TV TEM": ["Globo_BAU (TV TEM Bauru)", "Globo_ITP (TV TEM Itapetininga)", "Globo_SJR (TV TEM São José do Rio Preto)", "Globo_SOR (TV TEM Sorocaba)"],
-            "EPTV": ["Globo_CAM (EPTV Campinas)", "Globo_RIB (EPTV Ribeirão)", "Globo_SCA (EPTV Central)", "Globo_VAR (EPTV Sul de Minas)"],
-            "NSC": ["Globo_BLU (NSC Blumenau)", "Globo_CHA (NSC Chapecó)", "Globo_CRI (NSC Criciúma)", "Globo_JOA (NSC Centro-Oeste)", "Globo_JOI (NSC Joinville)", "Globo_SC1 (NSC Florianópolis)"],
-            "RBS": ["Globo_PEL (RBS TV Pelotas)", "Globo_PFO (RBS TV Passo Fundo)", "Globo_RS1 (RBS TV Porto Alegre)"],
-            "RPCTV": ["Globo_CAV (RPC Cascavel)", "Globo_CUR (RPC Curitiba)", "Globo_FOZ (RPC Foz do Iguaçu)", "Globo_GAV (RPC Guarapuava)", "Globo_LON (RPC Londrina)", "Globo_MAR (RPC Maringá)", "Globo_PGR (RPC Ponta Grossa)", "Globo_PR3 (RPC Paranavaí)"],
-            "INTER TV RJ": ["Globo_CAB (Inter TV Alto Litoral)", "Globo_FLU (Inter TV Planície)", "Globo_FRI (Inter TV Serra+Mar)"],
-            "INTER TV MG": ["Globo_FAB (Inter TV dos Vales)", "Globo_MTC (Inter TV Grande Minas)"],
-            "INTER TV RN": ["Globo_NA2 (Inter TV Costa Branca)", "Globo_NAT (Inter TV Cabugi)"],
-            "TV INTEGRACAO": ["Globo_JF (TV Integração Juiz de Fora)", "Globo_UBE (TV Integração Uberlândia)"],
-            "TV LIBERAL": ["Globo_BEL (TV Liberal Belém)"],
-            "TV VERDES MARES": ["Globo_CE1 (TV Verdes Mares)"],
-            "TV ANHANGUERA": ["Globo_GO01 (TV Anhanguera Goiânia)"],
-            "TV MIRANTE": ["Globo_MA1 (TV Mirante São Luís)"],
-            "TV AMAZONICA AM": ["Globo_MAN (Rede Amazônica Manaus)"],
-            "TV DIARIO": ["Globo_MOC (TV Diário)"],
-            "TV MORENA": ["Globo_MS1 (TV Morena Campo Grande)"],
-            "TV RIO SUL": ["Globo_RES (TV Rio Sul)"],
-            "REDE BAHIA": ["Globo_SAL (TV Bahia)"],
-            "TV TRIBUNA": ["Globo_SAN (TV Tribuna)"],
-            "TV SERGIPE": ["Globo_SER (TV Sergipe)"],
-            "TV GAZETA ES": ["Globo_VIT (TV Gazeta)"]
-        };
-
         function setConditionalRequired(itemId, fieldId, isRequired) {
             const field = document.getElementById(`${fieldId}-${itemId}`);
             if (!field) return;
@@ -767,10 +792,9 @@
             const posicaoVideo = document.getElementById(`posicaoVideo-${itemId}`);
             if (!group || !field || !tipoLinha || !formatos || !posicaoVideo) return;
 
-            const selectedFormats = Array.from(formatos.selectedOptions || []).map(option => option.value.toUpperCase());
             const shouldShow = tipoLinha.value === 'VIDEO'
-                && selectedFormats.includes('VIDEO')
-                && !selectedFormats.includes('DAI')
+                && hasSelectedFormatMode(itemId, 'VIDEO')
+                && !hasSelectedFormatMode(itemId, 'DAI')
                 && isPreRoll(posicaoVideo.value);
 
             group.classList.toggle('hidden', !shouldShow);
@@ -848,7 +872,7 @@
             const formatSelect = document.getElementById(`formatos-${itemId}`);
             if (!formatSelect) return;
 
-            const hasDAI = Array.from(formatSelect.selectedOptions || []).map(o => o.value.toUpperCase()).includes('DAI');
+            const hasDAI = hasSelectedFormatMode(itemId, 'DAI');
 
             if (hasDAI) {
                 const afiliada = document.getElementById('cg-afiliadas').value;
@@ -856,8 +880,7 @@
                 choiceSitesObj.instance.clearStore();
                 choiceSitesObj.instance.setChoices(formatChoices(daiSites), 'value', 'label', true);
             } else {
-                const allDaiSites = Object.values(daiSiteMappings).flat();
-                let nonDaiSites = dropdownData.sites.filter(site => !allDaiSites.includes(site));
+                let nonDaiSites = [...standardSites];
                 // Add Globoplay only for Video lines (non-DAI)
                 const tipoLinha = document.getElementById(`tipoLinha-${itemId}`);
                 if (tipoLinha && tipoLinha.value === 'VIDEO' && !nonDaiSites.includes('Globoplay')) {
@@ -870,6 +893,7 @@
 
         function initApp() {
             initDropdownOptions(document.getElementById('cg-afiliadas'), dropdownData.afiliadas);
+            initDropdownOptions(document.getElementById('cg-mes'), dropdownData.meses);
             new Choices(document.getElementById('cg-afiliadas'), { ...commonSearchOpts, itemSelectText: '' });
             new Choices(document.getElementById('cg-mes'), { searchEnabled: false, itemSelectText: '', shouldSort: false });
 
@@ -911,7 +935,9 @@
                 else if (field === 'generos') { available = dropdownData.generos; }
                 else if (field === 'potencialConsumo') { available = dropdownData.potencialConsumo; }
                 else if (field === 'interesses') { available = dropdownData.interesses; }
-                else if (field === 'sites') { available = dropdownData.sites; }
+                else if (field === 'sites') {
+                    available = Array.from(document.getElementById(`sites-${itemId}`).options).map(option => option.value);
+                }
                 else if (field === 'geolocalizacao') { available = dropdownData.geolocalizacao; }
                 else if (field === 'posicao') { available = dropdownData.posicao; }
 
@@ -975,8 +1001,7 @@
             let nameParts = [prop, tipoLinha, formato];
 
             if (tipoLinha === "VIDEO") {
-                const hasDAI = selectFormatos && Array.from(selectFormatos.selectedOptions).some(o => o.value.toUpperCase() === "DAI");
-                const hasVideo = selectFormatos && Array.from(selectFormatos.selectedOptions).some(o => o.value.toUpperCase() === "VIDEO");
+                const hasDAI = hasSelectedFormatMode(itemId, 'DAI');
 
                 const posVid = hasDAI ? "DAI" : el('posicaoVideo').value;
                 if (posVid) nameParts.push(posVid);
@@ -1081,8 +1106,6 @@
                     <label>Globoplay *</label>
                     <select id="globoplay-${itemId}">
                         <option value="">Selecione...</option>
-                        <option value="Sim">Sim</option>
-                        <option value="Não">Não</option>
                     </select>
                 </div>
 
@@ -1168,6 +1191,7 @@
             initDropdownOptions(el('tipoLinha'), dropdownData.tipoDeLinha);
             initDropdownOptions(el('posicaoVideo'), dropdownData.posicaoVideo);
             initDropdownOptions(el('skip'), dropdownData.skip);
+            initDropdownOptions(el('globoplay'), dropdownData.globoplay);
 
             const choicePropriedade = new Choices(el('propriedade'), { ...commonSearchOpts, itemSelectText: '' });
             const choicePosicaoVideo = new Choices(el('posicaoVideo'), { ...commonSearchOpts, itemSelectText: '' });
@@ -1182,12 +1206,9 @@
             setConditionalRequired(itemId, 'formatos', true);
             setConditionalRequired(itemId, 'sites', true);
 
-            const allDaiSites = Object.values(daiSiteMappings).flat();
-            const nonDaiSites = dropdownData.sites.filter(site => !allDaiSites.includes(site));
-
             const multiSetup = [
                 { id: 'posicao', data: dropdownData.posicao },
-                { id: 'sites', data: nonDaiSites },
+                { id: 'sites', data: standardSites },
                 { id: 'geolocalizacao', data: dropdownData.geolocalizacao },
                 { id: 'programarDisponivel', data: dropdownData.programarDisponivel },
                 { id: 'idades', data: dropdownData.idades },
@@ -1303,9 +1324,8 @@
 
             // Video/DAI format logic: driven by Formatos selection
             el('formatos').addEventListener('change', function () {
-                const selected = Array.from(el('formatos').selectedOptions || []).map(o => o.value.toUpperCase());
-                const hasVideo = selected.includes('VIDEO');
-                const hasDAI = selected.includes('DAI');
+                const hasVideo = hasSelectedFormatMode(itemId, 'VIDEO');
+                const hasDAI = hasSelectedFormatMode(itemId, 'DAI');
                 const fgPosVideo = document.getElementById(`fg-posicaoVideo-${itemId}`);
                 const fgSkip = document.getElementById(`fg-skip-${itemId}`);
                 const posVideoSelect = el('posicaoVideo');
@@ -1420,7 +1440,7 @@
 
         // --- CHANGELOG MODAL LOGIC ---
         // Altere o texto no HTML acima (id="changelog-text") e MUDE esta versão para mostrar novamente o modal.
-        const CHANGELOG_VERSION = "v1.1.3";
+        const CHANGELOG_VERSION = "v1.2.0";
 
         function checkChangelog() {
             const lastSeen = localStorage.getItem('changelogVersion');
@@ -1441,9 +1461,9 @@
             checkChangelog();
         }).catch(err => {
             console.error('Failed to load base data:', err);
-            alert('Erro ao carregar a base de dados. Verifique sua conexão e recarregue a página.');
+            alert(`Erro ao carregar a base de dados: ${err.message}`);
             const overlay = document.getElementById('loading-overlay');
-            if (overlay) overlay.querySelector('p').textContent = 'Erro ao carregar. Recarregue a página.';
+            if (overlay) overlay.querySelector('p').textContent = `Erro ao carregar: ${err.message}`;
         });
 
         function getMultipleChoicesValue(id) {
@@ -1502,9 +1522,8 @@
                     const el = field => document.getElementById(`${field}-${id}`) ? document.getElementById(`${field}-${id}`).value : "";
 
                     const formatRaw = getMultipleChoicesValue(`formatos-${id}`);
-                    const selectedFormats = formatRaw.split(',').map(value => value.trim().toUpperCase()).filter(Boolean);
-                    const isDAI = selectedFormats.includes("DAI");
-                    const isVideo = selectedFormats.includes("VIDEO");
+                    const isDAI = hasSelectedFormatMode(id, 'DAI');
+                    const isVideo = hasSelectedFormatMode(id, 'VIDEO');
                     const tipoLinha = el('tipoLinha');
                     const exportGloboplay = tipoLinha === 'VIDEO'
                         && isVideo
