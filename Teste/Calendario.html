@@ -1,502 +1,957 @@
-<!doctype html>
+<!DOCTYPE html>
 <!--
-# Team Calendar
+APP DE ARQUIVO ÚNICO.
+Sheets configuradas:
+- BasePessoas: 1rPmbo_VSAOyJO5wAhT1ydEoAR9t14ALcYsDW8uKrLZY
+- BaseCalendario: 1J44IdG2c6Ny_9AwUOSP6dARNYJzoYVL1tTkS1QGy8wE
+Para ativar dados privados e gravação, siga instruções no comentário ao fim deste arquivo.
+-->
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Escala de Tráfego</title>
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
+  <style>
+    :root, [data-theme="light"] {
+      --text-xs: clamp(0.72rem, 0.68rem + 0.2vw, 0.82rem);
+      --text-sm: clamp(0.82rem, 0.78rem + 0.3vw, 0.95rem);
+      --text-base: clamp(0.95rem, 0.9rem + 0.25vw, 1.05rem);
+      --text-lg: clamp(1.1rem, 1rem + 0.6vw, 1.4rem);
+      --text-xl: clamp(1.4rem, 1.1rem + 1vw, 2rem);
+      --sp1:.25rem;--sp2:.5rem;--sp3:.75rem;--sp4:1rem;--sp5:1.25rem;--sp6:1.5rem;--sp8:2rem;--sp10:2.5rem;--sp12:3rem;
+      --bg:#f7f6f2;--surf:#f9f8f5;--surf2:#fbfbf9;--soff:#edeae5;--soff2:#e6e4df;
+      --border:#d4d1ca;--div:#dcd9d5;--text:#28251d;--muted:#7a7974;--faint:#bab9b4;--inv:#f9f8f4;
+      --primary:#01696f;--primary-h:#0c4e54;--primary-hl:#cedcd8;
+      --success:#437a22;--success-h:#2e5c10;--success-hl:#d4dfcc;
+      --warn:#964219;--warn-hl:#ddcfc6;
+      --blue:#006494;--blue-hl:#c6d8e4;
+      --purple:#7a39bb;--purple-hl:#dacfde;
+      --rad-sm:.35rem;--rad-md:.5rem;--rad-lg:.75rem;--rad-xl:1rem;--rad-full:9999px;
+      --sh-sm:0 1px 3px rgba(0,0,0,.07);--sh-md:0 4px 16px rgba(0,0,0,.09);--sh-lg:0 12px 36px rgba(0,0,0,.13);
+      --trans:180ms cubic-bezier(.16,1,.3,1);
+    }
+    [data-theme="dark"] {
+      --bg:#171614;--surf:#1c1b19;--surf2:#201f1d;--soff:#22211f;--soff2:#2d2c2a;
+      --border:#393836;--div:#262523;--text:#cdccca;--muted:#979694;--faint:#5a5957;--inv:#2b2a28;
+      --primary:#4f98a3;--primary-h:#227f8b;--primary-hl:#313b3b;
+      --success:#6daa45;--success-h:#4d8f25;--success-hl:#3a4435;
+      --warn:#bb653b;--warn-hl:#564942;
+      --blue:#5591c7;--blue-hl:#3a4550;
+      --purple:#a86fdf;--purple-hl:#4e4652;
+      --sh-sm:0 1px 2px rgba(0,0,0,.25);--sh-md:0 4px 14px rgba(0,0,0,.35);--sh-lg:0 12px 32px rgba(0,0,0,.45);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;scroll-behavior:smooth}
+    body{min-height:100vh;line-height:1.5;font-family:'Satoshi',sans-serif;font-size:var(--text-base);color:var(--text);background:var(--bg);transition:background var(--trans),color var(--trans)}
+    button,input,select,textarea{font:inherit;color:inherit}
+    button{cursor:pointer;border:none;background:none}
+    :focus-visible{outline:2px solid var(--primary);outline-offset:2px;border-radius:var(--rad-sm)}
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important}}
 
-Static GitHub Pages calendar backed by two Google Sheets. No build step.
+    .app{max-width:1440px;margin:0 auto;padding:var(--sp4) var(--sp4) var(--sp12)}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:var(--sp4);padding:var(--sp4) 0 var(--sp6);flex-wrap:wrap}
+    .brand{display:flex;align-items:center;gap:var(--sp3)}
+    .brand svg{width:36px;height:36px;color:var(--primary);flex-shrink:0}
+    .brand-text h1{font-size:var(--text-xl);font-weight:700;line-height:1.1}
+    .brand-text p{color:var(--muted);font-size:var(--text-sm)}
+    .topbar-right{display:flex;align-items:center;gap:var(--sp2)}
+    .layout{display:grid;grid-template-columns:290px 1fr;gap:var(--sp4);align-items:start}
+    @media(max-width:1024px){.layout{grid-template-columns:1fr}}
+    .sidebar{position:sticky;top:var(--sp4);display:grid;gap:var(--sp4)}
+    @media(max-width:1024px){.sidebar{position:static}}
+    .main-content{display:grid;gap:var(--sp4)}
+    .panel{background:var(--surf);border:1px solid var(--border);border-radius:var(--rad-xl);box-shadow:var(--sh-sm)}
 
-## Setup
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--sp2);min-height:44px;padding:0 var(--sp4);border-radius:var(--rad-md);border:1px solid transparent;font-size:var(--text-sm);font-weight:600;text-decoration:none;transition:background var(--trans),border-color var(--trans),color var(--trans),box-shadow var(--trans),transform var(--trans);white-space:nowrap}
+    .btn:hover{transform:translateY(-1px)}
+    .btn:active{transform:translateY(0)}
+    .btn-sm{min-height:38px;padding:0 var(--sp3);font-size:var(--text-xs)}
+    .btn-primary{background:var(--primary);color:var(--inv);box-shadow:var(--sh-sm)}
+    .btn-primary:hover{background:var(--primary-h)}
+    .btn-secondary{background:var(--surf);border-color:var(--border)}
+    .btn-secondary:hover{background:var(--soff)}
+    .btn-ghost{background:transparent;border-color:var(--border)}
+    .btn-ghost:hover{background:var(--soff)}
+    .btn-warn{background:var(--warn);color:var(--inv)}
+    .btn-warn:hover{filter:brightness(.9)}
+    .btn[disabled]{opacity:.45;pointer-events:none;transform:none}
 
-1. Create People spreadsheet with tab named `People`. First row: `Name | Phone | Email`.
-2. Create Entries spreadsheet with tab named `Entries`. First row: `ID | Person | Type | Start Date | End Date`.
-3. Open [Google Apps Script](https://script.google.com), create project, paste `Code.gs`.
-4. Put both spreadsheet IDs at top of script. ID is text between `/d/` and `/edit` in sheet URL. Both IDs may be same if tabs live in one spreadsheet.
-5. In Apps Script: **Deploy > New deployment > Web app**. Execute as **Me**; access **Anyone**. Copy `/exec` URL.
-6. Edit `config.js`: paste web-app URL; change recipients and email text.
-7. Push files to GitHub. In **Settings > Pages**, deploy from branch root.
+    .s-panel{padding:var(--sp5);display:grid;gap:var(--sp4)}
+    .s-title{font-size:var(--text-base);font-weight:700;margin-bottom:var(--sp1)}
+    .s-copy{color:var(--muted);font-size:var(--text-sm);line-height:1.5}
+    .field{display:grid;gap:var(--sp2)}
+    .field label{font-size:var(--text-sm);font-weight:600}
+    .input,.select,.textarea{width:100%;min-height:44px;padding:0 var(--sp3);background:var(--surf2);border:1px solid var(--border);border-radius:var(--rad-md);transition:border-color var(--trans),box-shadow var(--trans)}
+    .input:focus,.select:focus,.textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 15%,transparent);outline:none}
+    .textarea{min-height:130px;padding:var(--sp3);resize:vertical;line-height:1.5}
+    .helper{font-size:var(--text-xs);color:var(--muted)}
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.82em;background:var(--soff);padding:.15rem .35rem;border-radius:.35rem}
+    .badge{display:inline-flex;align-items:center;gap:var(--sp1);padding:.3rem .65rem;border-radius:var(--rad-full);font-size:var(--text-xs);font-weight:700}
+    .badge-primary{background:color-mix(in srgb,var(--primary) 12%,transparent);color:var(--primary)}
+    .badge-success{background:var(--success-hl);color:var(--success)}
+    .badge-blue{background:var(--blue-hl);color:var(--blue)}
+    .badge-warn{background:var(--warn-hl);color:var(--warn)}
 
-Without Apps Script URL, site runs in demo mode. Entries added there disappear on reload.
+    .cal-shell{padding:var(--sp5)}
+    .cal-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--sp3);margin-bottom:var(--sp5)}
+    .cal-title{font-size:var(--text-lg);font-weight:700;line-height:1.2}
+    .cal-nav{display:flex;align-items:center;gap:var(--sp2)}
+    .legend{display:flex;flex-wrap:wrap;gap:var(--sp3);align-items:center;margin-top:var(--sp2)}
+    .legend-item{display:inline-flex;align-items:center;gap:6px;font-size:var(--text-xs);color:var(--muted)}
+    .legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+    .weekday-row,.calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+    .weekday-row{margin-bottom:var(--sp2)}
+    .weekday{text-align:center;font-size:var(--text-xs);color:var(--muted);text-transform:uppercase;letter-spacing:.07em;padding:var(--sp2) 0}
+    .day{min-height:130px;padding:var(--sp2) var(--sp2) var(--sp3);border-radius:var(--rad-lg);border:1px solid var(--border);background:var(--surf2);display:grid;grid-template-rows:auto 1fr;gap:var(--sp1);transition:border-color var(--trans)}
+    .day.other-month{opacity:.38}
+    .day.is-today{border-color:var(--primary);box-shadow:inset 0 0 0 1px var(--primary)}
+    .day-num{font-size:var(--text-sm);font-weight:700;text-align:right;padding-right:var(--sp1)}
+    .day-events{display:grid;gap:5px;align-content:start}
+    .chip{width:100%;text-align:left;padding:.38rem .55rem;border-radius:var(--rad-md);font-size:.78rem;line-height:1.2;font-weight:500;cursor:pointer;border:1px solid transparent;transition:filter var(--trans),box-shadow var(--trans),transform var(--trans)}
+    .chip:hover{filter:brightness(.93);transform:translateY(-1px);box-shadow:var(--sh-sm)}
+    .chip-plantan{background:var(--c-plantao-bg);border-color:var(--c-plantao-border);color:var(--c-plantao-text);font-weight:600}
+    .chip-ferias{background:var(--c-ferias-bg);border-color:var(--c-ferias-border);color:var(--c-ferias-text);font-weight:600}
+    .chip-selected{outline:2px solid var(--success);outline-offset:1px}
+    .chip-type{display:block;color:var(--muted);font-size:.7rem;margin-bottom:2px}
+    .chip-more{font-size:.72rem;color:var(--muted);padding-left:.55rem}
+    .cal-empty{padding:var(--sp10);text-align:center;color:var(--muted);font-size:var(--text-sm)}
 
-## Important security limit
+    .details-shell{padding:var(--sp5)}
+    .details-header{display:flex;align-items:start;justify-content:space-between;gap:var(--sp4);flex-wrap:wrap;margin-bottom:var(--sp4)}
+    .details-header h2{font-size:var(--text-lg);font-weight:700}
+    .details-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--sp4)}
+    @media(max-width:720px){.details-grid{grid-template-columns:1fr}.cal-header{align-items:flex-start}.day{min-height:100px}}
+    .detail-card{background:var(--surf2);border:1px solid var(--border);border-radius:var(--rad-lg);padding:var(--sp4)}
+    .detail-card h3{font-size:var(--text-sm);font-weight:700;margin-bottom:var(--sp3)}
+    .dl{display:grid;gap:var(--sp3)}
+    .dl-row{display:grid;grid-template-columns:110px 1fr;gap:var(--sp3);align-items:baseline;font-size:var(--text-sm)}
+    .dl-label{color:var(--muted);font-weight:600;font-size:var(--text-xs);text-transform:uppercase;letter-spacing:.05em}
+    .actions-row{display:flex;gap:var(--sp2);flex-wrap:wrap}
+    .status-banner{background:var(--soff);border:1px solid var(--border);border-radius:var(--rad-lg);padding:var(--sp3) var(--sp4);font-size:var(--text-sm);color:var(--muted)}
+    .status-banner strong{color:var(--text)}
+    .load-status{text-align:center;padding:var(--sp3);font-size:var(--text-sm);color:var(--muted)}
+    .spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+    @keyframes spin{to{transform:rotate(360deg)}}
 
-GitHub Pages and Apps Script web-app URL are public. Anyone who can reach site can read people and add entries. Do not use this setup for private contact data. Restricted access needs authentication or a private internal host.
+    /* Notify button separator */
+    .btn-notify{background:color-mix(in srgb,var(--warn) 10%,var(--surf));border-color:color-mix(in srgb,var(--warn) 30%,var(--border));color:var(--warn);font-weight:700}
+    .btn-notify:hover{background:color-mix(in srgb,var(--warn) 18%,var(--surf))}
 
-Email button opens user's email app with recipients, subject, and body prefilled. Automatic sending needs a server-side function and mail provider; never place a mail-provider secret in `config.js`.
+    :root,[data-theme="light"]{
+      --c-plantao:#52b96a; --c-plantao-bg:#d4f0da; --c-plantao-border:#52b96a; --c-plantao-text:#0f5c1f;
+      --c-ferias:#e07030; --c-ferias-bg:#fde8d4; --c-ferias-border:#e07030; --c-ferias-text:#7a2c00;
+      --c-rodizio:#a050e0; --c-rodizio-bg:#ecdcf8; --c-rodizio-border:#a050e0; --c-rodizio-text:#521a8a;
+      --c-cobertura:#b35a1f; --c-cobertura-bg:#f7e2d1; --c-cobertura-border:#b35a1f; --c-cobertura-text:#6a2d00;
+      --c-selected:#ffcc00;
+    }
+    [data-theme="dark"]{
+      --c-plantao:#6dd68a; --c-plantao-bg:#1a3a22; --c-plantao-border:#3d8c52; --c-plantao-text:#9eedb2;
+      --c-ferias:#f08040; --c-ferias-bg:#3a1e0a; --c-ferias-border:#c05c18; --c-ferias-text:#fdb080;
+      --c-rodizio:#c070f0; --c-rodizio-bg:#2a1040; --c-rodizio-border:#8030c0; --c-rodizio-text:#e0a8ff;
+      --c-cobertura:#d08a55; --c-cobertura-bg:#3a2214; --c-cobertura-border:#9a4f1d; --c-cobertura-text:#ffd2b0;
+      --c-selected:#ffd84d;
+    }
+    .chip-plantan{background:var(--c-plantao-bg);border-color:var(--c-plantao-border);color:var(--c-plantao-text);font-weight:600}
+    .chip-ferias{background:var(--c-ferias-bg);border-color:var(--c-ferias-border);color:var(--c-ferias-text);font-weight:600}
+    .chip-rodizio{background:var(--c-rodizio-bg);border-color:var(--c-rodizio-border);color:var(--c-rodizio-text);font-weight:600}
+    .chip-cobertura{background:var(--c-cobertura-bg);border-color:var(--c-cobertura-border);color:var(--c-cobertura-text);font-weight:600}
+    .chip-selected{outline:3px solid var(--c-selected);outline-offset:2px;box-shadow:0 0 0 3px color-mix(in srgb,var(--c-selected) 25%,transparent)}
+    .badge-primary{background:var(--c-plantao-bg);color:var(--c-plantao-text)}
+    .badge-blue{background:var(--c-ferias-bg);color:var(--c-ferias-text)}
+    .badge-purple{background:var(--c-rodizio-bg);color:var(--c-rodizio-text)}
+    .badge-cobertura{background:var(--c-cobertura-bg);color:var(--c-cobertura-text)}
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;display:flex;align-items:center;justify-content:center;padding:var(--sp4)}
+    .modal-backdrop.hidden{display:none}
+    .modal{background:var(--surf);border:1px solid var(--border);border-radius:var(--rad-xl);padding:var(--sp6);width:100%;max-width:520px;box-shadow:var(--sh-lg);display:grid;gap:var(--sp4)}
+    .modal h2{font-size:var(--text-base);font-weight:700;margin:0}
+    .color-row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:var(--sp3);padding:var(--sp3);background:var(--surf2);border-radius:var(--rad-md);border:1px solid var(--border)}
+    .color-row-label{font-size:var(--text-sm);font-weight:600}
+    .color-row-preview{display:flex;align-items:center;gap:var(--sp2)}
+    .color-swatch{width:40px;height:40px;border-radius:var(--rad-md);border:2px solid var(--border);padding:2px;background:var(--surf2)}
+    .color-swatch input[type=color]{width:100%;height:100%;border:none;padding:0;background:none;cursor:pointer;border-radius:calc(var(--rad-md) - 2px)}
+    .modal-actions{display:flex;gap:var(--sp2);justify-content:flex-end;flex-wrap:wrap}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp3)}
+    .form-error{min-height:1.25rem;color:var(--warn);font-size:var(--text-sm);font-weight:600}
+    .modal-close-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sp3)}
+    @media(max-width:560px){.form-grid{grid-template-columns:1fr}.topbar-right{width:100%}.topbar-right .btn{flex:1}}
+  </style>
+</head>
+<body>
+<a href="#main" class="sr-only">Pular para o conteúdo</a>
+<div class="app">
 
+  <header class="topbar">
+    <div class="brand">
+      <svg viewBox="0 0 48 48" fill="none" aria-label="Escala de Tráfego">
+        <rect x="7" y="10" width="34" height="30" rx="8" stroke="currentColor" stroke-width="2.5"/>
+        <path d="M7 20H41" stroke="currentColor" stroke-width="2.5"/>
+        <path d="M16 6V14M32 6V14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+        <rect x="13" y="27" width="6" height="6" rx="1.5" fill="currentColor" opacity=".9"/>
+        <rect x="21" y="27" width="6" height="6" rx="1.5" fill="currentColor" opacity=".5"/>
+        <rect x="29" y="27" width="6" height="6" rx="1.5" fill="currentColor" opacity=".25"/>
+      </svg>
+      <div class="brand-text">
+        <h1>Escala de Tráfego</h1>
+        <p>Plantões e férias — sincronizado com Google Sheets</p>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button id="newEntryBtn" class="btn btn-primary btn-sm">+ Novo evento</button>
+      <button id="reloadBtn" class="btn btn-secondary btn-sm">↻ Atualizar</button>
+      <button id="colorSettingsBtn" type="button" class="btn btn-ghost btn-sm" aria-label="Personalizar cores">🎨</button>
+      <button data-theme-toggle class="btn btn-ghost btn-sm" aria-label="Alternar tema">🌙</button>
+    </div>
+  </header>
 
+  <div class="layout" id="main">
+    <aside class="sidebar">
+      <div class="panel s-panel">
+        <div>
+          <div class="badge badge-primary" style="margin-bottom:var(--sp3)">📊 Google Sheets</div>
+          <p class="s-title">Filtros</p>
+        </div>
+        <div class="field">
+          <label for="personFilter">Filtrar por pessoa</label>
+          <input id="personFilter" class="input" type="text" list="personList" placeholder="Nome do profissional…" autocomplete="off"/>
+          <datalist id="personList"></datalist>
+        </div>
+        <div class="field">
+          <label for="tipoFilter">Tipo de escala</label>
+          <select id="tipoFilter" class="select">
+            <option value="">Todos os tipos</option>
+            <option value="Plantão">Plantão</option>
+            <option value="Férias">Férias</option>
+            <option value="Rodizio">Rodízio 9h</option>
+            <option value="Cobertura">Cobertura Férias</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="viewMode">Visualização</label>
+          <select id="viewMode" class="select">
+            <option value="month">Mês</option>
+            <option value="week">Próximos 7 dias</option>
+          </select>
+        </div>
+        <div id="loadStatus" class="load-status">Clique em <strong>Atualizar</strong> para carregar a escala.</div>
+      </div>
 
-GOOGLE APPS SCRIPT SOURCE (paste into Apps Script editor):
+      <div class="panel s-panel">
+        <div>
+          <p class="s-title">Modelo de e-mail</p>
+          <p class="s-copy">Texto padrão enviado ao selecionar um evento e clicar em <em>Enviar e-mail</em>.</p>
+        </div>
+        <div class="field">
+          <label for="emailSubject">Assunto</label>
+          <input id="emailSubject" class="input" type="text" value="Confirmação de {{tipo}} — {{pessoa}} — {{data}}"/>
+        </div>
+        <div class="field">
+          <label for="emailBody">Corpo</label>
+          <textarea id="emailBody" class="textarea">Olá {{pessoa}},
 
-// Google Apps Script bridge between GitHub Pages and two Google Sheets.
-// Set both IDs below, then deploy as Web app (execute as you; access: anyone).
-const PEOPLE_SPREADSHEET_ID = "PASTE_PEOPLE_SPREADSHEET_ID";
-const ENTRIES_SPREADSHEET_ID = "PASTE_ENTRIES_SPREADSHEET_ID";
-const PEOPLE_SHEET_NAME = "People";
-const ENTRIES_SHEET_NAME = "Entries";
+Segue a confirmação do seu {{tipo}} em {{data}}.
+
+Qualquer dúvida, fico à disposição.
+
+Atenciosamente,</textarea>
+        </div>
+        <p class="helper">Placeholders: <code>{{pessoa}}</code> <code>{{tipo}}</code> <code>{{data}}</code> <code>{{dataFim}}</code> <code>{{telefone}}</code></p>
+      </div>
+    </aside>
+
+    <section class="main-content">
+      <div class="panel cal-shell">
+        <div class="cal-header">
+          <div>
+            <div class="cal-title" id="calTitle">Calendário</div>
+            <div class="legend">
+              <span class="legend-item"><span class="legend-dot" style="background:var(--primary)"></span>Plantão</span>
+              <span class="legend-item"><span class="legend-dot" style="background:var(--blue)"></span>Férias</span>
+              <span class="legend-item"><span class="legend-dot" style="background:var(--success)"></span>Selecionado</span>
+            </div>
+          </div>
+          <div class="cal-nav">
+            <button id="prevBtn" class="btn btn-ghost btn-sm" aria-label="Período anterior">← Ant.</button>
+            <button id="todayBtn" class="btn btn-secondary btn-sm">Hoje</button>
+            <button id="nextBtn" class="btn btn-ghost btn-sm" aria-label="Próximo período">Próx. →</button>
+          </div>
+        </div>
+        <div class="weekday-row" id="weekdayRow"></div>
+        <div class="calendar-grid" id="calGrid"></div>
+        <div id="calEmpty" class="cal-empty" style="display:none">Nenhum evento encontrado para os filtros aplicados.</div>
+      </div>
+
+      <div class="panel details-shell">
+        <div class="details-header">
+          <div>
+            <h2>Evento selecionado</h2>
+            <p class="s-copy">Selecione um evento no calendário para acionar as ações abaixo.</p>
+          </div>
+          <div class="actions-row">
+            <button id="outlookCalBtn" class="btn btn-primary" disabled>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+              Adicionar ao Outlook
+            </button>
+            <button id="outlookEmailBtn" class="btn btn-secondary" disabled>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              Enviar e-mail
+            </button>
+            <button id="notifyTeamBtn" class="btn btn-notify" disabled>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              Notificar equipe
+            </button>
+          </div>
+        </div>
+        <div class="details-grid">
+          <div class="detail-card">
+            <h3>Detalhes do evento</h3>
+            <div id="detailContent" class="dl">
+              <p style="color:var(--muted);font-size:var(--text-sm)">Nenhum evento selecionado.</p>
+            </div>
+          </div>
+          <div class="detail-card">
+            <h3>Status</h3>
+            <div id="statusBox" class="status-banner">Aguardando seleção de evento.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- New entry modal -->
+<div id="entryModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="entryModalTitle">
+  <form id="entryForm" class="modal">
+    <div class="modal-close-row">
+      <h2 id="entryModalTitle">Novo evento</h2>
+      <button type="button" id="entryCloseBtn" class="btn btn-ghost btn-sm" aria-label="Fechar">✕</button>
+    </div>
+    <div class="field">
+      <label for="entryPerson">Pessoa</label>
+      <select id="entryPerson" class="select" required>
+        <option value="">Selecione uma pessoa…</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="entryType">Tipo de escala</label>
+      <select id="entryType" class="select" required>
+        <option value="Plantão">Plantão</option>
+        <option value="Férias">Férias</option>
+        <option value="Cobertura">Cobertura Férias</option>
+      </select>
+    </div>
+    <div class="form-grid">
+      <div class="field">
+        <label for="entryStart">Data inicial</label>
+        <input id="entryStart" class="input" type="date" required>
+      </div>
+      <div class="field">
+        <label for="entryEnd">Data final</label>
+        <input id="entryEnd" class="input" type="date" required>
+      </div>
+    </div>
+    <div id="entryError" class="form-error" role="alert"></div>
+    <div class="modal-actions">
+      <button type="button" id="entryCancelBtn" class="btn btn-secondary">Cancelar</button>
+      <button type="submit" id="entrySaveBtn" class="btn btn-primary">Salvar evento</button>
+    </div>
+  </form>
+</div>
+
+<!-- Color settings modal -->
+<div id="colorModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-label="Personalizar cores">
+  <div class="modal">
+    <h2>🎨 Personalizar cores</h2>
+    <div class="color-row"><div><div class="color-row-label">Plantão</div><div style="font-size:var(--text-xs);color:var(--muted)">Chip, badge e legenda</div></div><div class="color-row-preview"><div class="color-swatch"><input type="color" id="cpPlantao"></div></div></div>
+    <div class="color-row"><div><div class="color-row-label">Férias</div><div style="font-size:var(--text-xs);color:var(--muted)">Chip, badge e legenda</div></div><div class="color-row-preview"><div class="color-swatch"><input type="color" id="cpFerias"></div></div></div>
+    <div class="color-row"><div><div class="color-row-label">Rodízio 9h</div><div style="font-size:var(--text-xs);color:var(--muted)">Chip, badge e legenda</div></div><div class="color-row-preview"><div class="color-swatch"><input type="color" id="cpRodizio"></div></div></div>
+    <div class="color-row"><div><div class="color-row-label">Cobertura Férias</div><div style="font-size:var(--text-xs);color:var(--muted)">Chip, badge e legenda</div></div><div class="color-row-preview"><div class="color-swatch"><input type="color" id="cpCobertura"></div></div></div>
+    <div class="modal-actions">
+      <button type="button" id="colorResetBtn" class="btn btn-ghost btn-sm">Restaurar padrão</button>
+      <button type="button" id="colorCancelBtn" class="btn btn-secondary btn-sm">Cancelar</button>
+      <button type="button" id="colorSaveBtn" class="btn btn-primary btn-sm">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// After deploying Apps Script code embedded at end of this file, paste its /exec URL here.
+const APPS_SCRIPT_URL = 'COLE_AQUI_A_URL_DO_APPS_SCRIPT';
+const PEOPLE_SPREADSHEET_ID = '1rPmbo_VSAOyJO5wAhT1ydEoAR9t14ALcYsDW8uKrLZY';
+const CALENDAR_SPREADSHEET_ID = '1J44IdG2c6Ny_9AwUOSP6dARNYJzoYVL1tTkS1QGy8wE';
+
+const NOTIFY_TO = 'filipe.forte@g.globo,rennan.tigre@g.globo,miguel.jr@g.globo,ptoscano@g.globo';
+
+const state = { people: [], events: [], filtered: [], selected: null, cursor: new Date(), view: 'month' };
+
+const $id = id => document.getElementById(id);
+const els = {
+  personFilter:$id('personFilter'), tipoFilter:$id('tipoFilter'), viewMode:$id('viewMode'),
+  reloadBtn:$id('reloadBtn'), prevBtn:$id('prevBtn'), nextBtn:$id('nextBtn'), todayBtn:$id('todayBtn'),
+  calTitle:$id('calTitle'), weekdayRow:$id('weekdayRow'), calGrid:$id('calGrid'), calEmpty:$id('calEmpty'),
+  detailContent:$id('detailContent'), statusBox:$id('statusBox'),
+  outlookCalBtn:$id('outlookCalBtn'), outlookEmailBtn:$id('outlookEmailBtn'), notifyTeamBtn:$id('notifyTeamBtn'),
+  emailSubject:$id('emailSubject'), emailBody:$id('emailBody'),
+  loadStatus:$id('loadStatus'), personList:$id('personList'), themeBtn:document.querySelector('[data-theme-toggle]')
+};
+
+// --- THEME ---
+(function(){
+  let t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', t);
+  els.themeBtn.textContent = t === 'dark' ? '☀️' : '🌙';
+  els.themeBtn.addEventListener('click', () => {
+    t = t === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', t);
+    els.themeBtn.textContent = t === 'dark' ? '☀️' : '🌙';
+  });
+})();
+
+// --- CSV PARSER ---
+function parseCsv(text) {
+  const rows = []; let row = [], cell = '', inQ = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i], n = text[i+1];
+    if (c === '"') { if (inQ && n === '"') { cell += '"'; i++; } else { inQ = !inQ; } }
+    else if (c === ',' && !inQ) { row.push(cell); cell = ''; }
+    else if ((c === '\n' || c === '\r') && !inQ) {
+      if (c === '\r' && n === '\n') i++;
+      if (cell.length || row.length) { row.push(cell); rows.push(row); row = []; cell = ''; }
+    } else cell += c;
+  }
+  if (cell.length || row.length) { row.push(cell); rows.push(row); }
+  if (!rows.length) return [];
+  // Normalize headers: lowercase, strip accents
+  const headers = rows[0].map(h => h.trim().toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g,''));
+  return rows.slice(1).filter(r => r.some(c => c.trim())).map(r => {
+    const o = {}; headers.forEach((h, i) => o[h] = (r[i]||'').trim()); return o;
+  });
+}
+
+function parseDate(v) {
+  if (!v) return null;
+  // DD/MM/YY or DD/MM/YYYY
+  const mdy = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+  if (mdy) {
+    let [,d,mo,y] = mdy;
+    if (y.length === 2) y = '20' + y;
+    return new Date(+y, +mo-1, +d);
+  }
+  const iso = v.replace(' ', 'T').replace(/T00:00:00$/, '');
+  const date = new Date(iso);
+  if (!isNaN(date)) return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  return null;
+}
+
+function normKey(v) {
+  return String(v || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+}
+
+function pick(row, aliases) {
+  for (const key of aliases) if (row[key] != null && String(row[key]).trim()) return String(row[key]).trim();
+  return '';
+}
+
+function normalizePeople(rows) {
+  return rows.map((r, idx) => ({
+    id: r.id || `person-${idx}`,
+    name: pick(r, ['name','nome','pessoa','trafego']),
+    phone: pick(r, ['phone','telefone','celular']),
+    email: pick(r, ['email','e-mail'])
+  })).filter(p => p.name).sort((a,b) => a.name.localeCompare(b.name, 'pt-BR'));
+}
+
+function normalizeRows(rows, people) {
+  const peopleByName = new Map(people.map(p => [normKey(p.name), p]));
+  return rows.map((r, idx) => {
+    const pessoa = pick(r, ['person_name','person','pessoa','trafego','nome']);
+    const contact = peopleByName.get(normKey(pessoa)) || {};
+    const inicio = parseDate(pick(r, ['start_date','startdate','start','inicio','datainicio','data']));
+    const fim = parseDate(pick(r, ['end_date','enddate','end','fim','datafim']));
+    const tipo = pick(r, ['type','tipo']);
+    if (!inicio || !pessoa || !tipo) return null;
+    return {
+      id: r.id || `ev-${idx}`,
+      pessoa,
+      email: contact.email || pick(r, ['email','e-mail']),
+      telefone: contact.phone || pick(r, ['phone','telefone','celular']),
+      tipo,
+      inicio,
+      fim: fim || inicio
+    };
+  }).filter(Boolean);
+}
+
+// --- LOAD ---
+function setLoadStatus(html) { els.loadStatus.innerHTML = html; }
+
+async function api(action, data) {
+  if (!/^https:\/\/script\.google\.com\/.+\/exec$/.test(APPS_SCRIPT_URL)) {
+    throw new Error('Configure APPS_SCRIPT_URL no HTML após publicar o Apps Script.');
+  }
+  const options = data ? { method:'POST', body:new URLSearchParams({ action, ...data }) } : {};
+  const url = data ? APPS_SCRIPT_URL : `${APPS_SCRIPT_URL}?action=${encodeURIComponent(action)}`;
+  const res = await fetch(url, options);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const result = await res.json();
+  if (!result.ok) throw new Error(result.error || 'Erro desconhecido');
+  return result;
+}
+
+function fillPeopleControls() {
+  els.personList.innerHTML = state.people.map(p => `<option value="${escHtml(p.name)}">`).join('');
+  const select = $id('entryPerson');
+  select.innerHTML = '<option value="">Selecione uma pessoa…</option>' +
+    state.people.map(p => `<option value="${escHtml(p.name)}">${escHtml(p.name)}</option>`).join('');
+}
+
+async function loadData() {
+  setLoadStatus('<span class="spinner"></span> Carregando bases…');
+  els.reloadBtn.disabled = true;
+  try {
+    const result = await api('list');
+    state.people = normalizePeople(result.people || []);
+    state.events = normalizeRows(result.entries || [], state.people);
+    fillPeopleControls();
+    setLoadStatus(`✅ ${state.people.length} pessoas e ${state.events.length} eventos carregados.`);
+    applyFilters();
+  } catch(err) {
+    setLoadStatus(`❌ Erro: ${escHtml(err.message)}`);
+  }
+  els.reloadBtn.disabled = false;
+}
+
+// --- FILTERS ---
+function applyFilters() {
+  const person = els.personFilter.value.trim().toLowerCase();
+  const tipo = els.tipoFilter.value;
+  const norm = (v) => String(v || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const tipoNorm = norm(tipo);
+  state.view = els.viewMode.value;
+  state.filtered = state.events.filter(e => {
+    const eNorm = norm(e.tipo);
+    const tipoMatch = !tipo || (tipoNorm === 'cobertura' ? eNorm === 'cobertura' : eNorm === tipoNorm);
+    return (!person || e.pessoa.toLowerCase().includes(person)) && tipoMatch;
+  });
+  renderCalendar();
+}
+
+// --- CALENDAR ---
+const DAYS = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+function sameDay(a, b) { return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate(); }
+function dateInRange(d, s, e) { const t=d.getTime(); return t>=s.getTime()&&t<=e.getTime(); }
+
+function isWeekend(d) {
+  const day = d.getDay();
+  return day === 0 || day === 6;
+}
+
+function renderCalendar() {
+  els.weekdayRow.innerHTML = DAYS.map(d=>`<div class="weekday">${d}</div>`).join('');
+  els.calGrid.innerHTML = '';
+  const today = new Date(); today.setHours(0,0,0,0);
+  const cur = state.cursor;
+
+  let start, end, label;
+  if (state.view === 'month') {
+    const first = new Date(cur.getFullYear(), cur.getMonth(), 1);
+    start = new Date(first); start.setDate(first.getDate()-first.getDay());
+    end = new Date(start); end.setDate(start.getDate()+41);
+    label = `${MONTHS[cur.getMonth()]} ${cur.getFullYear()}`;
+  } else {
+    start = new Date(cur); start.setHours(0,0,0,0);
+    end = new Date(start); end.setDate(start.getDate()+6);
+    label = `${fmt(start)} — ${fmt(end)}`;
+  }
+  els.calTitle.textContent = label;
+
+  const days = [];
+  const c = new Date(start);
+  while (c <= end) { days.push(new Date(c)); c.setDate(c.getDate()+1); }
+
+  function eventsOnDay(day) {
+    return state.filtered.filter(ev => {
+      if (!dateInRange(day, ev.inicio, ev.fim)) return false;
+      const tipoNorm = String(ev.tipo || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+      const blockWeekend = ['cobertura', 'ferias', 'rodizio'].includes(tipoNorm);
+      return !(blockWeekend && isWeekend(day));
+    }).sort((a,b) => a.tipo.localeCompare(b.tipo));
+  }
+
+  const hasAny = days.some(d => eventsOnDay(d).length > 0);
+  els.calEmpty.style.display = (!state.events.length || !hasAny) ? 'block' : 'none';
+
+  days.forEach(day => {
+    const events = eventsOnDay(day);
+    const isOtherMonth = state.view==='month' && day.getMonth()!==cur.getMonth();
+    const isToday = sameDay(day, today);
+    const cell = document.createElement('div');
+    cell.className = 'day'+(isOtherMonth?' other-month':'')+(isToday?' is-today':'');
+    cell.innerHTML = `<div class="day-num">${day.getDate()}</div><div class="day-events"></div>`;
+    const evContainer = cell.querySelector('.day-events');
+
+    const MAX = 3;
+    events.slice(0, MAX).forEach(ev => {
+      const btn = document.createElement('button');
+      const norm = v => String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+      const eNorm = norm(ev.tipo);
+      const cls = eNorm==='cobertura' ? 'chip-cobertura' : eNorm==='ferias' ? 'chip-ferias' : eNorm==='rodizio' ? 'chip-rodizio' : 'chip-plantan';
+      const sel = state.selected&&state.selected.id===ev.id ? ' chip-selected' : '';
+      btn.className = `chip ${cls}${sel}`;
+      btn.innerHTML = `<span class="chip-type">${escHtml(ev.tipo)}</span>${escHtml(ev.pessoa)}`;
+      btn.addEventListener('click', () => selectEvent(ev));
+      evContainer.appendChild(btn);
+    });
+    if (events.length > MAX) {
+      const more = document.createElement('div');
+      more.className = 'chip-more';
+      more.textContent = `+${events.length-MAX} mais`;
+      evContainer.appendChild(more);
+    }
+    if (!events.length) {
+      evContainer.innerHTML = `<span style="font-size:.72rem;color:var(--faint)">—</span>`;
+    }
+    els.calGrid.appendChild(cell);
+  });
+}
+
+// --- DETAIL ---
+function fmt(date, includeYear=true) {
+  if (!date) return '—';
+  return date.toLocaleDateString('pt-BR', {day:'2-digit',month:'short',year:includeYear?'numeric':undefined});
+}
+
+function escHtml(v) { return String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function selectEvent(ev) {
+  state.selected = ev;
+  els.outlookCalBtn.disabled = false;
+  els.outlookEmailBtn.disabled = false;
+  // Notify button only enabled for Plantão
+  els.notifyTeamBtn.disabled = normKey(ev.tipo) !== 'plantao';
+  const norm = v => String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+  const eNorm = norm(ev.tipo);
+  const badgeCls = eNorm==='cobertura' ? 'badge-cobertura' : eNorm==='ferias' ? 'badge-blue' : eNorm==='rodizio' ? 'badge-purple' : 'badge-primary';
+  els.detailContent.innerHTML = `
+    <div class="dl-row"><span class="dl-label">Pessoa</span><span>${escHtml(ev.pessoa)}</span></div>
+    <div class="dl-row"><span class="dl-label">Tipo</span><span><span class="badge ${badgeCls}">${escHtml(ev.tipo)}</span></span></div>
+    <div class="dl-row"><span class="dl-label">Início</span><span>${fmt(ev.inicio)}</span></div>
+    <div class="dl-row"><span class="dl-label">Fim</span><span>${fmt(ev.fim)}</span></div>
+    <div class="dl-row"><span class="dl-label">E-mail</span><span>${ev.email?escHtml(ev.email):'<span style="color:var(--muted)">—</span>'}</span></div>
+    <div class="dl-row"><span class="dl-label">Telefone</span><span>${ev.telefone?escHtml(ev.telefone):'<span style="color:var(--muted)">—</span>'}</span></div>
+  `;
+  els.statusBox.innerHTML = `<strong>Selecionado:</strong> ${escHtml(ev.tipo)} de ${escHtml(ev.pessoa)} — ${fmt(ev.inicio)} a ${fmt(ev.fim)}.`;
+  renderCalendar();
+}
+
+// --- OUTLOOK HELPERS ---
+function outlookDateFmt(d) {
+  const p = n=>String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T00:00:00`;
+}
+
+// FIX: use encodeURIComponent carefully so Outlook receives proper line breaks and spaces
+// Outlook web deeplink uses query params; body/subject must be percent-encoded.
+// We build the URL manually to avoid URLSearchParams replacing spaces with +.
+function buildOutlookUrl(base, params) {
+  const parts = Object.entries(params)
+    .filter(([,v]) => v !== undefined && v !== null && v !== '')
+    .map(([k,v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`);
+  return `${base}?${parts.join('&')}`;
+}
+
+function addToOutlook() {
+  const ev = state.selected; if (!ev) return;
+  const endDay = new Date(ev.fim); endDay.setDate(endDay.getDate()+1);
+  const url = buildOutlookUrl('https://outlook.office.com/calendar/0/deeplink/compose', {
+    path: '/calendar/action/compose',
+    rru: 'addevent',
+    subject: `${ev.tipo} — ${ev.pessoa}`,
+    startdt: outlookDateFmt(ev.inicio),
+    enddt: outlookDateFmt(endDay),
+    allday: 'true',
+    body: `${ev.tipo} de ${ev.pessoa}\nPeríodo: ${fmt(ev.inicio)} a ${fmt(ev.fim)}${ev.telefone ? '\nTelefone: '+ev.telefone : ''}`
+  });
+  window.open(url, '_blank', 'noopener,noreferrer');
+}
+
+function applyTemplate(tpl, ev) {
+  return tpl
+    .replace(/{{pessoa}}/g, ev.pessoa)
+    .replace(/{{tipo}}/g, ev.tipo)
+    .replace(/{{data}}/g, fmt(ev.inicio))
+    .replace(/{{dataFim}}/g, fmt(ev.fim))
+    .replace(/{{telefone}}/g, ev.telefone || '—');
+}
+
+function sendEmail() {
+  const ev = state.selected; if (!ev) return;
+  const subject = applyTemplate(els.emailSubject.value, ev);
+  const body = applyTemplate(els.emailBody.value, ev);
+  const url = buildOutlookUrl('https://outlook.office.com/mail/deeplink/compose', {
+    to: ev.email || '',
+    subject,
+    body
+  });
+  window.open(url, '_blank', 'noopener,noreferrer');
+}
+
+function notifyTeam() {
+  const ev = state.selected; if (!ev || normKey(ev.tipo) !== 'plantao') return;
+  const subject = `Plantonista tráfego - ${fmt(ev.inicio)} e ${fmt(ev.fim)}`;
+  const body = `A pessoa plantonista deste final de semana será ${ev.pessoa}: ${ev.telefone || '(telefone não informado)'}`;
+  const url = buildOutlookUrl('https://outlook.office.com/mail/deeplink/compose', {
+    to: NOTIFY_TO,
+    subject,
+    body
+  });
+  window.open(url, '_blank', 'noopener,noreferrer');
+}
+
+// Period nav
+function shiftPeriod(step) {
+  if (state.view==='month') state.cursor = new Date(state.cursor.getFullYear(), state.cursor.getMonth()+step, 1);
+  else { const c=new Date(state.cursor); c.setDate(c.getDate()+7*step); state.cursor=c; }
+  renderCalendar();
+}
+
+// --- NEW ENTRY ---
+function openEntryModal() {
+  if (!state.people.length) {
+    setLoadStatus('❌ Carregue a BasePessoas antes de criar um evento.');
+    return;
+  }
+  const today = new Date();
+  const iso = d => [d.getFullYear(), String(d.getMonth()+1).padStart(2,'0'), String(d.getDate()).padStart(2,'0')].join('-');
+  $id('entryStart').value = iso(today);
+  $id('entryEnd').value = iso(today);
+  $id('entryError').textContent = '';
+  $id('entryModal').classList.remove('hidden');
+  $id('entryPerson').focus();
+}
+function closeEntryModal() { $id('entryModal').classList.add('hidden'); }
+async function saveEntry(event) {
+  event.preventDefault();
+  const data = {
+    person_name: $id('entryPerson').value,
+    type: $id('entryType').value,
+    start_date: $id('entryStart').value,
+    end_date: $id('entryEnd').value
+  };
+  const error = $id('entryError');
+  if (data.end_date < data.start_date) {
+    error.textContent = 'Data final não pode ser anterior à inicial.';
+    return;
+  }
+  const button = $id('entrySaveBtn');
+  try {
+    error.textContent = '';
+    button.disabled = true;
+    button.textContent = 'Salvando…';
+    await api('add', data);
+    closeEntryModal();
+    await loadData();
+  } catch (err) {
+    error.textContent = err.message;
+  } finally {
+    button.disabled = false;
+    button.textContent = 'Salvar evento';
+  }
+}
+
+// --- WIRE UP ---
+els.reloadBtn.addEventListener('click', loadData);
+$id('newEntryBtn').addEventListener('click', openEntryModal);
+$id('entryCloseBtn').addEventListener('click', closeEntryModal);
+$id('entryCancelBtn').addEventListener('click', closeEntryModal);
+$id('entryForm').addEventListener('submit', saveEntry);
+$id('entryModal').addEventListener('click', e => { if (e.target.id === 'entryModal') closeEntryModal(); });
+els.personFilter.addEventListener('input', applyFilters);
+els.tipoFilter.addEventListener('change', applyFilters);
+els.viewMode.addEventListener('change', applyFilters);
+els.prevBtn.addEventListener('click', () => shiftPeriod(-1));
+els.nextBtn.addEventListener('click', () => shiftPeriod(1));
+els.todayBtn.addEventListener('click', () => { state.cursor = new Date(); renderCalendar(); });
+els.outlookCalBtn.addEventListener('click', addToOutlook);
+els.outlookEmailBtn.addEventListener('click', sendEmail);
+els.notifyTeamBtn.addEventListener('click', notifyTeam);
+
+// ── COLOR CUSTOMIZATION ──────────────────────────────────────────────────
+const COLOR_DEFAULTS = {
+  plantao:   { light: '#52b96a', dark: '#6dd68a' },
+  ferias:    { light: '#e07030', dark: '#f08040' },
+  rodizio:   { light: '#a050e0', dark: '#c070f0' },
+  cobertura: { light: '#b35a1f', dark: '#d08a55' },
+};
+const LS_KEY = 'escala-colors';
+
+const hexToRgb = h => ({ r: parseInt(h.slice(1,3),16), g: parseInt(h.slice(3,5),16), b: parseInt(h.slice(5,7),16) });
+const lighten = (h, a=.85) => { const c=hexToRgb(h); return `rgb(${Math.round(c.r+(255-c.r)*a)},${Math.round(c.g+(255-c.g)*a)},${Math.round(c.b+(255-c.b)*a)})`; };
+const darken  = (h, a=.7)  => { const c=hexToRgb(h); return `rgb(${Math.round(c.r*(1-a))},${Math.round(c.g*(1-a))},${Math.round(c.b*(1-a))})`; };
+const textOnLight = h => { const c=hexToRgb(h); return `rgb(${Math.round(c.r*.3)},${Math.round(c.g*.3)},${Math.round(c.b*.3)})`; };
+const textOnDark  = h => { const c=hexToRgb(h); return `rgb(${Math.round(c.r+(255-c.r)*.5)},${Math.round(c.g+(255-c.g)*.5)},${Math.round(c.b+(255-c.b)*.5)})`; };
+const loadSavedColors = () => { try { return JSON.parse(localStorage.getItem(LS_KEY)) || {}; } catch(e) { return {}; } };
+
+function applyColors(saved) {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const root = document.documentElement;
+  ['plantao','ferias','rodizio','cobertura'].forEach(key => {
+    const hex = (saved && saved[key]) ? saved[key] : COLOR_DEFAULTS[key][isDark ? 'dark' : 'light'];
+    root.style.setProperty('--c-'+key, hex);
+    root.style.setProperty('--c-'+key+'-bg',     isDark ? darken(hex,.75)  : lighten(hex,.85));
+    root.style.setProperty('--c-'+key+'-border',  isDark ? darken(hex,.3)   : hex);
+    root.style.setProperty('--c-'+key+'-text',    isDark ? textOnDark(hex)  : textOnLight(hex));
+  });
+  updateLegendDots();
+}
+
+function updateLegendDots() {
+  const s = getComputedStyle(document.documentElement);
+  document.querySelectorAll('.legend-item').forEach(item => {
+    const dot = item.querySelector('.legend-dot');
+    const txt = item.textContent.trim();
+    if (!dot) return;
+    if (txt.includes('Cobertura Férias'))    dot.style.background = s.getPropertyValue('--c-cobertura').trim();
+    else if (txt.includes('Plantão'))        dot.style.background = s.getPropertyValue('--c-plantao').trim();
+    else if (txt.includes('Férias'))         dot.style.background = s.getPropertyValue('--c-ferias').trim();
+    else if (txt.includes('Rodízio'))        dot.style.background = s.getPropertyValue('--c-rodizio').trim();
+  });
+}
+
+function syncPickerInputs(saved) {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  ['plantao','ferias','rodizio','cobertura'].forEach(key => {
+    const hex = (saved && saved[key]) ? saved[key] : COLOR_DEFAULTS[key][isDark ? 'dark' : 'light'];
+    const id  = key==='plantao' ? 'cpPlantao' : key==='ferias' ? 'cpFerias' : key==='rodizio' ? 'cpRodizio' : 'cpCobertura';
+    const inp = document.getElementById(id);
+    if (inp) inp.value = hex;
+  });
+}
+
+function openColorModal()  { syncPickerInputs(loadSavedColors()); document.getElementById('colorModal').classList.remove('hidden'); }
+function closeColorModal() { document.getElementById('colorModal').classList.add('hidden'); }
+
+function saveColors() {
+  const saved = {
+    plantao:   document.getElementById('cpPlantao').value,
+    ferias:    document.getElementById('cpFerias').value,
+    rodizio:   document.getElementById('cpRodizio').value,
+    cobertura: document.getElementById('cpCobertura').value,
+  };
+  localStorage.setItem(LS_KEY, JSON.stringify(saved));
+  applyColors(saved);
+  renderCalendar();
+  closeColorModal();
+}
+
+function resetColors() {
+  localStorage.removeItem(LS_KEY);
+  applyColors({});
+  renderCalendar();
+  closeColorModal();
+}
+
+document.getElementById('colorSettingsBtn').addEventListener('click', openColorModal);
+document.getElementById('colorCancelBtn').addEventListener('click', closeColorModal);
+document.getElementById('colorSaveBtn').addEventListener('click', saveColors);
+document.getElementById('colorResetBtn').addEventListener('click', resetColors);
+document.getElementById('colorModal').addEventListener('click', e => { if (e.target.id === 'colorModal') closeColorModal(); });
+document.querySelector('[data-theme-toggle]').addEventListener('click', () => { setTimeout(() => { applyColors(loadSavedColors()); renderCalendar(); }, 30); });
+
+applyColors(loadSavedColors());
+
+loadData();
+</script>
+<!--
+
+SETUP DO GOOGLE APPS SCRIPT
+1. Acesse https://script.google.com e crie um projeto.
+2. Cole o código abaixo no arquivo Code.gs.
+3. Implantar > Nova implantação > Aplicativo da Web.
+4. Executar como: você. Quem pode acessar: qualquer pessoa.
+5. Cole a URL terminada em /exec na constante APPS_SCRIPT_URL deste HTML.
+
+CÓDIGO CODE.GS:
+
+const PEOPLE_SPREADSHEET_ID = '1rPmbo_VSAOyJO5wAhT1ydEoAR9t14ALcYsDW8uKrLZY';
+const CALENDAR_SPREADSHEET_ID = '1J44IdG2c6Ny_9AwUOSP6dARNYJzoYVL1tTkS1QGy8wE';
 
 function doGet(e) {
   try {
-    if ((e.parameter.action || "list") !== "list") throw new Error("Unknown action");
-    return json_({ ok: true, people: people_(), entries: entries_() });
+    if ((e.parameter.action || 'list') !== 'list') throw new Error('Ação inválida');
+    return json_({ ok:true, people:readRows_(PEOPLE_SPREADSHEET_ID), entries:readRows_(CALENDAR_SPREADSHEET_ID) });
   } catch (error) {
-    return json_({ ok: false, error: error.message });
+    return json_({ ok:false, error:error.message });
   }
 }
 
 function doPost(e) {
+  const lock = LockService.getScriptLock();
+  let locked = false;
   try {
-    if (e.parameter.action !== "add") throw new Error("Unknown action");
+    locked = lock.tryLock(10000);
+    if (!locked) throw new Error('Base ocupada; tente novamente');
+    if (e.parameter.action !== 'add') throw new Error('Ação inválida');
     addEntry_(e.parameter);
-    return json_({ ok: true });
+    return json_({ ok:true });
   } catch (error) {
-    return json_({ ok: false, error: error.message });
+    return json_({ ok:false, error:error.message });
+  } finally {
+    if (locked) lock.releaseLock();
   }
 }
 
-function people_() {
-  const rows = sheet_(PEOPLE_SPREADSHEET_ID, PEOPLE_SHEET_NAME).getDataRange().getDisplayValues();
-  if (rows.length < 2) return [];
-  const columns = headers_(rows.shift(), ["name", "phone", "email"]);
-  return rows.filter(row => row[columns.name]).map((row, index) => ({
-    id: String(index + 2),
-    name: row[columns.name].trim(),
-    phone: row[columns.phone].trim(),
-    email: row[columns.email].trim()
-  })).sort((a, b) => a.name.localeCompare(b.name));
-}
-
-function entries_() {
-  const rows = sheet_(ENTRIES_SPREADSHEET_ID, ENTRIES_SHEET_NAME).getDataRange().getDisplayValues();
-  if (rows.length < 2) return [];
-  const columns = headers_(rows.shift(), ["id", "person", "type", "start date", "end date"]);
-  const people = people_();
-  return rows.filter(row => row[columns.person]).map(row => {
-    const name = row[columns.person].trim();
-    return {
-      id: row[columns.id],
-      person_name: name,
-      type: row[columns.type],
-      start_date: normalizeDate_(row[columns["start date"]]),
-      end_date: normalizeDate_(row[columns["end date"]]),
-      person: people.find(person => person.name === name) || { name: name, phone: "", email: "" }
-    };
+function readRows_(spreadsheetId) {
+  const sheet = SpreadsheetApp.openById(spreadsheetId).getSheets()[0];
+  const values = sheet.getDataRange().getDisplayValues();
+  if (values.length < 2) return [];
+  const headers = values.shift().map(key_);
+  return values.filter(row => row.some(String)).map(row => {
+    const item = {};
+    headers.forEach((header, i) => item[header] = row[i] || '');
+    return item;
   });
 }
 
 function addEntry_(data) {
-  const type = String(data.type || "");
-  const personName = String(data.person_name || "").trim();
-  const start = String(data.start_date || "");
-  const end = String(data.end_date || "");
-  if (!people_().some(person => person.name === personName)) throw new Error("Unknown person");
-  if (!["Ferias", "Plantao", "Cobertura"].includes(type)) throw new Error("Invalid entry type");
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(start) || !/^\d{4}-\d{2}-\d{2}$/.test(end) || end < start) throw new Error("Invalid date range");
-  sheet_(ENTRIES_SPREADSHEET_ID, ENTRIES_SHEET_NAME).appendRow([Utilities.getUuid(), personName, type, start, end]);
+  const person = String(data.person_name || '').trim();
+  const type = String(data.type || '').trim();
+  const start = String(data.start_date || '');
+  const end = String(data.end_date || '');
+  if (!person) throw new Error('Selecione uma pessoa');
+  if (!['Plantão','Férias','Cobertura'].includes(type)) throw new Error('Tipo inválido');
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(start) || !/^\d{4}-\d{2}-\d{2}$/.test(end) || end < start) throw new Error('Período inválido');
+
+  const people = readRows_(PEOPLE_SPREADSHEET_ID);
+  if (!people.some(row => [row.name,row.nome,row.pessoa,row.trafego].some(value => norm_(value) === norm_(person)))) {
+    throw new Error('Pessoa não encontrada na BasePessoas');
+  }
+
+  const sheet = SpreadsheetApp.openById(CALENDAR_SPREADSHEET_ID).getSheets()[0];
+  if (sheet.getLastRow() === 0) sheet.appendRow(['ID','Pessoa','Tipo','Inicio','Fim']);
+  const headers = sheet.getRange(1,1,1,sheet.getLastColumn()).getDisplayValues()[0].map(key_);
+  const row = Array(headers.length).fill('');
+  put_(row, headers, ['id'], Utilities.getUuid(), false);
+  put_(row, headers, ['pessoa','person','personname','trafego','nome'], person, true);
+  put_(row, headers, ['tipo','type'], type, true);
+  put_(row, headers, ['inicio','start','startdate','datainicio','data'], start, true);
+  put_(row, headers, ['fim','end','enddate','datafim'], end, true);
+  sheet.appendRow(row);
 }
 
-function sheet_(spreadsheetId, sheetName) {
-  const sheet = SpreadsheetApp.openById(spreadsheetId).getSheetByName(sheetName);
-  if (!sheet) throw new Error(`Sheet tab '${sheetName}' not found`);
-  return sheet;
+function put_(row, headers, aliases, value, required) {
+  const index = aliases.map(a => headers.indexOf(a)).find(i => i >= 0);
+  if (index == null && required) throw new Error('Coluna ausente: ' + aliases[0]);
+  if (index != null) row[index] = value;
 }
-
-function headers_(headerRow, required) {
-  const normalized = headerRow.map(value => value.trim().toLowerCase());
-  return required.reduce((result, name) => {
-    const index = normalized.indexOf(name);
-    if (index < 0) throw new Error(`Missing column: ${name}`);
-    result[name] = index;
-    return result;
-  }, {});
-}
-
-function normalizeDate_(value) {
-  const match = String(value).match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (match) return value;
-  const date = new Date(value);
-  if (isNaN(date)) throw new Error(`Invalid date in Entries sheet: ${value}`);
-  return Utilities.formatDate(date, Session.getScriptTimeZone(), "yyyy-MM-dd");
-}
-
-function json_(value) {
-  return ContentService.createTextOutput(JSON.stringify(value)).setMimeType(ContentService.MimeType.JSON);
-}
-
+function key_(value) { return norm_(value).replace(/[^a-z0-9]/g,''); }
+function norm_(value) { return String(value || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+function json_(value) { return ContentService.createTextOutput(JSON.stringify(value)).setMimeType(ContentService.MimeType.JSON); }
 
 -->
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Team on-call, vacation, and coverage calendar">
-  <title>Team Calendar</title>
-  <style>
-:root {
-  color-scheme: light;
-  --ink: #16221d;
-  --muted: #66736d;
-  --line: #dce4df;
-  --paper: #f6f8f7;
-  --white: #fff;
-  --brand: #155b42;
-  --brand-dark: #0f4834;
-  --vacation: #d46b34;
-  --shift: #2769ad;
-  --coverage: #7b55a4;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
-
-* { box-sizing: border-box; }
-body { margin: 0; min-width: 320px; background: var(--paper); color: var(--ink); }
-button, input, select { font: inherit; }
-button, a { -webkit-tap-highlight-color: transparent; }
-
-.topbar {
-  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
-  padding: 1.25rem clamp(1rem, 4vw, 3.5rem); color: white;
-  background: linear-gradient(120deg, #0d3f2e, #1c6f51);
-}
-h1, h2, p { margin-top: 0; }
-h1 { margin-bottom: 0; font-family: Georgia, serif; font-size: clamp(2rem, 4vw, 3rem); font-weight: 500; }
-.eyebrow { margin-bottom: .25rem; font-size: .75rem; font-weight: 800; letter-spacing: .18em; opacity: .78; }
-main { max-width: 1440px; margin: auto; padding: clamp(1rem, 3vw, 2rem); }
-
-.toolbar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 1rem; margin-bottom: 1rem; }
-.toolbar h2 { margin: 0; font-family: Georgia, serif; font-size: clamp(1.5rem, 3vw, 2.1rem); font-weight: 500; text-align: center; }
-.month-nav, .legend { display: flex; align-items: center; gap: .5rem; }
-.legend { justify-content: flex-end; flex-wrap: wrap; color: var(--muted); font-size: .875rem; }
-.legend span { display: inline-flex; align-items: center; gap: .35rem; }
-.dot { width: .6rem; height: .6rem; border-radius: 50%; }
-.dot.vacation { background: var(--vacation); }.dot.shift { background: var(--shift); }.dot.coverage { background: var(--coverage); }
-
-button, .button-link { border: 0; border-radius: .55rem; cursor: pointer; font-weight: 700; }
-.primary { padding: .75rem 1rem; background: var(--brand); color: white; box-shadow: 0 2px 7px #082b1e26; }
-.primary:hover { background: var(--brand-dark); }
-.topbar .primary { background: white; color: var(--brand-dark); }
-.secondary, .today-button, .icon-button { padding: .65rem .85rem; border: 1px solid var(--line); background: white; color: var(--ink); }
-.icon-button { width: 2.65rem; font-size: 1.35rem; line-height: 1; }
-button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid #73b99f; outline-offset: 2px; }
-
-.calendar { overflow: hidden; border: 1px solid var(--line); border-radius: .8rem; background: white; box-shadow: 0 12px 40px #20382d0a; }
-.weekdays, .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
-.weekdays { border-bottom: 1px solid var(--line); background: #eef3f0; }
-.weekdays span { padding: .65rem; color: var(--muted); font-size: .75rem; font-weight: 800; letter-spacing: .08em; text-align: center; text-transform: uppercase; }
-.day { min-height: 125px; padding: .5rem; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); overflow: hidden; }
-.day:nth-child(7n) { border-right: 0; }
-.day.other-month { background: #fafbfa; color: #9ba59f; }
-.day.today .day-number { display: grid; place-items: center; width: 1.8rem; height: 1.8rem; border-radius: 50%; background: var(--brand); color: white; }
-.day-number { display: block; margin: 0 0 .35rem auto; font-size: .8rem; font-weight: 800; }
-.entry { display: block; width: 100%; margin: .25rem 0; padding: .38rem .45rem; overflow: hidden; border: 0; border-left: 4px solid; border-radius: .3rem; color: #17201c; font-size: .75rem; font-weight: 700; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
-.entry.ferias { border-color: var(--vacation); background: #fff0e8; }
-.entry.plantao { border-color: var(--shift); background: #e9f3ff; }
-.entry.cobertura { border-color: var(--coverage); background: #f3ebfb; }
-
-.notice { margin-bottom: 1rem; padding: .8rem 1rem; border: 1px solid #e7cf91; border-radius: .5rem; background: #fff8e5; color: #614f1e; }
-dialog { width: min(92vw, 520px); padding: 0; border: 0; border-radius: .9rem; box-shadow: 0 24px 80px #081b1470; }
-dialog::backdrop { background: #081b1499; backdrop-filter: blur(2px); }
-dialog > form, dialog > .dialog-head, dialog > .details, dialog > .dialog-actions { margin-inline: 1.5rem; }
-dialog > form { margin: 0; padding: 1.5rem; }
-.dialog-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1.25rem; }
-.dialog-head h2 { margin: 0; font-family: Georgia, serif; font-size: 1.75rem; font-weight: 500; }
-.close-button { padding: .1rem .45rem; background: transparent; color: var(--muted); font-size: 1.7rem; line-height: 1; }
-label { display: grid; gap: .4rem; margin-bottom: 1rem; font-size: .875rem; font-weight: 700; }
-input, select { width: 100%; min-height: 2.8rem; padding: .65rem .75rem; border: 1px solid #bdc9c2; border-radius: .45rem; background: white; color: var(--ink); }
-.date-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-.dialog-actions { display: flex; justify-content: flex-end; gap: .65rem; margin-top: 1.5rem; }
-.button-link { display: inline-flex; align-items: center; text-decoration: none; }
-.form-error { min-height: 1.2em; margin: 0; color: #a32929; font-size: .85rem; font-weight: 700; }
-#detail-dialog { padding: 1.5rem 0; }
-.details { display: grid; gap: .8rem; }
-.details div { display: grid; grid-template-columns: 5rem 1fr; gap: .8rem; }
-.details dt { color: var(--muted); font-size: .8rem; font-weight: 800; text-transform: uppercase; }
-.details dd { margin: 0; }
-
-@media (max-width: 760px) {
-  .toolbar { grid-template-columns: 1fr 1fr; }
-  .toolbar h2 { grid-column: 1 / -1; grid-row: 1; }
-  .legend { justify-content: flex-end; }
-  .day { min-height: 90px; padding: .3rem; }
-  .entry { padding: .3rem; border-left-width: 3px; font-size: .68rem; }
-}
-@media (max-width: 520px) {
-  .topbar { align-items: flex-end; }
-  .topbar .primary { padding: .65rem .75rem; }
-  .legend { display: none; }
-  .toolbar { grid-template-columns: 1fr; }
-  .month-nav { justify-content: center; }
-  .weekdays span { padding-inline: .1rem; font-size: .62rem; }
-  .day { min-height: 74px; }
-  .day-number { font-size: .7rem; }
-  .entry { font-size: 0; height: .65rem; padding: 0; }
-  .date-fields { grid-template-columns: 1fr; gap: 0; }
-}
-
-
-  </style>
-</head>
-<body>
-  <header class="topbar">
-    <div>
-      <p class="eyebrow">TEAM SCHEDULE</p>
-      <h1>Calendar</h1>
-    </div>
-    <button class="primary" id="new-entry" type="button">+ New entry</button>
-  </header>
-
-  <main>
-    <section class="toolbar" aria-label="Calendar controls">
-      <div class="month-nav">
-        <button class="icon-button" id="previous-month" type="button" aria-label="Previous month">â€¹</button>
-        <button class="today-button" id="today" type="button">Today</button>
-        <button class="icon-button" id="next-month" type="button" aria-label="Next month">â€º</button>
-      </div>
-      <h2 id="month-title" aria-live="polite"></h2>
-      <div class="legend" aria-label="Entry types">
-        <span><i class="dot vacation"></i>FÃ©rias</span>
-        <span><i class="dot shift"></i>PlantÃ£o</span>
-        <span><i class="dot coverage"></i>Cobertura</span>
-      </div>
-    </section>
-
-    <p class="notice" id="notice" hidden></p>
-
-    <section class="calendar" aria-label="Monthly calendar">
-      <div class="weekdays" aria-hidden="true">
-        <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
-      </div>
-      <div class="calendar-grid" id="calendar-grid"></div>
-    </section>
-  </main>
-
-  <dialog id="entry-dialog">
-    <form id="entry-form">
-      <div class="dialog-head">
-        <div><p class="eyebrow">SCHEDULE</p><h2>New entry</h2></div>
-        <button class="close-button" type="button" data-close="entry-dialog" aria-label="Close">Ã—</button>
-      </div>
-      <label>Person
-        <select id="person" required></select>
-      </label>
-      <label>Entry type
-        <select id="entry-type" required>
-          <option value="Ferias">FÃ©rias</option>
-          <option value="Plantao">PlantÃ£o</option>
-          <option value="Cobertura">Cobertura</option>
-        </select>
-      </label>
-      <div class="date-fields">
-        <label>Start date<input id="start-date" type="date" required></label>
-        <label>End date<input id="end-date" type="date" required></label>
-      </div>
-      <p class="form-error" id="form-error" role="alert"></p>
-      <div class="dialog-actions">
-        <button class="secondary" type="button" data-close="entry-dialog">Cancel</button>
-        <button class="primary" id="save-entry" type="submit">Save entry</button>
-      </div>
-    </form>
-  </dialog>
-
-  <dialog id="detail-dialog">
-    <div class="dialog-head">
-      <div><p class="eyebrow">ENTRY DETAILS</p><h2 id="detail-name"></h2></div>
-      <button class="close-button" type="button" data-close="detail-dialog" aria-label="Close">Ã—</button>
-    </div>
-    <dl class="details">
-      <div><dt>Type</dt><dd id="detail-type"></dd></div>
-      <div><dt>Period</dt><dd id="detail-period"></dd></div>
-      <div><dt>Contact</dt><dd id="detail-contact"></dd></div>
-    </dl>
-    <div class="dialog-actions">
-      <button class="secondary" type="button" data-close="detail-dialog">Close</button>
-      <a class="primary button-link" id="send-email">Create email</a>
-    </div>
-  </dialog>
-
-  <script>
-window.APP_CONFIG = {
-  // Deploy Code.gs as a Google Apps Script web app, then paste its /exec URL.
-  apiUrl: "https://script.google.com/macros/s/AKfycbwg0q8pxJm5iAvbIHhbqXudxt2AnyEbC2SgU1ipXmMdPm_XWCh3OF3NrgJTB_VbP6fBEQ/exec",
-
-  // Everyone placed here appears in the email draft's To field.
-  emailRecipients: ["manager@example.com", "team@example.com"],
-  emailSubject: "Shift notification â€” {name}",
-  emailBody: "Hello,\n\nThis is to inform you that {start} through {end} is {name}'s shift.\n\nRegards,"
-};
-
-
-
-(() => {
-  "use strict";
-
-  const config = window.APP_CONFIG || {};
-  const configured = /^https:\/\/script\.google\.com\/.+\/exec$/.test(config.apiUrl || "");
-  const today = new Date();
-  let visibleMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-  let people = [];
-  let entries = [];
-
-  const demoPeople = [
-    { id: 1, name: "Ana Silva", phone: "+55 11 90000-0001", email: "ana@example.com" },
-    { id: 2, name: "Bruno Costa", phone: "+55 11 90000-0002", email: "bruno@example.com" },
-    { id: 3, name: "Carla Lima", phone: "+55 11 90000-0003", email: "carla@example.com" }
-  ];
-
-  const iso = date => {
-    const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2, "0");
-    const d = String(date.getDate()).padStart(2, "0");
-    return `${y}-${m}-${d}`;
-  };
-  const parseDate = value => new Date(`${value}T12:00:00`);
-  const formatDate = value => new Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(parseDate(value));
-  const typeLabel = type => ({ Ferias: "FÃ©rias", Plantao: "PlantÃ£o", Cobertura: "Cobertura" }[type] || type);
-  const fillTemplate = (template, entry) => String(template || "")
-    .replaceAll("{name}", entry.person.name)
-    .replaceAll("{start}", formatDate(entry.start_date))
-    .replaceAll("{end}", formatDate(entry.end_date))
-    .replaceAll("{type}", typeLabel(entry.type));
-
-  function demoEntries() {
-    const y = visibleMonth.getFullYear();
-    const m = String(visibleMonth.getMonth() + 1).padStart(2, "0");
-    return [
-      { id: "demo-1", person_id: 1, type: "Plantao", start_date: `${y}-${m}-04`, end_date: `${y}-${m}-06`, person: demoPeople[0] },
-      { id: "demo-2", person_id: 2, type: "Ferias", start_date: `${y}-${m}-12`, end_date: `${y}-${m}-16`, person: demoPeople[1] },
-      { id: "demo-3", person_id: 3, type: "Cobertura", start_date: `${y}-${m}-21`, end_date: `${y}-${m}-22`, person: demoPeople[2] }
-    ];
-  }
-
-  async function api(action, payload) {
-    const options = payload ? { method: "POST", body: new URLSearchParams({ action, ...payload }) } : {};
-    const response = await fetch(payload ? config.apiUrl : `${config.apiUrl}?action=${encodeURIComponent(action)}`, options);
-    if (!response.ok) throw new Error((await response.text()) || `Request failed (${response.status})`);
-    const result = await response.json();
-    if (!result.ok) throw new Error(result.error || "Request failed");
-    return result;
-  }
-
-  async function loadData() {
-    const notice = document.querySelector("#notice");
-    if (!configured) {
-      people = demoPeople;
-      entries = demoEntries();
-      notice.textContent = "Demo mode â€” add Google Apps Script URL in config.js to use live data.";
-      notice.hidden = false;
-      render();
-      return;
-    }
-    try {
-      const result = await api("list");
-      people = result.people;
-      entries = result.entries;
-      notice.hidden = true;
-      render();
-    } catch (error) {
-      notice.textContent = `Could not load calendar: ${error.message}`;
-      notice.hidden = false;
-    }
-  }
-
-  function render() {
-    document.querySelector("#month-title").textContent = new Intl.DateTimeFormat("en", { month: "long", year: "numeric" }).format(visibleMonth);
-    const grid = document.querySelector("#calendar-grid");
-    grid.replaceChildren();
-    const first = new Date(visibleMonth);
-    first.setDate(1 - ((first.getDay() + 6) % 7));
-
-    for (let i = 0; i < 42; i++) {
-      const date = new Date(first);
-      date.setDate(first.getDate() + i);
-      const day = document.createElement("article");
-      day.className = "day";
-      if (date.getMonth() !== visibleMonth.getMonth()) day.classList.add("other-month");
-      if (iso(date) === iso(today)) day.classList.add("today");
-      day.innerHTML = `<span class="day-number">${date.getDate()}</span>`;
-
-      entries.filter(entry => entry.start_date <= iso(date) && entry.end_date >= iso(date)).forEach(entry => {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = `entry ${entry.type.toLowerCase()}`;
-        button.textContent = `${entry.person.name} Â· ${typeLabel(entry.type)}`;
-        button.title = button.textContent;
-        button.addEventListener("click", () => showDetails(entry));
-        day.append(button);
-      });
-      grid.append(day);
-    }
-    populatePeople();
-  }
-
-  function populatePeople() {
-    const select = document.querySelector("#person");
-    select.replaceChildren(new Option("Select a personâ€¦", ""));
-    people.forEach(person => select.add(new Option(person.name, person.name)));
-  }
-
-  function showDetails(entry) {
-    document.querySelector("#detail-name").textContent = entry.person.name;
-    document.querySelector("#detail-type").textContent = typeLabel(entry.type);
-    document.querySelector("#detail-period").textContent = `${formatDate(entry.start_date)} â€“ ${formatDate(entry.end_date)}`;
-    document.querySelector("#detail-contact").textContent = [entry.person.email, entry.person.phone].filter(Boolean).join(" Â· ") || "â€”";
-    const subject = fillTemplate(config.emailSubject || "Shift notification â€” {name}", entry);
-    const body = fillTemplate(config.emailBody || "{start} through {end} is {name}'s shift.", entry);
-    document.querySelector("#send-email").href = `mailto:${(config.emailRecipients || []).join(",")}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    document.querySelector("#detail-dialog").showModal();
-  }
-
-  document.querySelector("#new-entry").addEventListener("click", () => {
-    const day = iso(today);
-    document.querySelector("#start-date").value = day;
-    document.querySelector("#end-date").value = day;
-    document.querySelector("#form-error").textContent = "";
-    document.querySelector("#entry-dialog").showModal();
-  });
-  document.querySelectorAll("[data-close]").forEach(button => button.addEventListener("click", () => document.querySelector(`#${button.dataset.close}`).close()));
-  document.querySelectorAll("dialog").forEach(dialog => dialog.addEventListener("click", event => { if (event.target === dialog) dialog.close(); }));
-  document.querySelector("#previous-month").addEventListener("click", () => { visibleMonth.setMonth(visibleMonth.getMonth() - 1); loadData(); });
-  document.querySelector("#next-month").addEventListener("click", () => { visibleMonth.setMonth(visibleMonth.getMonth() + 1); loadData(); });
-  document.querySelector("#today").addEventListener("click", () => { visibleMonth = new Date(today.getFullYear(), today.getMonth(), 1); loadData(); });
-
-  document.querySelector("#entry-form").addEventListener("submit", async event => {
-    event.preventDefault();
-    const error = document.querySelector("#form-error");
-    const button = document.querySelector("#save-entry");
-    const payload = {
-      person_name: document.querySelector("#person").value,
-      type: document.querySelector("#entry-type").value,
-      start_date: document.querySelector("#start-date").value,
-      end_date: document.querySelector("#end-date").value
-    };
-    if (payload.end_date < payload.start_date) {
-      error.textContent = "End date cannot be before start date.";
-      return;
-    }
-    if (!configured) {
-      const person = people.find(item => item.name === payload.person_name);
-      entries.push({ id: crypto.randomUUID(), ...payload, person });
-      render();
-      document.querySelector("#entry-dialog").close();
-      return;
-    }
-    try {
-      button.disabled = true;
-      button.textContent = "Savingâ€¦";
-      await api("add", payload);
-      await loadData();
-      document.querySelector("#entry-dialog").close();
-    } catch (requestError) {
-      error.textContent = `Could not save: ${requestError.message}`;
-    } finally {
-      button.disabled = false;
-      button.textContent = "Save entry";
-    }
-  });
-
-  loadData();
-})();
-
-
-  </script>
 </body>
 </html>
-
-
