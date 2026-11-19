@@ -1,4 +1,11 @@
 <!DOCTYPE html>
+<!--
+APP DE ARQUIVO ÚNICO.
+Sheets configuradas:
+- BasePessoas: 1rPmbo_VSAOyJO5wAhT1ydEoAR9t14ALcYsDW8uKrLZY
+- BaseCalendario: 1J44IdG2c6Ny_9AwUOSP6dARNYJzoYVL1tTkS1QGy8wE
+Para ativar dados privados e gravação, publique Code.gs e configure APPS_SCRIPT_URL.
+-->
 <html lang="pt-BR" data-theme="light">
 <head>
   <meta charset="UTF-8" />
@@ -165,6 +172,10 @@
     .color-swatch{width:40px;height:40px;border-radius:var(--rad-md);border:2px solid var(--border);padding:2px;background:var(--surf2)}
     .color-swatch input[type=color]{width:100%;height:100%;border:none;padding:0;background:none;cursor:pointer;border-radius:calc(var(--rad-md) - 2px)}
     .modal-actions{display:flex;gap:var(--sp2);justify-content:flex-end;flex-wrap:wrap}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp3)}
+    .form-error{min-height:1.25rem;color:var(--warn);font-size:var(--text-sm);font-weight:600}
+    .modal-close-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sp3)}
+    @media(max-width:560px){.form-grid{grid-template-columns:1fr}.topbar-right{width:100%}.topbar-right .btn{flex:1}}
   </style>
 </head>
 <body>
@@ -187,6 +198,7 @@
       </div>
     </div>
     <div class="topbar-right">
+      <button id="newEntryBtn" class="btn btn-primary btn-sm">+ Novo evento</button>
       <button id="reloadBtn" class="btn btn-secondary btn-sm">↻ Atualizar</button>
       <button id="colorSettingsBtn" type="button" class="btn btn-ghost btn-sm" aria-label="Personalizar cores">🎨</button>
       <button data-theme-toggle class="btn btn-ghost btn-sm" aria-label="Alternar tema">🌙</button>
@@ -308,6 +320,45 @@ Atenciosamente,</textarea>
   </div>
 </div>
 
+<!-- New entry modal -->
+<div id="entryModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="entryModalTitle">
+  <form id="entryForm" class="modal">
+    <div class="modal-close-row">
+      <h2 id="entryModalTitle">Novo evento</h2>
+      <button type="button" id="entryCloseBtn" class="btn btn-ghost btn-sm" aria-label="Fechar">✕</button>
+    </div>
+    <div class="field">
+      <label for="entryPerson">Pessoa</label>
+      <select id="entryPerson" class="select" required>
+        <option value="">Selecione uma pessoa…</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="entryType">Tipo de escala</label>
+      <select id="entryType" class="select" required>
+        <option value="Plantao">Plantão</option>
+        <option value="Ferias">Férias</option>
+        <option value="Cobertura">Cobertura Férias</option>
+      </select>
+    </div>
+    <div class="form-grid">
+      <div class="field">
+        <label for="entryStart">Data inicial</label>
+        <input id="entryStart" class="input" type="date" required>
+      </div>
+      <div class="field">
+        <label for="entryEnd">Data final</label>
+        <input id="entryEnd" class="input" type="date" required>
+      </div>
+    </div>
+    <div id="entryError" class="form-error" role="alert"></div>
+    <div class="modal-actions">
+      <button type="button" id="entryCancelBtn" class="btn btn-secondary">Cancelar</button>
+      <button type="submit" id="entrySaveBtn" class="btn btn-primary">Salvar evento</button>
+    </div>
+  </form>
+</div>
+
 <!-- Color settings modal -->
 <div id="colorModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-label="Personalizar cores">
   <div class="modal">
@@ -325,11 +376,14 @@ Atenciosamente,</textarea>
 </div>
 
 <script>
-const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTHAoiJoriJvtqMB5LTRolHYBi9hGmz_tZE5UrdsE_WT1HTqQlOOdoCYm_ATKPEZsTTD6629LmiuNRz/pub?output=csv';
+// After deploying Apps Script code embedded at end of this file, paste its /exec URL here.
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwg0q8pxJm5iAvbIHhbqXudxt2AnyEbC2SgU1ipXmMdPm_XWCh3OF3NrgJTB_VbP6fBEQ/exec';
+const PEOPLE_SPREADSHEET_ID = '1rPmbo_VSAOyJO5wAhT1ydEoAR9t14ALcYsDW8uKrLZY';
+const CALENDAR_SPREADSHEET_ID = '1J44IdG2c6Ny_9AwUOSP6dARNYJzoYVL1tTkS1QGy8wE';
 
 const NOTIFY_TO = 'filipe.forte@g.globo,rennan.tigre@g.globo,miguel.jr@g.globo,ptoscano@g.globo';
 
-const state = { events: [], filtered: [], selected: null, cursor: new Date(), view: 'month' };
+const state = { people: [], events: [], filtered: [], selected: null, cursor: new Date(), view: 'month' };
 
 const $id = id => document.getElementById(id);
 const els = {
@@ -378,10 +432,15 @@ function parseCsv(text) {
 
 function parseDate(v) {
   if (!v) return null;
-  // M/D/YY or M/D/YYYY
+  v = String(v).trim();
+  // Parse ISO date components locally. `new Date('YYYY-MM-DD')` means UTC and
+  // becomes the previous day in negative UTC offsets such as São Paulo.
+  const ymd = v.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T\s].*)?$/);
+  if (ymd) return new Date(+ymd[1], +ymd[2]-1, +ymd[3]);
+  // DD/MM/YY or DD/MM/YYYY
   const mdy = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
   if (mdy) {
-    let [,mo,d,y] = mdy;
+    let [,d,mo,y] = mdy;
     if (y.length === 2) y = '20' + y;
     return new Date(+y, +mo-1, +d);
   }
@@ -391,34 +450,77 @@ function parseDate(v) {
   return null;
 }
 
-function normalizeRows(rows) {
+function normKey(v) {
+  return String(v || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+}
+
+function pick(row, aliases) {
+  for (const key of aliases) if (row[key] != null && String(row[key]).trim()) return String(row[key]).trim();
+  return '';
+}
+
+function normalizePeople(rows) {
+  return rows.map((r, idx) => ({
+    id: r.id || `person-${idx}`,
+    name: pick(r, ['name','nome','pessoa','trafego']),
+    phone: pick(r, ['phone','telefone','celular']),
+    email: pick(r, ['email','e-mail'])
+  })).filter(p => p.name).sort((a,b) => a.name.localeCompare(b.name, 'pt-BR'));
+}
+
+function normalizeRows(rows, people) {
+  const peopleByName = new Map(people.map(p => [normKey(p.name), p]));
   return rows.map((r, idx) => {
-    const trafego = r.trafego || r['tr?fego'] || '';
-    const email = r.email || '';
-    const telefone = r.telefone || '';
-    const tipo = r.tipo || '';
-    const inicio = parseDate(r.inicio || r['in?cio'] || '');
-    const fim = parseDate(r.fim || '');
-    if (!inicio || !trafego) return null;
-    return { id:`ev-${idx}`, pessoa:trafego.trim(), email:email.trim(), telefone:telefone.trim(), tipo:tipo.trim(), inicio, fim:fim||inicio };
+    const pessoa = pick(r, ['person_name','person','pessoa','trafego','nome']);
+    const contact = peopleByName.get(normKey(pessoa)) || {};
+    const inicio = parseDate(pick(r, ['start_date','startdate','start','inicio','datainicio','data']));
+    const fim = parseDate(pick(r, ['end_date','enddate','end','fim','datafim']));
+    const tipo = pick(r, ['type','tipo']);
+    if (!inicio || !pessoa || !tipo) return null;
+    return {
+      id: r.id || `ev-${idx}`,
+      pessoa,
+      email: contact.email || pick(r, ['email','e-mail']),
+      telefone: contact.phone || pick(r, ['phone','telefone','celular']),
+      tipo,
+      inicio,
+      fim: fim || inicio
+    };
   }).filter(Boolean);
 }
 
 // --- LOAD ---
 function setLoadStatus(html) { els.loadStatus.innerHTML = html; }
 
+async function api(action, data) {
+  if (!/^https:\/\/script\.google\.com\/.+\/exec$/.test(APPS_SCRIPT_URL)) {
+    throw new Error('Configure APPS_SCRIPT_URL no HTML após publicar o Apps Script.');
+  }
+  const options = data ? { method:'POST', body:new URLSearchParams({ action, ...data }) } : {};
+  const url = data ? APPS_SCRIPT_URL : `${APPS_SCRIPT_URL}?action=${encodeURIComponent(action)}`;
+  const res = await fetch(url, options);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const result = await res.json();
+  if (!result.ok) throw new Error(result.error || 'Erro desconhecido');
+  return result;
+}
+
+function fillPeopleControls() {
+  els.personList.innerHTML = state.people.map(p => `<option value="${escHtml(p.name)}">`).join('');
+  const select = $id('entryPerson');
+  select.innerHTML = '<option value="">Selecione uma pessoa…</option>' +
+    state.people.map(p => `<option value="${escHtml(p.name)}">${escHtml(p.name)}</option>`).join('');
+}
+
 async function loadData() {
-  setLoadStatus('<span class="spinner"></span> Carregando escala…');
+  setLoadStatus('<span class="spinner"></span> Carregando bases…');
   els.reloadBtn.disabled = true;
   try {
-    const res = await fetch(SHEET_URL);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const text = await res.text();
-    const rows = parseCsv(text);
-    state.events = normalizeRows(rows);
-    const people = [...new Set(state.events.map(e => e.pessoa))].sort();
-    els.personList.innerHTML = people.map(p => `<option value="${escHtml(p)}">`).join('');
-    setLoadStatus(`✅ ${state.events.length} eventos carregados.`);
+    const result = await api('list');
+    state.people = normalizePeople(result.people || []);
+    state.events = normalizeRows(result.entries || [], state.people);
+    fillPeopleControls();
+    setLoadStatus(`✅ ${state.people.length} pessoas e ${state.events.length} eventos carregados.`);
     applyFilters();
   } catch(err) {
     setLoadStatus(`❌ Erro: ${escHtml(err.message)}`);
@@ -535,7 +637,7 @@ function selectEvent(ev) {
   els.outlookCalBtn.disabled = false;
   els.outlookEmailBtn.disabled = false;
   // Notify button only enabled for Plantão
-  els.notifyTeamBtn.disabled = ev.tipo !== 'Plantão';
+  els.notifyTeamBtn.disabled = normKey(ev.tipo) !== 'plantao';
   const norm = v => String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
   const eNorm = norm(ev.tipo);
   const badgeCls = eNorm==='cobertura' ? 'badge-cobertura' : eNorm==='ferias' ? 'badge-blue' : eNorm==='rodizio' ? 'badge-purple' : 'badge-primary';
@@ -604,7 +706,7 @@ function sendEmail() {
 }
 
 function notifyTeam() {
-  const ev = state.selected; if (!ev || ev.tipo !== 'Plantão') return;
+  const ev = state.selected; if (!ev || normKey(ev.tipo) !== 'plantao') return;
   const subject = `Plantonista tráfego - ${fmt(ev.inicio)} e ${fmt(ev.fim)}`;
   const body = `A pessoa plantonista deste final de semana será ${ev.pessoa}: ${ev.telefone || '(telefone não informado)'}`;
   const url = buildOutlookUrl('https://outlook.office.com/mail/deeplink/compose', {
@@ -622,8 +724,57 @@ function shiftPeriod(step) {
   renderCalendar();
 }
 
+// --- NEW ENTRY ---
+function openEntryModal() {
+  if (!state.people.length) {
+    setLoadStatus('❌ Carregue a BasePessoas antes de criar um evento.');
+    return;
+  }
+  const today = new Date();
+  const iso = d => [d.getFullYear(), String(d.getMonth()+1).padStart(2,'0'), String(d.getDate()).padStart(2,'0')].join('-');
+  $id('entryStart').value = iso(today);
+  $id('entryEnd').value = iso(today);
+  $id('entryError').textContent = '';
+  $id('entryModal').classList.remove('hidden');
+  $id('entryPerson').focus();
+}
+function closeEntryModal() { $id('entryModal').classList.add('hidden'); }
+async function saveEntry(event) {
+  event.preventDefault();
+  const data = {
+    person_name: $id('entryPerson').value,
+    type: $id('entryType').value,
+    start_date: $id('entryStart').value,
+    end_date: $id('entryEnd').value
+  };
+  const error = $id('entryError');
+  if (data.end_date < data.start_date) {
+    error.textContent = 'Data final não pode ser anterior à inicial.';
+    return;
+  }
+  const button = $id('entrySaveBtn');
+  try {
+    error.textContent = '';
+    button.disabled = true;
+    button.textContent = 'Salvando…';
+    await api('add', data);
+    closeEntryModal();
+    await loadData();
+  } catch (err) {
+    error.textContent = err.message;
+  } finally {
+    button.disabled = false;
+    button.textContent = 'Salvar evento';
+  }
+}
+
 // --- WIRE UP ---
 els.reloadBtn.addEventListener('click', loadData);
+$id('newEntryBtn').addEventListener('click', openEntryModal);
+$id('entryCloseBtn').addEventListener('click', closeEntryModal);
+$id('entryCancelBtn').addEventListener('click', closeEntryModal);
+$id('entryForm').addEventListener('submit', saveEntry);
+$id('entryModal').addEventListener('click', e => { if (e.target.id === 'entryModal') closeEntryModal(); });
 els.personFilter.addEventListener('input', applyFilters);
 els.tipoFilter.addEventListener('change', applyFilters);
 els.viewMode.addEventListener('change', applyFilters);
@@ -720,5 +871,6 @@ applyColors(loadSavedColors());
 
 loadData();
 </script>
+
 </body>
 </html>
