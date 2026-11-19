@@ -1,0 +1,502 @@
+<!doctype html>
+<!--
+# Team Calendar
+
+Static GitHub Pages calendar backed by two Google Sheets. No build step.
+
+## Setup
+
+1. Create People spreadsheet with tab named `People`. First row: `Name | Phone | Email`.
+2. Create Entries spreadsheet with tab named `Entries`. First row: `ID | Person | Type | Start Date | End Date`.
+3. Open [Google Apps Script](https://script.google.com), create project, paste `Code.gs`.
+4. Put both spreadsheet IDs at top of script. ID is text between `/d/` and `/edit` in sheet URL. Both IDs may be same if tabs live in one spreadsheet.
+5. In Apps Script: **Deploy > New deployment > Web app**. Execute as **Me**; access **Anyone**. Copy `/exec` URL.
+6. Edit `config.js`: paste web-app URL; change recipients and email text.
+7. Push files to GitHub. In **Settings > Pages**, deploy from branch root.
+
+Without Apps Script URL, site runs in demo mode. Entries added there disappear on reload.
+
+## Important security limit
+
+GitHub Pages and Apps Script web-app URL are public. Anyone who can reach site can read people and add entries. Do not use this setup for private contact data. Restricted access needs authentication or a private internal host.
+
+Email button opens user's email app with recipients, subject, and body prefilled. Automatic sending needs a server-side function and mail provider; never place a mail-provider secret in `config.js`.
+
+
+
+GOOGLE APPS SCRIPT SOURCE (paste into Apps Script editor):
+
+// Google Apps Script bridge between GitHub Pages and two Google Sheets.
+// Set both IDs below, then deploy as Web app (execute as you; access: anyone).
+const PEOPLE_SPREADSHEET_ID = "PASTE_PEOPLE_SPREADSHEET_ID";
+const ENTRIES_SPREADSHEET_ID = "PASTE_ENTRIES_SPREADSHEET_ID";
+const PEOPLE_SHEET_NAME = "People";
+const ENTRIES_SHEET_NAME = "Entries";
+
+function doGet(e) {
+  try {
+    if ((e.parameter.action || "list") !== "list") throw new Error("Unknown action");
+    return json_({ ok: true, people: people_(), entries: entries_() });
+  } catch (error) {
+    return json_({ ok: false, error: error.message });
+  }
+}
+
+function doPost(e) {
+  try {
+    if (e.parameter.action !== "add") throw new Error("Unknown action");
+    addEntry_(e.parameter);
+    return json_({ ok: true });
+  } catch (error) {
+    return json_({ ok: false, error: error.message });
+  }
+}
+
+function people_() {
+  const rows = sheet_(PEOPLE_SPREADSHEET_ID, PEOPLE_SHEET_NAME).getDataRange().getDisplayValues();
+  if (rows.length < 2) return [];
+  const columns = headers_(rows.shift(), ["name", "phone", "email"]);
+  return rows.filter(row => row[columns.name]).map((row, index) => ({
+    id: String(index + 2),
+    name: row[columns.name].trim(),
+    phone: row[columns.phone].trim(),
+    email: row[columns.email].trim()
+  })).sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function entries_() {
+  const rows = sheet_(ENTRIES_SPREADSHEET_ID, ENTRIES_SHEET_NAME).getDataRange().getDisplayValues();
+  if (rows.length < 2) return [];
+  const columns = headers_(rows.shift(), ["id", "person", "type", "start date", "end date"]);
+  const people = people_();
+  return rows.filter(row => row[columns.person]).map(row => {
+    const name = row[columns.person].trim();
+    return {
+      id: row[columns.id],
+      person_name: name,
+      type: row[columns.type],
+      start_date: normalizeDate_(row[columns["start date"]]),
+      end_date: normalizeDate_(row[columns["end date"]]),
+      person: people.find(person => person.name === name) || { name: name, phone: "", email: "" }
+    };
+  });
+}
+
+function addEntry_(data) {
+  const type = String(data.type || "");
+  const personName = String(data.person_name || "").trim();
+  const start = String(data.start_date || "");
+  const end = String(data.end_date || "");
+  if (!people_().some(person => person.name === personName)) throw new Error("Unknown person");
+  if (!["Ferias", "Plantao", "Cobertura"].includes(type)) throw new Error("Invalid entry type");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(start) || !/^\d{4}-\d{2}-\d{2}$/.test(end) || end < start) throw new Error("Invalid date range");
+  sheet_(ENTRIES_SPREADSHEET_ID, ENTRIES_SHEET_NAME).appendRow([Utilities.getUuid(), personName, type, start, end]);
+}
+
+function sheet_(spreadsheetId, sheetName) {
+  const sheet = SpreadsheetApp.openById(spreadsheetId).getSheetByName(sheetName);
+  if (!sheet) throw new Error(`Sheet tab '${sheetName}' not found`);
+  return sheet;
+}
+
+function headers_(headerRow, required) {
+  const normalized = headerRow.map(value => value.trim().toLowerCase());
+  return required.reduce((result, name) => {
+    const index = normalized.indexOf(name);
+    if (index < 0) throw new Error(`Missing column: ${name}`);
+    result[name] = index;
+    return result;
+  }, {});
+}
+
+function normalizeDate_(value) {
+  const match = String(value).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (match) return value;
+  const date = new Date(value);
+  if (isNaN(date)) throw new Error(`Invalid date in Entries sheet: ${value}`);
+  return Utilities.formatDate(date, Session.getScriptTimeZone(), "yyyy-MM-dd");
+}
+
+function json_(value) {
+  return ContentService.createTextOutput(JSON.stringify(value)).setMimeType(ContentService.MimeType.JSON);
+}
+
+
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Team on-call, vacation, and coverage calendar">
+  <title>Team Calendar</title>
+  <style>
+:root {
+  color-scheme: light;
+  --ink: #16221d;
+  --muted: #66736d;
+  --line: #dce4df;
+  --paper: #f6f8f7;
+  --white: #fff;
+  --brand: #155b42;
+  --brand-dark: #0f4834;
+  --vacation: #d46b34;
+  --shift: #2769ad;
+  --coverage: #7b55a4;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; background: var(--paper); color: var(--ink); }
+button, input, select { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+
+.topbar {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: 1.25rem clamp(1rem, 4vw, 3.5rem); color: white;
+  background: linear-gradient(120deg, #0d3f2e, #1c6f51);
+}
+h1, h2, p { margin-top: 0; }
+h1 { margin-bottom: 0; font-family: Georgia, serif; font-size: clamp(2rem, 4vw, 3rem); font-weight: 500; }
+.eyebrow { margin-bottom: .25rem; font-size: .75rem; font-weight: 800; letter-spacing: .18em; opacity: .78; }
+main { max-width: 1440px; margin: auto; padding: clamp(1rem, 3vw, 2rem); }
+
+.toolbar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+.toolbar h2 { margin: 0; font-family: Georgia, serif; font-size: clamp(1.5rem, 3vw, 2.1rem); font-weight: 500; text-align: center; }
+.month-nav, .legend { display: flex; align-items: center; gap: .5rem; }
+.legend { justify-content: flex-end; flex-wrap: wrap; color: var(--muted); font-size: .875rem; }
+.legend span { display: inline-flex; align-items: center; gap: .35rem; }
+.dot { width: .6rem; height: .6rem; border-radius: 50%; }
+.dot.vacation { background: var(--vacation); }.dot.shift { background: var(--shift); }.dot.coverage { background: var(--coverage); }
+
+button, .button-link { border: 0; border-radius: .55rem; cursor: pointer; font-weight: 700; }
+.primary { padding: .75rem 1rem; background: var(--brand); color: white; box-shadow: 0 2px 7px #082b1e26; }
+.primary:hover { background: var(--brand-dark); }
+.topbar .primary { background: white; color: var(--brand-dark); }
+.secondary, .today-button, .icon-button { padding: .65rem .85rem; border: 1px solid var(--line); background: white; color: var(--ink); }
+.icon-button { width: 2.65rem; font-size: 1.35rem; line-height: 1; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid #73b99f; outline-offset: 2px; }
+
+.calendar { overflow: hidden; border: 1px solid var(--line); border-radius: .8rem; background: white; box-shadow: 0 12px 40px #20382d0a; }
+.weekdays, .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.weekdays { border-bottom: 1px solid var(--line); background: #eef3f0; }
+.weekdays span { padding: .65rem; color: var(--muted); font-size: .75rem; font-weight: 800; letter-spacing: .08em; text-align: center; text-transform: uppercase; }
+.day { min-height: 125px; padding: .5rem; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); overflow: hidden; }
+.day:nth-child(7n) { border-right: 0; }
+.day.other-month { background: #fafbfa; color: #9ba59f; }
+.day.today .day-number { display: grid; place-items: center; width: 1.8rem; height: 1.8rem; border-radius: 50%; background: var(--brand); color: white; }
+.day-number { display: block; margin: 0 0 .35rem auto; font-size: .8rem; font-weight: 800; }
+.entry { display: block; width: 100%; margin: .25rem 0; padding: .38rem .45rem; overflow: hidden; border: 0; border-left: 4px solid; border-radius: .3rem; color: #17201c; font-size: .75rem; font-weight: 700; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
+.entry.ferias { border-color: var(--vacation); background: #fff0e8; }
+.entry.plantao { border-color: var(--shift); background: #e9f3ff; }
+.entry.cobertura { border-color: var(--coverage); background: #f3ebfb; }
+
+.notice { margin-bottom: 1rem; padding: .8rem 1rem; border: 1px solid #e7cf91; border-radius: .5rem; background: #fff8e5; color: #614f1e; }
+dialog { width: min(92vw, 520px); padding: 0; border: 0; border-radius: .9rem; box-shadow: 0 24px 80px #081b1470; }
+dialog::backdrop { background: #081b1499; backdrop-filter: blur(2px); }
+dialog > form, dialog > .dialog-head, dialog > .details, dialog > .dialog-actions { margin-inline: 1.5rem; }
+dialog > form { margin: 0; padding: 1.5rem; }
+.dialog-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1.25rem; }
+.dialog-head h2 { margin: 0; font-family: Georgia, serif; font-size: 1.75rem; font-weight: 500; }
+.close-button { padding: .1rem .45rem; background: transparent; color: var(--muted); font-size: 1.7rem; line-height: 1; }
+label { display: grid; gap: .4rem; margin-bottom: 1rem; font-size: .875rem; font-weight: 700; }
+input, select { width: 100%; min-height: 2.8rem; padding: .65rem .75rem; border: 1px solid #bdc9c2; border-radius: .45rem; background: white; color: var(--ink); }
+.date-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: .65rem; margin-top: 1.5rem; }
+.button-link { display: inline-flex; align-items: center; text-decoration: none; }
+.form-error { min-height: 1.2em; margin: 0; color: #a32929; font-size: .85rem; font-weight: 700; }
+#detail-dialog { padding: 1.5rem 0; }
+.details { display: grid; gap: .8rem; }
+.details div { display: grid; grid-template-columns: 5rem 1fr; gap: .8rem; }
+.details dt { color: var(--muted); font-size: .8rem; font-weight: 800; text-transform: uppercase; }
+.details dd { margin: 0; }
+
+@media (max-width: 760px) {
+  .toolbar { grid-template-columns: 1fr 1fr; }
+  .toolbar h2 { grid-column: 1 / -1; grid-row: 1; }
+  .legend { justify-content: flex-end; }
+  .day { min-height: 90px; padding: .3rem; }
+  .entry { padding: .3rem; border-left-width: 3px; font-size: .68rem; }
+}
+@media (max-width: 520px) {
+  .topbar { align-items: flex-end; }
+  .topbar .primary { padding: .65rem .75rem; }
+  .legend { display: none; }
+  .toolbar { grid-template-columns: 1fr; }
+  .month-nav { justify-content: center; }
+  .weekdays span { padding-inline: .1rem; font-size: .62rem; }
+  .day { min-height: 74px; }
+  .day-number { font-size: .7rem; }
+  .entry { font-size: 0; height: .65rem; padding: 0; }
+  .date-fields { grid-template-columns: 1fr; gap: 0; }
+}
+
+
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">TEAM SCHEDULE</p>
+      <h1>Calendar</h1>
+    </div>
+    <button class="primary" id="new-entry" type="button">+ New entry</button>
+  </header>
+
+  <main>
+    <section class="toolbar" aria-label="Calendar controls">
+      <div class="month-nav">
+        <button class="icon-button" id="previous-month" type="button" aria-label="Previous month">â€¹</button>
+        <button class="today-button" id="today" type="button">Today</button>
+        <button class="icon-button" id="next-month" type="button" aria-label="Next month">â€º</button>
+      </div>
+      <h2 id="month-title" aria-live="polite"></h2>
+      <div class="legend" aria-label="Entry types">
+        <span><i class="dot vacation"></i>FÃ©rias</span>
+        <span><i class="dot shift"></i>PlantÃ£o</span>
+        <span><i class="dot coverage"></i>Cobertura</span>
+      </div>
+    </section>
+
+    <p class="notice" id="notice" hidden></p>
+
+    <section class="calendar" aria-label="Monthly calendar">
+      <div class="weekdays" aria-hidden="true">
+        <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+      </div>
+      <div class="calendar-grid" id="calendar-grid"></div>
+    </section>
+  </main>
+
+  <dialog id="entry-dialog">
+    <form id="entry-form">
+      <div class="dialog-head">
+        <div><p class="eyebrow">SCHEDULE</p><h2>New entry</h2></div>
+        <button class="close-button" type="button" data-close="entry-dialog" aria-label="Close">Ã—</button>
+      </div>
+      <label>Person
+        <select id="person" required></select>
+      </label>
+      <label>Entry type
+        <select id="entry-type" required>
+          <option value="Ferias">FÃ©rias</option>
+          <option value="Plantao">PlantÃ£o</option>
+          <option value="Cobertura">Cobertura</option>
+        </select>
+      </label>
+      <div class="date-fields">
+        <label>Start date<input id="start-date" type="date" required></label>
+        <label>End date<input id="end-date" type="date" required></label>
+      </div>
+      <p class="form-error" id="form-error" role="alert"></p>
+      <div class="dialog-actions">
+        <button class="secondary" type="button" data-close="entry-dialog">Cancel</button>
+        <button class="primary" id="save-entry" type="submit">Save entry</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="detail-dialog">
+    <div class="dialog-head">
+      <div><p class="eyebrow">ENTRY DETAILS</p><h2 id="detail-name"></h2></div>
+      <button class="close-button" type="button" data-close="detail-dialog" aria-label="Close">Ã—</button>
+    </div>
+    <dl class="details">
+      <div><dt>Type</dt><dd id="detail-type"></dd></div>
+      <div><dt>Period</dt><dd id="detail-period"></dd></div>
+      <div><dt>Contact</dt><dd id="detail-contact"></dd></div>
+    </dl>
+    <div class="dialog-actions">
+      <button class="secondary" type="button" data-close="detail-dialog">Close</button>
+      <a class="primary button-link" id="send-email">Create email</a>
+    </div>
+  </dialog>
+
+  <script>
+window.APP_CONFIG = {
+  // Deploy Code.gs as a Google Apps Script web app, then paste its /exec URL.
+  apiUrl: "https://script.google.com/macros/s/AKfycbwg0q8pxJm5iAvbIHhbqXudxt2AnyEbC2SgU1ipXmMdPm_XWCh3OF3NrgJTB_VbP6fBEQ/exec",
+
+  // Everyone placed here appears in the email draft's To field.
+  emailRecipients: ["manager@example.com", "team@example.com"],
+  emailSubject: "Shift notification â€” {name}",
+  emailBody: "Hello,\n\nThis is to inform you that {start} through {end} is {name}'s shift.\n\nRegards,"
+};
+
+
+
+(() => {
+  "use strict";
+
+  const config = window.APP_CONFIG || {};
+  const configured = /^https:\/\/script\.google\.com\/.+\/exec$/.test(config.apiUrl || "");
+  const today = new Date();
+  let visibleMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  let people = [];
+  let entries = [];
+
+  const demoPeople = [
+    { id: 1, name: "Ana Silva", phone: "+55 11 90000-0001", email: "ana@example.com" },
+    { id: 2, name: "Bruno Costa", phone: "+55 11 90000-0002", email: "bruno@example.com" },
+    { id: 3, name: "Carla Lima", phone: "+55 11 90000-0003", email: "carla@example.com" }
+  ];
+
+  const iso = date => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  };
+  const parseDate = value => new Date(`${value}T12:00:00`);
+  const formatDate = value => new Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(parseDate(value));
+  const typeLabel = type => ({ Ferias: "FÃ©rias", Plantao: "PlantÃ£o", Cobertura: "Cobertura" }[type] || type);
+  const fillTemplate = (template, entry) => String(template || "")
+    .replaceAll("{name}", entry.person.name)
+    .replaceAll("{start}", formatDate(entry.start_date))
+    .replaceAll("{end}", formatDate(entry.end_date))
+    .replaceAll("{type}", typeLabel(entry.type));
+
+  function demoEntries() {
+    const y = visibleMonth.getFullYear();
+    const m = String(visibleMonth.getMonth() + 1).padStart(2, "0");
+    return [
+      { id: "demo-1", person_id: 1, type: "Plantao", start_date: `${y}-${m}-04`, end_date: `${y}-${m}-06`, person: demoPeople[0] },
+      { id: "demo-2", person_id: 2, type: "Ferias", start_date: `${y}-${m}-12`, end_date: `${y}-${m}-16`, person: demoPeople[1] },
+      { id: "demo-3", person_id: 3, type: "Cobertura", start_date: `${y}-${m}-21`, end_date: `${y}-${m}-22`, person: demoPeople[2] }
+    ];
+  }
+
+  async function api(action, payload) {
+    const options = payload ? { method: "POST", body: new URLSearchParams({ action, ...payload }) } : {};
+    const response = await fetch(payload ? config.apiUrl : `${config.apiUrl}?action=${encodeURIComponent(action)}`, options);
+    if (!response.ok) throw new Error((await response.text()) || `Request failed (${response.status})`);
+    const result = await response.json();
+    if (!result.ok) throw new Error(result.error || "Request failed");
+    return result;
+  }
+
+  async function loadData() {
+    const notice = document.querySelector("#notice");
+    if (!configured) {
+      people = demoPeople;
+      entries = demoEntries();
+      notice.textContent = "Demo mode â€” add Google Apps Script URL in config.js to use live data.";
+      notice.hidden = false;
+      render();
+      return;
+    }
+    try {
+      const result = await api("list");
+      people = result.people;
+      entries = result.entries;
+      notice.hidden = true;
+      render();
+    } catch (error) {
+      notice.textContent = `Could not load calendar: ${error.message}`;
+      notice.hidden = false;
+    }
+  }
+
+  function render() {
+    document.querySelector("#month-title").textContent = new Intl.DateTimeFormat("en", { month: "long", year: "numeric" }).format(visibleMonth);
+    const grid = document.querySelector("#calendar-grid");
+    grid.replaceChildren();
+    const first = new Date(visibleMonth);
+    first.setDate(1 - ((first.getDay() + 6) % 7));
+
+    for (let i = 0; i < 42; i++) {
+      const date = new Date(first);
+      date.setDate(first.getDate() + i);
+      const day = document.createElement("article");
+      day.className = "day";
+      if (date.getMonth() !== visibleMonth.getMonth()) day.classList.add("other-month");
+      if (iso(date) === iso(today)) day.classList.add("today");
+      day.innerHTML = `<span class="day-number">${date.getDate()}</span>`;
+
+      entries.filter(entry => entry.start_date <= iso(date) && entry.end_date >= iso(date)).forEach(entry => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = `entry ${entry.type.toLowerCase()}`;
+        button.textContent = `${entry.person.name} Â· ${typeLabel(entry.type)}`;
+        button.title = button.textContent;
+        button.addEventListener("click", () => showDetails(entry));
+        day.append(button);
+      });
+      grid.append(day);
+    }
+    populatePeople();
+  }
+
+  function populatePeople() {
+    const select = document.querySelector("#person");
+    select.replaceChildren(new Option("Select a personâ€¦", ""));
+    people.forEach(person => select.add(new Option(person.name, person.name)));
+  }
+
+  function showDetails(entry) {
+    document.querySelector("#detail-name").textContent = entry.person.name;
+    document.querySelector("#detail-type").textContent = typeLabel(entry.type);
+    document.querySelector("#detail-period").textContent = `${formatDate(entry.start_date)} â€“ ${formatDate(entry.end_date)}`;
+    document.querySelector("#detail-contact").textContent = [entry.person.email, entry.person.phone].filter(Boolean).join(" Â· ") || "â€”";
+    const subject = fillTemplate(config.emailSubject || "Shift notification â€” {name}", entry);
+    const body = fillTemplate(config.emailBody || "{start} through {end} is {name}'s shift.", entry);
+    document.querySelector("#send-email").href = `mailto:${(config.emailRecipients || []).join(",")}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    document.querySelector("#detail-dialog").showModal();
+  }
+
+  document.querySelector("#new-entry").addEventListener("click", () => {
+    const day = iso(today);
+    document.querySelector("#start-date").value = day;
+    document.querySelector("#end-date").value = day;
+    document.querySelector("#form-error").textContent = "";
+    document.querySelector("#entry-dialog").showModal();
+  });
+  document.querySelectorAll("[data-close]").forEach(button => button.addEventListener("click", () => document.querySelector(`#${button.dataset.close}`).close()));
+  document.querySelectorAll("dialog").forEach(dialog => dialog.addEventListener("click", event => { if (event.target === dialog) dialog.close(); }));
+  document.querySelector("#previous-month").addEventListener("click", () => { visibleMonth.setMonth(visibleMonth.getMonth() - 1); loadData(); });
+  document.querySelector("#next-month").addEventListener("click", () => { visibleMonth.setMonth(visibleMonth.getMonth() + 1); loadData(); });
+  document.querySelector("#today").addEventListener("click", () => { visibleMonth = new Date(today.getFullYear(), today.getMonth(), 1); loadData(); });
+
+  document.querySelector("#entry-form").addEventListener("submit", async event => {
+    event.preventDefault();
+    const error = document.querySelector("#form-error");
+    const button = document.querySelector("#save-entry");
+    const payload = {
+      person_name: document.querySelector("#person").value,
+      type: document.querySelector("#entry-type").value,
+      start_date: document.querySelector("#start-date").value,
+      end_date: document.querySelector("#end-date").value
+    };
+    if (payload.end_date < payload.start_date) {
+      error.textContent = "End date cannot be before start date.";
+      return;
+    }
+    if (!configured) {
+      const person = people.find(item => item.name === payload.person_name);
+      entries.push({ id: crypto.randomUUID(), ...payload, person });
+      render();
+      document.querySelector("#entry-dialog").close();
+      return;
+    }
+    try {
+      button.disabled = true;
+      button.textContent = "Savingâ€¦";
+      await api("add", payload);
+      await loadData();
+      document.querySelector("#entry-dialog").close();
+    } catch (requestError) {
+      error.textContent = `Could not save: ${requestError.message}`;
+    } finally {
+      button.disabled = false;
+      button.textContent = "Save entry";
+    }
+  });
+
+  loadData();
+})();
+
+
+  </script>
+</body>
+</html>
+
+
