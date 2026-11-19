@@ -336,8 +336,8 @@ Atenciosamente,</textarea>
     <div class="field">
       <label for="entryType">Tipo de escala</label>
       <select id="entryType" class="select" required>
-        <option value="Plantão">Plantão</option>
-        <option value="Férias">Férias</option>
+        <option value="Plantao">Plantão</option>
+        <option value="Ferias">Férias</option>
         <option value="Cobertura">Cobertura Férias</option>
       </select>
     </div>
@@ -377,7 +377,7 @@ Atenciosamente,</textarea>
 
 <script>
 // After deploying Apps Script code embedded at end of this file, paste its /exec URL here.
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwg0q8pxJm5iAvbIHhbqXudxt2AnyEbC2SgU1ipXmMdPm_XWCh3OF3NrgJTB_VbP6fBEQ/exec';
+const APPS_SCRIPT_URL = 'COLE_AQUI_A_URL_DO_APPS_SCRIPT';
 const PEOPLE_SPREADSHEET_ID = '1rPmbo_VSAOyJO5wAhT1ydEoAR9t14ALcYsDW8uKrLZY';
 const CALENDAR_SPREADSHEET_ID = '1J44IdG2c6Ny_9AwUOSP6dARNYJzoYVL1tTkS1QGy8wE';
 
@@ -432,6 +432,11 @@ function parseCsv(text) {
 
 function parseDate(v) {
   if (!v) return null;
+  v = String(v).trim();
+  // Parse ISO date components locally. `new Date('YYYY-MM-DD')` means UTC and
+  // becomes the previous day in negative UTC offsets such as São Paulo.
+  const ymd = v.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T\s].*)?$/);
+  if (ymd) return new Date(+ymd[1], +ymd[2]-1, +ymd[3]);
   // DD/MM/YY or DD/MM/YYYY
   const mdy = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
   if (mdy) {
@@ -866,92 +871,6 @@ applyColors(loadSavedColors());
 
 loadData();
 </script>
-<!--
 
-SETUP DO GOOGLE APPS SCRIPT
-1. Acesse https://script.google.com e crie um projeto.
-2. Cole o código abaixo no arquivo Code.gs.
-3. Implantar > Nova implantação > Aplicativo da Web.
-4. Executar como: você. Quem pode acessar: qualquer pessoa.
-5. Cole a URL terminada em /exec na constante APPS_SCRIPT_URL deste HTML.
-
-CÓDIGO CODE.GS:
-
-const PEOPLE_SPREADSHEET_ID = '1rPmbo_VSAOyJO5wAhT1ydEoAR9t14ALcYsDW8uKrLZY';
-const CALENDAR_SPREADSHEET_ID = '1J44IdG2c6Ny_9AwUOSP6dARNYJzoYVL1tTkS1QGy8wE';
-
-function doGet(e) {
-  try {
-    if ((e.parameter.action || 'list') !== 'list') throw new Error('Ação inválida');
-    return json_({ ok:true, people:readRows_(PEOPLE_SPREADSHEET_ID), entries:readRows_(CALENDAR_SPREADSHEET_ID) });
-  } catch (error) {
-    return json_({ ok:false, error:error.message });
-  }
-}
-
-function doPost(e) {
-  const lock = LockService.getScriptLock();
-  let locked = false;
-  try {
-    locked = lock.tryLock(10000);
-    if (!locked) throw new Error('Base ocupada; tente novamente');
-    if (e.parameter.action !== 'add') throw new Error('Ação inválida');
-    addEntry_(e.parameter);
-    return json_({ ok:true });
-  } catch (error) {
-    return json_({ ok:false, error:error.message });
-  } finally {
-    if (locked) lock.releaseLock();
-  }
-}
-
-function readRows_(spreadsheetId) {
-  const sheet = SpreadsheetApp.openById(spreadsheetId).getSheets()[0];
-  const values = sheet.getDataRange().getDisplayValues();
-  if (values.length < 2) return [];
-  const headers = values.shift().map(key_);
-  return values.filter(row => row.some(String)).map(row => {
-    const item = {};
-    headers.forEach((header, i) => item[header] = row[i] || '');
-    return item;
-  });
-}
-
-function addEntry_(data) {
-  const person = String(data.person_name || '').trim();
-  const type = String(data.type || '').trim();
-  const start = String(data.start_date || '');
-  const end = String(data.end_date || '');
-  if (!person) throw new Error('Selecione uma pessoa');
-  if (!['Plantão','Férias','Cobertura'].includes(type)) throw new Error('Tipo inválido');
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(start) || !/^\d{4}-\d{2}-\d{2}$/.test(end) || end < start) throw new Error('Período inválido');
-
-  const people = readRows_(PEOPLE_SPREADSHEET_ID);
-  if (!people.some(row => [row.name,row.nome,row.pessoa,row.trafego].some(value => norm_(value) === norm_(person)))) {
-    throw new Error('Pessoa não encontrada na BasePessoas');
-  }
-
-  const sheet = SpreadsheetApp.openById(CALENDAR_SPREADSHEET_ID).getSheets()[0];
-  if (sheet.getLastRow() === 0) sheet.appendRow(['ID','Pessoa','Tipo','Inicio','Fim']);
-  const headers = sheet.getRange(1,1,1,sheet.getLastColumn()).getDisplayValues()[0].map(key_);
-  const row = Array(headers.length).fill('');
-  put_(row, headers, ['id'], Utilities.getUuid(), false);
-  put_(row, headers, ['pessoa','person','personname','trafego','nome'], person, true);
-  put_(row, headers, ['tipo','type'], type, true);
-  put_(row, headers, ['inicio','start','startdate','datainicio','data'], start, true);
-  put_(row, headers, ['fim','end','enddate','datafim'], end, true);
-  sheet.appendRow(row);
-}
-
-function put_(row, headers, aliases, value, required) {
-  const index = aliases.map(a => headers.indexOf(a)).find(i => i >= 0);
-  if (index == null && required) throw new Error('Coluna ausente: ' + aliases[0]);
-  if (index != null) row[index] = value;
-}
-function key_(value) { return norm_(value).replace(/[^a-z0-9]/g,''); }
-function norm_(value) { return String(value || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
-function json_(value) { return ContentService.createTextOutput(JSON.stringify(value)).setMimeType(ContentService.MimeType.JSON); }
-
--->
 </body>
 </html>
