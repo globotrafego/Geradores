@@ -6,301 +6,316 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerador de Campanhas - Afiliadas</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 
     <style>
         :root {
-            --primary: #6366f1;
-            --primary-hover: #4f46e5;
-            --bg-color: #f8fafc;
-            --card-bg: rgba(255, 255, 255, 0.85);
-            --card-border: rgba(255, 255, 255, 0.3);
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --border-color: #cbd5e1;
-            --input-bg: #ffffff;
-            --input-border: #cbd5e1;
-            --danger: #ef4444;
-            --danger-hover: #dc2626;
-            --shadow-color: rgba(15, 23, 42, 0.08);
-            --item-bg: rgba(241, 245, 249, 0.6);
-            --glass-blur: blur(12px);
+            color-scheme: light;
+            --primary: #1859bd;
+            --primary-hover: #124b9f;
+            --action-bg: #1859bd;
+            --action-hover: #124b9f;
+            --bg-color: #f2f5fa;
+            --card-bg: #fff;
+            --card-border: #dbe3ee;
+            --text-main: #182638;
+            --text-muted: #53647a;
+            --border-color: #dbe3ee;
+            --input-bg: #fff;
+            --input-border: #aebcd0;
+            --danger: #a82a37;
+            --shadow-color: rgba(21, 39, 64, .10);
+            --item-bg: #f2f6fc;
+            --accent-bg: #e7effd;
+            --focus-ring: rgba(24, 89, 189, .24);
+            --topbar-height: 64px;
         }
 
         body.dark-theme {
-            --primary: #818cf8;
-            --primary-hover: #6366f1;
-            --bg-color: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.75);
-            --card-border: rgba(255, 255, 255, 0.05);
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --border-color: #334155;
-            --input-bg: #0f172a;
-            --input-border: #475569;
-            --danger: #f87171;
-            --danger-hover: #ef4444;
-            --shadow-color: rgba(0, 0, 0, 0.4);
-            --item-bg: rgba(15, 23, 42, 0.5);
-            --glass-blur: blur(16px);
+            color-scheme: dark;
+            --primary: #9abfff;
+            --primary-hover: #bfd5ff;
+            --action-bg: #326fce;
+            --action-hover: #3b74cc;
+            --bg-color: #101927;
+            --card-bg: #172334;
+            --card-border: #35455c;
+            --text-main: #edf3fc;
+            --text-muted: #b2c2d7;
+            --border-color: #35455c;
+            --input-bg: #131f30;
+            --input-border: #586a83;
+            --danger: #ff9aa5;
+            --shadow-color: rgba(0, 0, 0, .35);
+            --item-bg: #1c2b41;
+            --accent-bg: #213a5e;
+            --focus-ring: rgba(154, 191, 255, .24);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Outfit', sans-serif;
-            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-        }
-
+        *, *::before, *::after { box-sizing: border-box; }
+        html { scroll-padding-block-start: calc(var(--topbar-height) + 16px); }
         body {
-            background-color: var(--bg-color);
-            background-image: radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.08), transparent 25%),
-                radial-gradient(circle at 85% 30%, rgba(168, 85, 247, 0.08), transparent 25%);
+            margin: 0;
+            min-block-size: 100dvh;
+            background: var(--bg-color);
             color: var(--text-main);
-            padding: 40px 20px;
-            min-height: 100vh;
+            font: 400 .875rem/1.5 Inter, system-ui, sans-serif;
         }
+        h1, h2, h3, p, dl, dd { margin: 0; }
+        button, input, select { font: inherit; }
+        :focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+        [hidden], .hidden { display: none !important; }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .top-bar {
+        .workspace-header {
+            position: sticky;
+            inset-block-start: 0;
+            z-index: 150;
             display: flex;
+            align-items: center;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 40px;
-        }
-
-        .header-title {
-            font-size: 2.75rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--primary), #a855f7);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 4px 10px rgba(99, 102, 241, 0.1);
-        }
-
-        .theme-toggle {
+            gap: 12px;
+            min-block-size: var(--topbar-height);
+            padding: 10px clamp(12px, 3vw, 32px);
+            border-block-end: 1px solid var(--border-color);
             background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 50%;
-            width: 48px;
-            height: 48px;
+        }
+        .workspace-brand, .workspace-actions, .line-actions {
             display: flex;
             align-items: center;
+            gap: 8px;
+        }
+        .workspace-brand { gap: 10px; font-size: 1.05rem; font-weight: 700; }
+        .brand-mark {
+            display: inline-flex;
+            align-items: flex-end;
             justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 4px 6px var(--shadow-color);
-            backdrop-filter: var(--glass-blur);
-            font-size: 1.25rem;
-            color: var(--text-main);
+            gap: 3px;
+            inline-size: 34px;
+            block-size: 34px;
+            padding-block-end: 8px;
+            flex: none;
+            border-radius: 9px;
+            background: var(--action-bg);
         }
-
-        .theme-toggle:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px var(--shadow-color);
-        }
-
-        .card {
+        .brand-mark span { inline-size: 4px; block-size: 7px; border-radius: 2px; background: #fff; }
+        .brand-mark span:nth-child(2) { block-size: 12px; }
+        .brand-mark span:nth-child(3) { block-size: 17px; }
+        .theme-toggle {
+            display: inline-grid;
+            place-items: center;
+            inline-size: 40px;
+            block-size: 40px;
+            flex: none;
+            border: 1px solid var(--input-border);
+            border-radius: 8px;
             background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 20px;
-            box-shadow: 0 8px 32px var(--shadow-color);
-            backdrop-filter: var(--glass-blur);
-            padding: 35px;
-            margin-bottom: 30px;
+            color: var(--text-main);
+            cursor: pointer;
+            font-size: 1.05rem;
         }
-
-        #section-geral {
-            position: relative;
-            z-index: 10;
-        }
-
-        #section-lines {
-            position: relative;
-            z-index: 5;
-        }
-
-        .card h2 {
-            font-weight: 600;
-            font-size: 1.5rem;
-            margin-bottom: 25px;
-            border-bottom: 2px solid var(--border-color);
-            padding-bottom: 15px;
-        }
-
-        .grid {
+        .theme-toggle:hover { background: var(--item-bg); }
+        .workspace {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 24px;
+            grid-template-columns: 188px minmax(0, 1fr);
+            min-block-size: calc(100dvh - var(--topbar-height));
         }
-
-        .form-group {
+        .workspace-sidebar {
+            padding: 24px 12px;
+            background: #17283e;
+            color: #d9e5f7;
+        }
+        .workspace-sidebar nav {
+            position: sticky;
+            inset-block-start: calc(var(--topbar-height) + 24px);
+            display: grid;
+            gap: 5px;
+        }
+        .workspace-sidebar a {
+            padding: 10px 12px;
+            border-radius: 7px;
+            color: inherit;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .workspace-sidebar a:hover, .workspace-sidebar a:focus-visible { background: #2a4261; color: #fff; }
+        .workspace-main {
+            inline-size: 100%;
+            min-inline-size: 0;
+            max-inline-size: 1500px;
+            margin-inline: auto;
+            padding: clamp(16px, 3vw, 38px);
+        }
+        .workspace-intro { margin-block-end: 24px; }
+        .workspace-intro h1 {
+            font-size: clamp(1.65rem, 1.3rem + 1.2vw, 2.35rem);
+            letter-spacing: -.04em;
+            line-height: 1.16;
+            font-weight: 700;
+        }
+        .workspace-intro p { margin-block-start: 6px; color: var(--text-muted); }
+        .editor-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(220px, 275px);
+            grid-template-areas: "campaign summary" "lines summary";
+            align-items: start;
+            gap: 18px;
+        }
+        #section-geral { grid-area: campaign; position: relative; z-index: 10; }
+        #section-lines { grid-area: lines; min-inline-size: 0; position: relative; }
+        .campaign-summary {
+            grid-area: summary;
+            position: sticky;
+            inset-block-start: calc(var(--topbar-height) + 16px);
+        }
+        .card { min-inline-size: 0; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; }
+        .panel-header {
             display: flex;
-            flex-direction: column;
-            margin-bottom: 10px;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 15px 20px;
         }
-
-        .field-header {
+        .card > .panel-header { border-block-end: 1px solid var(--border-color); }
+        .lines-heading { padding-inline: 0; padding-block-start: 4px; }
+        .panel-header h2 { font-size: 1.03rem; letter-spacing: -.012em; }
+        .panel-note { color: var(--text-muted); font-size: .785rem; }
+        .campaign-fields { padding: 20px; }
+        .generated-field { margin-block-start: 16px; }
+        .summary-metrics { padding: 7px 18px 16px; }
+        .summary-metrics div {
             display: flex;
             align-items: baseline;
             justify-content: space-between;
-            gap: 12px;
+            flex-wrap: wrap;
+            gap: 2px 8px;
+            padding-block: 10px;
+            border-block-end: 1px solid var(--border-color);
         }
-
-        .field-header label,
-        .field-header .field-link {
-            margin-bottom: 8px;
+        .summary-metrics dt { color: var(--text-muted); font-size: .8rem; }
+        .summary-metrics dd { font-weight: 600; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+        .summary-metrics .summary-total {
+            display: grid;
+            gap: 2px;
+            margin-block-start: 13px;
+            padding: 12px;
+            border: 0;
+            border-radius: 8px;
+            background: var(--accent-bg);
         }
-
-        .field-link {
-            color: var(--primary);
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-decoration: none;
+        .summary-total dd { font-size: 1.28rem; color: var(--primary); }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 185px), 1fr));
+            gap: 14px 16px;
         }
-
-        .field-link:hover {
-            text-decoration: underline;
-        }
-
-        label {
-            font-size: 0.9rem;
-            font-weight: 500;
-            margin-bottom: 8px;
-            color: var(--text-main);
-        }
-
-        input[type="text"],
-        input[type="number"],
-        input[type="date"],
-        select {
-            padding: 12px 14px;
+        .form-group { display: flex; flex-direction: column; min-inline-size: 0; }
+        .field-header { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 5px 12px; }
+        .field-link { color: var(--primary); font-size: .8rem; font-weight: 600; }
+        label { font-size: .81rem; font-weight: 600; margin-block-end: 5px; color: var(--text-main); }
+        input[type="text"], input[type="number"], input[type="date"], select {
+            min-inline-size: 0;
+            inline-size: 100%;
+            min-block-size: 40px;
+            padding: 8px 10px;
             border: 1px solid var(--input-border);
-            background-color: var(--input-bg);
+            border-radius: 7px;
+            background: var(--input-bg);
             color: var(--text-main);
-            border-radius: 10px;
-            font-size: 0.95rem;
-            width: 100%;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
         }
-
-        input:focus,
-        select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-        }
-
-        input[readonly] {
-            background-color: var(--item-bg);
-            color: var(--text-muted);
-            cursor: not-allowed;
-            border-color: transparent;
-        }
-
+        input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--focus-ring); }
+        input[readonly] { background: var(--item-bg); border-color: var(--border-color); color: var(--text-muted); }
         .btn {
-            padding: 12px 24px;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 1rem;
-            box-shadow: 0 4px 6px var(--shadow-color);
+            gap: 7px;
+            min-block-size: 40px;
+            padding: 8px 13px;
+            border: 1px solid transparent;
+            border-radius: 7px;
+            font-size: .84rem;
+            font-weight: 600;
+            line-height: 1.25;
+            cursor: pointer;
         }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px var(--shadow-color);
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), #818cf8);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: linear-gradient(135deg, var(--primary-hover), var(--primary));
-        }
-
-        .btn-danger {
-            background-color: var(--danger);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background-color: var(--danger-hover);
-        }
-
-        .btn-secondary {
-            background-color: var(--text-muted);
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background-color: var(--border-color);
-        }
-
-
+        .btn-primary { background: var(--action-bg); color: #fff; }
+        .btn-primary:hover { background: var(--action-hover); }
+        .btn-secondary { border-color: var(--input-border); background: var(--card-bg); color: var(--text-main); }
+        .btn-secondary:hover, .btn-danger:hover { background: var(--item-bg); }
+        .btn-danger { border-color: var(--card-border); background: var(--card-bg); color: var(--danger); }
         .line-item {
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 25px;
-            margin-bottom: 25px;
-            background: var(--item-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            background: var(--card-bg);
+            margin-block-end: 14px;
         }
-
         .line-item-header {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 15px;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px 12px;
+            padding: 13px 18px;
+            border-block-end: 1px solid var(--border-color);
+            border-radius: 12px 12px 0 0;
+            background: var(--item-bg);
         }
-
-        .line-item-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: var(--primary);
-        }
-
+        .line-item-title { font-size: .97rem; font-weight: 700; }
+        .line-actions { flex-wrap: wrap; }
+        .line-body { padding: 17px 18px 5px; }
+        .line-group { min-inline-size: 0; margin: 18px 0 0; padding: 10px 0 16px; border: 0; border-block-start: 1px solid var(--border-color); }
+        .line-group legend { padding-inline-end: 10px; font-size: .9rem; font-weight: 700; }
         .line-item-add-row {
             display: flex;
             justify-content: flex-end;
-            margin-top: 20px;
+            padding: 0 18px 15px;
         }
 
-        .actions-bar {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 30px;
-            align-items: center;
+        @media (max-width: 1120px) {
+            .workspace { grid-template-columns: 152px minmax(0, 1fr); }
+            .editor-grid { grid-template-columns: minmax(0, 1fr) minmax(205px, 230px); }
+        }
+        @media (max-width: 920px) {
+            .workspace { grid-template-columns: minmax(0, 1fr); }
+            .workspace-sidebar { padding: 5px 12px; }
+            .workspace-sidebar nav { position: static; display: flex; flex-wrap: wrap; }
+            .workspace-sidebar a { padding-block: 8px; }
+            .editor-grid {
+                grid-template-columns: minmax(0, 1fr);
+                grid-template-areas: "campaign" "summary" "lines";
+            }
+            .campaign-summary { position: static; }
+        }
+        @media (max-width: 460px) {
+            .workspace-header { gap: 8px; }
+            .workspace-brand { font-size: .94rem; }
+            .brand-mark { inline-size: 30px; block-size: 30px; padding-block-end: 6px; }
+            .workspace-actions { gap: 5px; }
+            .workspace-actions .btn { padding-inline: 8px; }
+            .theme-toggle { inline-size: 34px; }
+            .card > .panel-header, .campaign-fields, .line-item-header, .line-body { padding-inline: 12px; }
         }
 
         .choices[data-type*="select-one"] .choices__inner {
-            padding-bottom: 0px;
+            padding-bottom: 0;
         }
 
+        .choices[data-type*="select-one"]::after { border-color: var(--text-muted) transparent transparent; }
+        .choices[data-type*="select-one"].is-open::after { border-color: transparent transparent var(--text-muted); }
+
         .choices__inner {
-            border-radius: 10px !important;
+            border-radius: 7px !important;
             background-color: var(--input-bg) !important;
             border: 1px solid var(--input-border) !important;
-            min-height: 46px;
+            min-height: 40px;
         }
 
         .choices.is-focused .choices__inner {
             border-color: var(--primary) !important;
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+            box-shadow: 0 0 0 3px var(--focus-ring);
         }
 
         .choices__input {
@@ -311,7 +326,6 @@
         .choices__list--dropdown {
             background-color: var(--card-bg) !important;
             border: 1px solid var(--border-color) !important;
-            backdrop-filter: var(--glass-blur);
             border-radius: 10px;
             margin-top: 5px;
             box-shadow: 0 10px 25px var(--shadow-color);
@@ -326,17 +340,12 @@
         }
 
         .choices__list--dropdown .choices__item--selectable.is-highlighted {
-            background-color: rgba(99, 102, 241, 0.1) !important;
-            color: var(--primary) !important;
-        }
-
-        body.dark-theme .choices__list--dropdown .choices__item--selectable.is-highlighted {
-            background-color: rgba(129, 140, 248, 0.2) !important;
+            background-color: var(--accent-bg) !important;
             color: var(--primary) !important;
         }
 
         .choices__list--multiple .choices__item {
-            background-color: var(--primary) !important;
+            background-color: var(--action-bg) !important;
             border: none !important;
             border-radius: 6px !important;
             color: white !important;
@@ -346,18 +355,6 @@
 
         .choices__list--multiple .choices__item[data-deletable] {
             padding-right: 25px;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        ::-webkit-calendar-picker-indicator {
-            filter: invert(0.5);
-        }
-
-        body.dark-theme ::-webkit-calendar-picker-indicator {
-            filter: invert(0.8);
         }
 
         /* Custom Dropdown Actions */
@@ -380,13 +377,13 @@
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            background-color: rgba(99, 102, 241, 0.1);
+            background-color: var(--accent-bg);
             color: var(--primary);
             transition: all 0.2s;
         }
 
         .action-btn:hover {
-            background-color: rgba(99, 102, 241, 0.2);
+            background-color: var(--item-bg);
         }
 
         .action-btn.danger {
@@ -642,69 +639,99 @@
         }
     </style>
 
-    <div class="container">
-        <div class="top-bar">
-            <h1 class="header-title">Gerador de Campanhas - Afiliadas</h1>
-            <button class="theme-toggle" id="theme-toggle-btn" aria-label="Toggle Dark Mode">
-                🌙
-            </button>
+    <header class="workspace-header">
+        <div class="workspace-brand">
+            <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+            Afiliadas
         </div>
+        <div class="workspace-actions">
+            <button type="button" class="theme-toggle" id="theme-toggle-btn" title="Alternar tema"
+                aria-label="Tema escuro" aria-pressed="false">☾</button>
+            <button type="button" class="btn btn-primary" onclick="exportToExcel()">Exportar XLSX</button>
+        </div>
+    </header>
 
-        <div class="card" id="section-geral">
-            <h2>Informações Gerais da Campanha</h2>
-            <div class="grid">
-                <div class="form-group">
-                    <label>Número de RP *</label>
-                    <input type="number" id="cg-rp" required>
-                </div>
-                <div class="form-group">
-                    <label>Afiliadas *</label>
-                    <select id="cg-afiliadas" required>
-                        <option value="">Selecione...</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Order ID *</label>
-                    <input type="number" id="cg-order-id" required>
-                </div>
-                <div class="form-group">
-                    <label>Cliente *</label>
-                    <input type="text" id="cg-cliente" required>
-                </div>
-                <div class="form-group">
-                    <label>Agência / Direto</label>
-                    <input type="text" id="cg-agencia" placeholder="Direto (padrão)">
-                </div>
-                <div class="form-group">
-                    <label>Mês *</label>
-                    <select id="cg-mes" required>
-                        <option value="">Selecione...</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Ano *</label>
-                    <input type="number" id="cg-ano" value="2024" required>
-                </div>
-            </div>
-            <div class="form-group" style="margin-top:24px;">
-                <label>Nome da Campanha (Gerado Automático)</label>
-                <input type="text" id="cg-nome-campanha" readonly>
-            </div>
-        </div>
+    <div class="workspace">
+        <aside class="workspace-sidebar">
+            <nav aria-label="Navegação da campanha">
+                <a href="#section-geral">Campanha</a>
+                <a href="#section-lines">Itens de linha</a>
+            </nav>
+        </aside>
 
-        <div class="card" id="section-lines">
-            <div class="actions-bar" style="margin-top:0; margin-bottom:25px;">
-                <h2 style="border:none; margin:0; padding:0;">Line Items</h2>
-                <button type="button" class="btn btn-primary" onclick="addLineItem()">+ Adicionar Linha</button>
-            </div>
-            <div id="line-items-container"></div>
-        </div>
+        <main class="workspace-main">
+            <header class="workspace-intro">
+                <h1>Nova campanha</h1>
+                <p>Configure a veiculação e exporte a planilha para importação no GAM.</p>
+            </header>
 
-        <div class="actions-bar" style="margin-top:0; margin-bottom: 50px;">
-            <div></div>
-            <button class="btn btn-primary" style="font-size: 1.15rem; padding: 16px 40px;" onclick="exportToExcel()">📄
-                Gerar Excel</button>
-        </div>
+            <div class="editor-grid">
+                <section class="card" id="section-geral" aria-labelledby="campaign-title">
+                    <header class="panel-header">
+                        <h2 id="campaign-title">Detalhes da campanha</h2>
+                        <p class="panel-note">* Campos obrigatórios</p>
+                    </header>
+                    <div class="campaign-fields">
+                        <div class="grid">
+                            <div class="form-group">
+                                <label for="cg-rp">Número de RP *</label>
+                                <input type="number" id="cg-rp" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="cg-afiliadas">Afiliadas *</label>
+                                <select id="cg-afiliadas" required>
+                                    <option value="">Selecione...</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="cg-order-id">Order ID *</label>
+                                <input type="number" id="cg-order-id" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="cg-cliente">Cliente *</label>
+                                <input type="text" id="cg-cliente" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="cg-agencia">Agência / Direto</label>
+                                <input type="text" id="cg-agencia" placeholder="Direto (padrão)">
+                            </div>
+                            <div class="form-group">
+                                <label for="cg-mes">Mês *</label>
+                                <select id="cg-mes" required>
+                                    <option value="">Selecione...</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="cg-ano">Ano *</label>
+                                <input type="number" id="cg-ano" value="2024" required>
+                            </div>
+                        </div>
+                        <div class="form-group generated-field">
+                            <label for="cg-nome-campanha">Nome gerado da campanha</label>
+                            <input type="text" id="cg-nome-campanha" readonly>
+                        </div>
+                    </div>
+                </section>
+
+                <aside class="card campaign-summary" aria-labelledby="summary-title">
+                    <header class="panel-header"><h2 id="summary-title">Resumo da campanha</h2></header>
+                    <dl class="summary-metrics">
+                        <div><dt>Itens de linha</dt><dd id="summary-lines">0</dd></div>
+                        <div><dt>Impressões previstas</dt><dd id="summary-impressions">0</dd></div>
+                        <div><dt>Total de tabela</dt><dd id="summary-table">R$ 0,00</dd></div>
+                        <div class="summary-total"><dt>Total negociado</dt><dd id="summary-negotiated">R$ 0,00</dd></div>
+                    </dl>
+                </aside>
+
+                <section id="section-lines" aria-labelledby="lines-title">
+                    <header class="panel-header lines-heading">
+                        <h2 id="lines-title">Itens de linha</h2>
+                        <button type="button" class="btn btn-secondary" onclick="addLineItem(true)">+ Adicionar linha</button>
+                    </header>
+                    <div id="line-items-container"></div>
+                </section>
+            </div>
+        </main>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
@@ -744,12 +771,9 @@
         // Theme logic
         const themeBtn = document.getElementById('theme-toggle-btn');
         themeBtn.addEventListener('click', () => {
-            document.body.classList.toggle('dark-theme');
-            if (document.body.classList.contains('dark-theme')) {
-                themeBtn.textContent = '☀️';
-            } else {
-                themeBtn.textContent = '🌙';
-            }
+            const dark = document.body.classList.toggle('dark-theme');
+            themeBtn.setAttribute('aria-pressed', String(dark));
+            themeBtn.textContent = dark ? '☀' : '☾';
         });
 
         const BASE_SHEET_ID = '1ClTgaFfpYFaWbNhvKlyr2JJeyTaoQ4FlvJVbfU2O9cg';
@@ -1431,24 +1455,39 @@
 
             const totalNegociado = totalTabela - ((totalTabela * desconto) / 100);
             el('totalNegociado').value = totalNegociado.toFixed(2);
+            updateCampaignSummary();
         }
 
-        function buildMultiGroup(label, id, itemId, isHidden = false, isRequired = false, link = null) {
+        const summaryNumber = new Intl.NumberFormat('pt-BR');
+        const summaryMoney = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+
+        function updateCampaignSummary(items = document.querySelectorAll('#line-items-container .line-item')) {
+            const totals = { entregaDeterminada: 0, totalTabela: 0, totalNegociado: 0 };
+            for (const item of items) {
+                const id = item.id.slice('line-item-container-'.length);
+                for (const field of Object.keys(totals)) {
+                    totals[field] += Number(document.getElementById(`${field}-${id}`).value) || 0;
+                }
+            }
+            document.getElementById('summary-lines').textContent = summaryNumber.format(items.length);
+            document.getElementById('summary-impressions').textContent = summaryNumber.format(totals.entregaDeterminada);
+            document.getElementById('summary-table').textContent = summaryMoney.format(totals.totalTabela);
+            document.getElementById('summary-negotiated').textContent = summaryMoney.format(totals.totalNegociado);
+        }
+
+        function buildMultiGroup(label, id, itemId, isHidden = false, isRequired = false) {
             const hiddenClass = isHidden ? "hidden" : "";
             const requiredAttr = isRequired ? "required" : "";
             const requiredMark = isRequired ? " *" : "";
-            const labelHtml = link
-                ? `<div class="field-header"><label>${label}${requiredMark}</label><a class="field-link" href="${link.url}" target="_blank" rel="noopener noreferrer">${link.text}</a></div>`
-                : `<label>${label}${requiredMark}</label>`;
             return `
             <div class="form-group ${hiddenClass}" id="fg-${id}-${itemId}">
-                ${labelHtml}
+                <label for="${id}-${itemId}">${label}${requiredMark}</label>
                 <select id="${id}-${itemId}" multiple ${requiredAttr}></select>
             </div>
         `;
         }
 
-        function addLineItem() {
+        function addLineItem(focusNew = false) {
             lineItemCount++;
             const itemId = lineItemCount;
             const container = document.getElementById('line-items-container');
@@ -1466,121 +1505,138 @@
 
             itemDiv.innerHTML = `
             <div class="line-item-header">
-                <span class="line-item-title">Linha ${lineNumber}</span>
-                <div>
-                    <button type="button" class="btn btn-secondary" style="margin-right: 10px;" onclick="copyLineItem(${itemId})">Copiar Linha</button>
-                    <button type="button" class="btn btn-danger" onclick="removeLineItem(${itemId})">Remover Linha</button>
+                <h3 class="line-item-title" tabindex="-1">Linha ${lineNumber}</h3>
+                <div class="line-actions">
+                    <button type="button" class="btn btn-secondary" onclick="copyLineItem(${itemId})">Copiar linha</button>
+                    <button type="button" class="btn btn-danger" onclick="removeLineItem(${itemId})">Remover</button>
                 </div>
             </div>
             
-            <div class="form-group" style="margin-bottom:24px;">
-                <label>Nome da Linha (Gerado Automático)</label>
-                <input type="text" id="lineItemName-${itemId}" readonly>
-            </div>
-
-            <div class="grid">
+            <div class="line-body">
                 <div class="form-group">
-                    <label>Propriedades *</label>
-                    <select id="propriedade-${itemId}" required><option value="">Selecione...</option></select>
-                </div>
-                
-                <div class="form-group">
-                    <label>Tipo de Linha *</label>
-                    <select id="tipoLinha-${itemId}" required><option value="">Selecione...</option></select>
+                    <label for="lineItemName-${itemId}">Nome gerado do item</label>
+                    <input type="text" id="lineItemName-${itemId}" readonly>
                 </div>
 
-                ${buildMultiGroup("Formatos", "formatos", itemId, false, true)}
+                <fieldset class="line-group">
+                    <legend>Formato e inventário</legend>
+                    <div class="grid">
+                        <div class="form-group">
+                            <label for="propriedade-${itemId}">Propriedades *</label>
+                            <select id="propriedade-${itemId}" required><option value="">Selecione...</option></select>
+                        </div>
 
-                <div class="form-group hidden" id="fg-posicaoVideo-${itemId}">
-                    <label>Posição Vídeo *</label>
-                    <select id="posicaoVideo-${itemId}" required><option value="">Selecione...</option></select>
-                </div>
+                        <div class="form-group">
+                            <label for="tipoLinha-${itemId}">Tipo de Linha *</label>
+                            <select id="tipoLinha-${itemId}" required><option value="">Selecione...</option></select>
+                        </div>
 
-                <div class="form-group hidden" id="fg-skip-${itemId}">
-                    <label>Skip *</label>
-                    <select id="skip-${itemId}" required><option value="">Selecione...</option></select>
-                </div>
+                        ${buildMultiGroup("Formatos", "formatos", itemId, false, true)}
 
-                <div class="form-group hidden" id="fg-globoplay-${itemId}">
-                    <label>Globoplay *</label>
-                    <select id="globoplay-${itemId}">
-                        <option value="">Selecione...</option>
-                    </select>
-                </div>
+                        <div class="form-group hidden" id="fg-posicaoVideo-${itemId}">
+                            <label for="posicaoVideo-${itemId}">Posição Vídeo *</label>
+                            <select id="posicaoVideo-${itemId}" required><option value="">Selecione...</option></select>
+                        </div>
 
-                ${buildMultiGroup("Posição", "posicao", itemId, true, true)}
+                        <div class="form-group hidden" id="fg-skip-${itemId}">
+                            <label for="skip-${itemId}">Skip *</label>
+                            <select id="skip-${itemId}" required><option value="">Selecione...</option></select>
+                        </div>
 
-                <div class="form-group">
-                    <label>Data de Início *</label>
-                    <input type="date" id="dataInicio-${itemId}" min="${todayStr}" required>
-                </div>
+                        <div class="form-group hidden" id="fg-globoplay-${itemId}">
+                            <label for="globoplay-${itemId}">Globoplay *</label>
+                            <select id="globoplay-${itemId}">
+                                <option value="">Selecione...</option>
+                            </select>
+                        </div>
 
-                <div class="form-group">
-                    <label>Data Fim *</label>
-                    <input type="date" id="dataFim-${itemId}" min="${todayStr}" required>
-                </div>
+                        ${buildMultiGroup("Posição", "posicao", itemId, true, true)}
 
-                <div class="form-group">
-                    <label>Entrega Determinada *</label>
-                    <input type="text" inputmode="numeric" pattern="[0-9]*" id="entregaDeterminada-${itemId}" oninput="this.value=this.value.replace(/[^0-9]/g,'')" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Valor Unitário (R$) *</label>
-                    <input type="number" step="0.01" id="valorUnitario-${itemId}" min="0" required>
-                </div>
-                
-                <div class="form-group">
-                    <label>Total Tabela (R$)</label>
-                    <input type="number" id="totalTabela-${itemId}" readonly>
-                </div>
-
-                <div class="form-group">
-                    <label>Desconto (%) *</label>
-                    <input type="text" inputmode="numeric" pattern="[0-9]*" id="desconto-${itemId}" value="0" oninput="this.value=this.value.replace(/[^0-9]/g,''); if(parseInt(this.value)>100) this.value='100';" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Total Negociado (R$)</label>
-                    <input type="number" id="totalNegociado-${itemId}" readonly>
-                </div>
-
-                ${buildMultiGroup("Site", "sites", itemId, false, true)}
-
-                <div class="form-group">
-                    <label>Editoria / Programa</label>
-                    <input type="text" id="editoria-${itemId}">
-                </div>
-
-                ${buildMultiGroup("Geolocalização", "geolocalizacao", itemId)}
-                
-                ${buildMultiGroup("Caso Under, programar o disponível?", "programarDisponivel", itemId)}
-
-                <div class="form-group">
-                    <label>Cidades</label>
-                    <input type="text" id="cidades-${itemId}">
-                </div>
-
-                <div class="form-group segment-field">
-                    <div class="field-header">
-                        <label for="segment-trigger-${itemId}">Segmentação de audiência</label>
-                        <a class="field-link" href="https://app.powerbi.com/view?r=eyJrIjoiMzExYzVjMDEtMzA5OC00NTAwLTk4YTctYzQzNWU0ODY2OWViIiwidCI6ImE3Y2RjNDQ3LTNiMjktNGI0MS1iNzNlLThhMmNiNTRiMDZjNiIsImMiOjR9" target="_blank" rel="noopener noreferrer">Lista de Segmentos</a>
+                        ${buildMultiGroup("Site", "sites", itemId, false, true)}
                     </div>
-                    <button type="button" id="segment-trigger-${itemId}" class="segment-trigger" aria-haspopup="dialog"
-                        aria-describedby="segment-summary-${itemId}" onclick="openSegmentPicker(${itemId})">
-                        Selecionar segmentos <span id="segment-summary-${itemId}">Nenhum selecionado</span>
-                    </button>
-                    ${audienceFields.map(field => `<select id="${field}-${itemId}" multiple hidden></select>`).join('')}
-                </div>
+                </fieldset>
+                <fieldset class="line-group">
+                    <legend>Veiculação</legend>
+                    <div class="grid">
+                        <div class="form-group">
+                            <label for="dataInicio-${itemId}">Data de Início *</label>
+                            <input type="date" id="dataInicio-${itemId}" min="${todayStr}" required>
+                        </div>
 
-                <div class="form-group">
-                    <label>Observações</label>
-                    <input type="text" id="observacoes-${itemId}">
-                </div>
+                        <div class="form-group">
+                            <label for="dataFim-${itemId}">Data Fim *</label>
+                            <input type="date" id="dataFim-${itemId}" min="${todayStr}" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="entregaDeterminada-${itemId}">Entrega Determinada *</label>
+                            <input type="text" inputmode="numeric" pattern="[0-9]*" id="entregaDeterminada-${itemId}" oninput="this.value=this.value.replace(/[^0-9]/g,'')" required>
+                        </div>
+
+                        ${buildMultiGroup("Caso Under, programar o disponível?", "programarDisponivel", itemId)}
+                    </div>
+                </fieldset>
+                <fieldset class="line-group">
+                    <legend>Investimento</legend>
+                    <div class="grid">
+                        <div class="form-group">
+                            <label for="valorUnitario-${itemId}">Valor Unitário (R$) *</label>
+                            <input type="number" step="0.01" id="valorUnitario-${itemId}" min="0" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="totalTabela-${itemId}">Total Tabela (R$)</label>
+                            <input type="number" id="totalTabela-${itemId}" readonly>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="desconto-${itemId}">Desconto (%) *</label>
+                            <input type="text" inputmode="numeric" pattern="[0-9]*" id="desconto-${itemId}" value="0" oninput="this.value=this.value.replace(/[^0-9]/g,''); if(parseInt(this.value)>100) this.value='100';" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="totalNegociado-${itemId}">Total Negociado (R$)</label>
+                            <input type="number" id="totalNegociado-${itemId}" readonly>
+                        </div>
+                    </div>
+                </fieldset>
+                <fieldset class="line-group">
+                    <legend>Segmentação e observações</legend>
+                    <div class="grid">
+                        <div class="form-group">
+                            <label for="editoria-${itemId}">Editoria / Programa</label>
+                            <input type="text" id="editoria-${itemId}">
+                        </div>
+
+                        ${buildMultiGroup("Geolocalização", "geolocalizacao", itemId)}
+
+                        <div class="form-group">
+                            <label for="cidades-${itemId}">Cidades</label>
+                            <input type="text" id="cidades-${itemId}">
+                        </div>
+
+                        <div class="form-group segment-field">
+                            <div class="field-header">
+                                <label for="segment-trigger-${itemId}">Segmentação de audiência</label>
+                                <a class="field-link" href="https://app.powerbi.com/view?r=eyJrIjoiMzExYzVjMDEtMzA5OC00NTAwLTk4YTctYzQzNWU0ODY2OWViIiwidCI6ImE3Y2RjNDQ3LTNiMjktNGI0MS1iNzNlLThhMmNiNTRiMDZjNiIsImMiOjR9" target="_blank" rel="noopener noreferrer">Lista de Segmentos</a>
+                            </div>
+                            <button type="button" id="segment-trigger-${itemId}" class="segment-trigger" aria-haspopup="dialog"
+                                aria-describedby="segment-summary-${itemId}" onclick="openSegmentPicker(${itemId})">
+                                Selecionar segmentos <span id="segment-summary-${itemId}">Nenhum selecionado</span>
+                            </button>
+                            ${audienceFields.map(field => `<select id="${field}-${itemId}" multiple hidden></select>`).join('')}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="observacoes-${itemId}">Observações</label>
+                            <input type="text" id="observacoes-${itemId}">
+                        </div>
+                    </div>
+                </fieldset>
             </div>
 
             <div class="line-item-add-row">
-                <button type="button" class="btn btn-primary btn-add-line-item" onclick="addLineItem()">+ Adicionar Linha</button>
+                <button type="button" class="btn btn-secondary btn-add-line-item" onclick="addLineItem(true)">+ Adicionar linha</button>
             </div>
         `;
 
@@ -1629,8 +1685,8 @@
                             const actionDiv = document.createElement('div');
                             actionDiv.className = 'custom-dropdown-actions';
                             actionDiv.innerHTML = `
-                            <button type="button" class="action-btn" onclick="selectAll('${m.id}', ${itemId})">✅ Selecionar Tudo</button>
-                            <button type="button" class="action-btn danger" onclick="deselectAll('${m.id}', ${itemId})">❌ Desmarcar Tudo</button>
+                            <button type="button" class="action-btn" onclick="selectAll('${m.id}', ${itemId})">Selecionar tudo</button>
+                            <button type="button" class="action-btn danger" onclick="deselectAll('${m.id}', ${itemId})">Desmarcar tudo</button>
                         `;
                             dropdown.insertBefore(actionDiv, dropdown.firstChild);
                         }
@@ -1646,8 +1702,8 @@
                     const actionDiv = document.createElement('div');
                     actionDiv.className = 'custom-dropdown-actions';
                     actionDiv.innerHTML = `
-                    <button type="button" class="action-btn" onclick="selectAll('formatos', ${itemId})">✅ Selecionar Tudo</button>
-                    <button type="button" class="action-btn danger" onclick="deselectAll('formatos', ${itemId})">❌ Desmarcar Tudo</button>
+                    <button type="button" class="action-btn" onclick="selectAll('formatos', ${itemId})">Selecionar tudo</button>
+                    <button type="button" class="action-btn danger" onclick="deselectAll('formatos', ${itemId})">Desmarcar tudo</button>
                 `;
                     dropdown.insertBefore(actionDiv, dropdown.firstChild);
                 }
@@ -1795,6 +1851,7 @@
 
             formatLineName(itemId);
             updateLineItemAddButtons();
+            if (focusNew) itemDiv.querySelector('.line-item-title').focus();
         }
 
         function updateLineItemAddButtons() {
@@ -1802,11 +1859,9 @@
             const items = container.querySelectorAll('.line-item');
 
             items.forEach((item, index) => {
-                const addButton = item.querySelector('.btn-add-line-item');
-                if (addButton) {
-                    addButton.style.display = index === items.length - 1 ? 'inline-flex' : 'none';
-                }
+                item.querySelector('.line-item-add-row').hidden = index !== items.length - 1;
             });
+            updateCampaignSummary(items);
         }
 
         function removeLineItem(idToRemove) {
