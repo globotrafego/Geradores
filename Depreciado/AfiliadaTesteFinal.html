@@ -625,6 +625,24 @@
             });
         }
 
+        function loadAudienceSegments(rows, field, source) {
+            const segments = new Map();
+            for (const { label, permutive_id, audience_id } of rows) {
+                if (!label) throw new Error(`Identificador vazio em ${source}.label`);
+                if (!/^\d+$/.test(permutive_id) || !/^\d+$/.test(audience_id)) {
+                    throw new Error(`ID inválido em ${source}: ${label}`);
+                }
+                if (!segments.has(label)) {
+                    segments.set(label, { permutive: new Set(), audience: new Set() });
+                }
+                const ids = segments.get(label);
+                ids.permutive.add(permutive_id);
+                ids.audience.add(audience_id);
+            }
+            dropdownData[field] = [...segments.keys()];
+            mappings[field] = segments;
+        }
+
         function hasSelectedFormatMode(itemId, mode) {
             const select = document.getElementById(`formatos-${itemId}`);
             return Array.from(select?.selectedOptions || []).some(option => mappings.formatoModes[option.value] === mode);
@@ -698,29 +716,21 @@
             videoFormatos = formatRows.filter(row => row.line_type === 'VIDEO').map(row => row.format_label);
             if (!formatRows.some(row => row.inventory_mode === 'DAI')) throw new Error('Formato DAI ausente em Formats');
 
-            const audienceConfig = {
-                AGE: ['idades', 'idade_permutive', 'idade_audience'],
-                GENDER: ['generos', 'genero_permutive', 'genero_audience'],
-                CONSUMPTION: ['potencialConsumo', 'potencial_permutive', 'potencial_audience']
-            };
+            const audienceFields = new Map([
+                ['AGE', 'idades'],
+                ['GENDER', 'generos'],
+                ['CONSUMPTION', 'potencialConsumo']
+            ]);
             const unknownAudienceCategories = [...new Set(audienceRows.map(row => row.category))]
-                .filter(category => !audienceConfig[category] && category !== 'INTEREST');
+                .filter(category => !audienceFields.has(category) && category !== 'INTEREST');
             if (unknownAudienceCategories.length) {
                 throw new Error(`Categorias desconhecidas em Audience: ${unknownAudienceCategories.join(', ')}`);
             }
-            Object.entries(audienceConfig).forEach(([category, [listKey, permutiveKey, audienceKey]]) => {
+            for (const [category, field] of audienceFields) {
                 const rows = audienceRows.filter(row => row.category === category).sort(bySortOrder);
                 if (!rows.length) throw new Error(`Categoria obrigatória ausente em Audience: ${category}`);
-                assertUnique(rows, 'label', `Audience/${category}`);
-                rows.forEach(row => {
-                    if (!/^\d+$/.test(row.permutive_id) || !/^\d+$/.test(row.audience_id)) {
-                        throw new Error(`ID inválido em Audience/${category}: ${row.label}`);
-                    }
-                });
-                dropdownData[listKey] = rows.map(row => row.label);
-                mappings[permutiveKey] = Object.fromEntries(rows.map(row => [row.label, row.permutive_id]));
-                mappings[audienceKey] = Object.fromEntries(rows.map(row => [row.label, row.audience_id]));
-            });
+                loadAudienceSegments(rows, field, `Audience/${category}`);
+            }
 
             const interestSheet = interestWb.Sheets[interestWb.SheetNames[0]];
             if (!interestSheet) throw new Error('A base de interesses não possui nenhuma aba.');
@@ -733,15 +743,7 @@
                 }))
                 .filter(row => row.label);
             if (!interestRows.length) throw new Error('A base de interesses não possui segmentos.');
-            assertUnique(interestRows, 'label', 'Interesses');
-            interestRows.forEach(row => {
-                if (!/^\d+$/.test(row.permutive_id) || !/^\d+$/.test(row.audience_id)) {
-                    throw new Error(`ID inválido na base de interesses: ${row.label}`);
-                }
-            });
-            dropdownData.interesses = interestRows.map(row => row.label);
-            mappings.interesse_permutive = Object.fromEntries(interestRows.map(row => [row.label, row.permutive_id]));
-            mappings.interesse_audience = Object.fromEntries(interestRows.map(row => [row.label, row.audience_id]));
+            loadAudienceSegments(interestRows, 'interesses', 'Interesses');
 
             siteRows.sort(bySortOrder);
             assertUnique(siteRows, 'site_label', 'Sites');
@@ -1512,6 +1514,16 @@
             }).join(", ");
         }
 
+        function getAudienceIds(field, itemId, isDAI) {
+            const select = document.getElementById(`${field}-${itemId}`);
+            const idType = isDAI ? 'audience' : 'permutive';
+            const ids = new Set();
+            for (const option of select?.selectedOptions || []) {
+                for (const id of mappings[field].get(option.value)[idType]) ids.add(id);
+            }
+            return [...ids].join(', ');
+        }
+
         function exportToExcel() {
             const requiredIds = ['cg-rp', 'cg-afiliadas', 'cg-order-id', 'cg-cliente', 'cg-mes', 'cg-ano'];
             for (let id of requiredIds) {
@@ -1566,10 +1578,10 @@
 
                     const formatMapped = mapValues(formatRaw, mappings.formatos);
 
-                    const idadeMapped = mapValues(getMultipleChoicesValue(`idades-${id}`), isDAI ? mappings.idade_audience : mappings.idade_permutive);
-                    const generoMapped = mapValues(getMultipleChoicesValue(`generos-${id}`), isDAI ? mappings.genero_audience : mappings.genero_permutive);
-                    const potencialMapped = mapValues(getMultipleChoicesValue(`potencialConsumo-${id}`), isDAI ? mappings.potencial_audience : mappings.potencial_permutive);
-                    const interesseMapped = mapValues(getMultipleChoicesValue(`interesses-${id}`), isDAI ? mappings.interesse_audience : mappings.interesse_permutive);
+                    const idadeMapped = getAudienceIds('idades', id, isDAI);
+                    const generoMapped = getAudienceIds('generos', id, isDAI);
+                    const potencialMapped = getAudienceIds('potencialConsumo', id, isDAI);
+                    const interesseMapped = getAudienceIds('interesses', id, isDAI);
 
                     let rowArr = [
                         el('lineItemName'),
