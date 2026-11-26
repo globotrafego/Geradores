@@ -397,6 +397,145 @@
         .action-btn.danger:hover {
             background-color: rgba(239, 68, 68, 0.2);
         }
+        .segment-field { grid-column: 1 / -1; }
+        .segment-field .field-header { margin-bottom: 8px; }
+        .segment-trigger {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 10px;
+            color: var(--text-main);
+            text-align: left;
+            font-size: .95rem;
+            cursor: pointer;
+        }
+        .segment-trigger:hover { border-color: var(--primary); }
+        .segment-trigger span, .segment-count { color: var(--text-muted); font-size: .875rem; }
+        .segment-dialog {
+            width: min(780px, calc(100% - 28px));
+            max-height: calc(100dvh - 28px);
+            margin: auto;
+            padding: 0;
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            background: var(--bg-color);
+            color: var(--text-main);
+            box-shadow: 0 20px 70px rgba(15, 23, 42, .28);
+        }
+        .segment-dialog:modal, .segment-results { overscroll-behavior: contain; }
+        .segment-dialog::backdrop {
+            background: rgba(15, 23, 42, .64);
+            overflow: hidden;
+            overscroll-behavior: contain;
+        }
+        .segment-dialog form { display: flex; flex-direction: column; max-height: inherit; min-height: 0; }
+        .segment-heading, .segment-search, .segment-footer { padding: 16px 20px; }
+        .segment-heading, .segment-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .segment-heading h1 { font-size: 1.35rem; }
+        .segment-heading p { color: var(--text-muted); margin-top: 2px; font-size: .875rem; }
+        .segment-search { padding-top: 0; }
+        .segment-search label { display: block; margin-bottom: 6px; }
+        .segment-search input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--input-border);
+            border-radius: 8px;
+            color: var(--text-main);
+            background: var(--input-bg);
+            font: inherit;
+        }
+        .segment-layout {
+            display: grid;
+            grid-template-columns: minmax(155px, 1fr) minmax(0, 3fr);
+            min-height: 0;
+            border-block: 1px solid var(--border-color);
+            background: var(--input-bg);
+        }
+        .segment-categories, .segment-results {
+            overflow: auto;
+            min-height: 0;
+            height: min(43dvh, 440px);
+            padding: 14px;
+        }
+        .segment-categories { border-inline-end: 1px solid var(--border-color); }
+        .segment-categories button, .segment-plain {
+            background: transparent;
+            border: 0;
+            border-radius: 8px;
+            color: var(--text-main);
+            font: inherit;
+            cursor: pointer;
+            padding: 8px 10px;
+        }
+        .segment-categories button { display: block; width: 100%; text-align: left; }
+        .segment-categories button[aria-pressed="true"] {
+            background: var(--item-bg);
+            box-shadow: inset 3px 0 var(--primary);
+            font-weight: 600;
+        }
+        .segment-plain:hover, .segment-categories button:hover { background: var(--item-bg); }
+        .segment-plain:disabled { color: var(--text-muted); cursor: default; }
+        .segment-results h2 { font-size: 1rem; margin-bottom: 10px; }
+        .segment-group {
+            position: relative;
+            margin-bottom: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+        }
+        .segment-group > input { position: absolute; inset: 12px auto auto 11px; }
+        .segment-group summary {
+            padding: 9px 10px 9px 38px;
+            cursor: pointer;
+            background: var(--item-bg);
+            border-radius: 10px;
+            overflow-wrap: anywhere;
+        }
+        .segment-group summary .segment-count { margin-inline-start: 8px; white-space: nowrap; }
+        .segment-options { padding: 5px 10px; }
+        .segment-options label {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            padding: 6px 0;
+            margin: 0;
+            color: var(--text-main);
+            overflow-wrap: anywhere;
+            cursor: pointer;
+        }
+        .segment-dialog input[type="checkbox"] { width: 17px; height: 17px; flex: none; accent-color: var(--primary); }
+        .segment-options input { margin-top: 2px; }
+        .segment-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+        .segment-dialog :focus-visible, .segment-trigger:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+        @media (max-width: 560px) {
+            .segment-layout { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+            .segment-categories {
+                display: flex;
+                height: auto;
+                padding: 6px 10px;
+                gap: 4px;
+                border-inline-end: 0;
+                border-bottom: 1px solid var(--border-color);
+            }
+            .segment-categories button { width: auto; flex: none; white-space: nowrap; }
+            .segment-results { height: min(39dvh, 340px); }
+            .segment-footer { flex-wrap: wrap; }
+            .segment-actions { width: 100%; justify-content: space-between; }
+            .segment-actions .btn, .segment-actions .segment-plain {
+                padding: 9px 10px;
+                font-size: .875rem;
+            }
+        }
+
     </style>
 </head>
 
@@ -569,6 +708,37 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+    <dialog id="segment-dialog" class="segment-dialog" aria-labelledby="segment-title">
+        <form method="dialog">
+            <header class="segment-heading">
+                <div>
+                    <h1 id="segment-title">Segmentação de audiência</h1>
+                    <p id="segment-line"></p>
+                </div>
+                <button type="submit" value="cancel" class="segment-plain" aria-label="Fechar">✕</button>
+            </header>
+            <div class="segment-search">
+                <label for="segment-search">Buscar segmentos</label>
+                <input id="segment-search" type="search" placeholder="Nome, categoria ou assunto" autofocus>
+            </div>
+            <div class="segment-layout">
+                <nav id="segment-categories" class="segment-categories" aria-label="Categorias de segmentação"></nav>
+                <div id="segment-results" class="segment-results">
+                    <h2 id="segment-results-title"></h2>
+                    <div id="segment-groups"></div>
+                </div>
+            </div>
+            <footer class="segment-footer">
+                <p id="segment-count" class="segment-count" role="status"></p>
+                <div class="segment-actions">
+                    <button type="button" class="segment-plain" id="segment-clear">Limpar seleção</button>
+                    <button type="submit" value="cancel" class="btn btn-secondary">Cancelar</button>
+                    <button type="submit" value="apply" class="btn btn-primary">Aplicar</button>
+                </div>
+            </footer>
+        </form>
+    </dialog>
 
     <script>
         // Theme logic
@@ -766,7 +936,7 @@
             console.log('Base normalizada carregada:', { dropdownData, mappings, standardSites, daiSiteMappings });
         }
 
-        const fieldsWithAll = ['formatos', 'posicao', 'sites', 'geolocalizacao', 'idades', 'generos', 'potencialConsumo'];
+        const fieldsWithAll = ['formatos', 'posicao', 'sites', 'geolocalizacao'];
 
         const commonSearchOpts = {
             searchEnabled: true,
@@ -956,6 +1126,205 @@
             if (overlay) overlay.style.display = 'none';
         }
 
+        const audienceFields = ['interesses', 'idades', 'generos', 'potencialConsumo'];
+        const segmentDialog = document.getElementById('segment-dialog');
+        const segmentNavigation = document.getElementById('segment-categories');
+        const segmentSearch = document.getElementById('segment-search');
+        const segmentGroups = document.getElementById('segment-groups');
+        let segmentCatalog;
+        let segmentPicker;
+
+        function normalizeSegmentSearch(value) {
+            return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+        }
+
+        function buildSegmentCatalog() {
+            const names = { idades: 'Idade', generos: 'Gênero', potencialConsumo: 'Potencial de consumo' };
+            const categories = new Map();
+            for (const field of audienceFields) {
+                if (names[field]) categories.set(field, { name: names[field], entries: [] });
+                for (const label of dropdownData[field]) {
+                    let key = field;
+                    let group = categories.get(field)?.name;
+                    let name = label;
+                    if (field === 'interesses') {
+                        const parts = label.split('|').map(part => part.trim()).filter(Boolean);
+                        if (normalizeSegmentSearch(parts[0] ?? '') === 'globo') parts.shift();
+                        const category = parts.length > 1 ? parts.shift() : 'Interesses';
+                        key = `interesses:${category}`;
+                        if (parts.length === 1 && parts[0].includes(' - ')) {
+                            const separator = parts[0].indexOf(' - ');
+                            parts.splice(0, 1, parts[0].slice(0, separator), parts[0].slice(separator + 3));
+                        }
+                        group = parts.length > 1 ? parts.shift() : 'Geral';
+                        name = parts.join(' · ') || label;
+                        if (!categories.has(key)) categories.set(key, { name: category, entries: [] });
+                    }
+                    const category = categories.get(key);
+                    const search = normalizeSegmentSearch(`${category.name} ${group} ${label}`);
+                    category.entries.push({ field, label, name, group, search });
+                }
+            }
+            return categories;
+        }
+
+        function readSegmentSelection(itemId) {
+            return Object.fromEntries(audienceFields.map(field => {
+                const select = document.getElementById(`${field}-${itemId}`);
+                return [field, new Set(Array.from(select.selectedOptions, option => option.value))];
+            }));
+        }
+
+        function segmentSelectionCount(selection) {
+            return Object.values(selection).reduce((total, labels) => total + labels.size, 0);
+        }
+
+        function writeSegmentSelection(itemId, selection) {
+            for (const field of audienceFields) {
+                const select = document.getElementById(`${field}-${itemId}`);
+                const options = Array.from(selection[field], label => new Option(label, label, true, true));
+                select.replaceChildren(...options);
+            }
+            const count = segmentSelectionCount(selection);
+            const summary = document.querySelector(`#segment-trigger-${itemId} span`);
+            summary.textContent = count === 0 ? 'Nenhum selecionado'
+                : count === 1 ? '1 selecionado' : `${count} selecionados`;
+        }
+
+        function openSegmentPicker(itemId) {
+            segmentCatalog ??= buildSegmentCatalog();
+            segmentPicker = {
+                itemId,
+                selection: readSegmentSelection(itemId),
+                category: [...segmentCatalog.keys()].find(key => key.startsWith('interesses:')) ?? 'idades',
+                groups: []
+            };
+            document.getElementById('segment-line').textContent =
+                document.querySelector(`#line-item-container-${itemId} .line-item-title`).textContent;
+            segmentSearch.value = '';
+            renderSegmentNavigation();
+            renderSegmentGroups();
+            segmentDialog.showModal();
+        }
+
+        function renderSegmentNavigation() {
+            segmentNavigation.replaceChildren();
+            for (const [key, category] of segmentCatalog) {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.textContent = category.name;
+                button.setAttribute('aria-pressed', String(key === segmentPicker.category));
+                button.addEventListener('click', () => {
+                    segmentPicker.category = key;
+                    segmentSearch.value = '';
+                    for (const item of segmentNavigation.children) {
+                        item.setAttribute('aria-pressed', String(item === button));
+                    }
+                    renderSegmentGroups();
+                });
+                segmentNavigation.append(button);
+            }
+        }
+
+        function renderSegmentGroups() {
+            const query = normalizeSegmentSearch(segmentSearch.value);
+            const categories = query ? [...segmentCatalog.values()] : [segmentCatalog.get(segmentPicker.category)];
+            const groups = new Map();
+            for (const category of categories) {
+                for (const entry of category.entries) {
+                    if (query && !entry.search.includes(query)) continue;
+                    const group = query ? `${category.name} · ${entry.group}` : entry.group;
+                    if (!groups.has(group)) groups.set(group, []);
+                    groups.get(group).push(entry);
+                }
+            }
+
+            document.getElementById('segment-results-title').textContent = query ? 'Resultados da busca' : categories[0].name;
+            segmentGroups.replaceChildren();
+            segmentPicker.groups = [];
+            for (const [name, entries] of groups) {
+                const card = document.createElement('section');
+                card.className = 'segment-group';
+                const groupToggle = document.createElement('input');
+                groupToggle.type = 'checkbox';
+                groupToggle.setAttribute('aria-label', `Selecionar grupo ${name}`);
+                groupToggle.addEventListener('change', () => {
+                    for (const entry of entries) setSegmentChecked(entry, groupToggle.checked);
+                    updateSegmentChecks();
+                });
+
+                const details = document.createElement('details');
+                details.open = Boolean(query) || segmentPicker.groups.length === 0;
+                const header = document.createElement('summary');
+                const count = document.createElement('span');
+                count.className = 'segment-count';
+                header.append(name, count);
+
+                const list = document.createElement('div');
+                list.className = 'segment-options';
+                const options = entries.map(entry => {
+                    const label = document.createElement('label');
+                    label.title = entry.label;
+                    const input = document.createElement('input');
+                    input.type = 'checkbox';
+                    input.addEventListener('change', () => {
+                        setSegmentChecked(entry, input.checked);
+                        updateSegmentChecks();
+                    });
+                    label.append(input, entry.name);
+                    list.append(label);
+                    return { entry, input };
+                });
+
+                details.append(header, list);
+                card.append(groupToggle, details);
+                segmentGroups.append(card);
+                segmentPicker.groups.push({ groupToggle, count, options });
+            }
+            if (!groups.size) segmentGroups.textContent = 'Nenhum segmento encontrado.';
+            document.getElementById('segment-results').scrollTop = 0;
+            updateSegmentChecks();
+        }
+
+        function setSegmentChecked(entry, checked) {
+            const selected = segmentPicker.selection[entry.field];
+            if (checked) selected.add(entry.label);
+            else selected.delete(entry.label);
+        }
+
+        function updateSegmentChecks() {
+            const total = segmentSelectionCount(segmentPicker.selection);
+            const available = [...segmentCatalog.values()].reduce((count, category) => count + category.entries.length, 0);
+            document.getElementById('segment-count').textContent = `${total} de ${available} selecionados`;
+            document.getElementById('segment-clear').disabled = total === 0;
+            for (const { groupToggle, count, options } of segmentPicker.groups) {
+                let checked = 0;
+                for (const { entry, input } of options) {
+                    input.checked = segmentPicker.selection[entry.field].has(entry.label);
+                    checked += Number(input.checked);
+                }
+                groupToggle.checked = checked === options.length;
+                groupToggle.indeterminate = checked > 0 && checked < options.length;
+                count.textContent = `${checked}/${options.length}`;
+            }
+        }
+
+        segmentSearch.addEventListener('input', renderSegmentGroups);
+        segmentSearch.addEventListener('keydown', event => {
+            if (event.key === 'Enter') event.preventDefault();
+        });
+        document.getElementById('segment-clear').addEventListener('click', () => {
+            for (const field of audienceFields) segmentPicker.selection[field].clear();
+            updateSegmentChecks();
+        });
+        segmentDialog.addEventListener('close', () => {
+            if (segmentDialog.returnValue === 'apply') {
+                writeSegmentSelection(segmentPicker.itemId, segmentPicker.selection);
+            }
+            segmentDialog.returnValue = '';
+            segmentPicker = undefined;
+        });
+
         function selectAll(field, itemId) {
             const choiceObj = choicesInstances.find(c => c.id === `${field}-${itemId}`);
             if (choiceObj) {
@@ -965,11 +1334,7 @@
                     if (tipo === 'DISPLAY') available = displayFormatos;
                     else if (tipo === 'VIDEO') available = videoFormatos;
                     else available = dropdownData.formatos;
-                } else if (field === 'idades') { available = dropdownData.idades; }
-                else if (field === 'generos') { available = dropdownData.generos; }
-                else if (field === 'potencialConsumo') { available = dropdownData.potencialConsumo; }
-                else if (field === 'interesses') { available = dropdownData.interesses; }
-                else if (field === 'sites') {
+                } else if (field === 'sites') {
                     available = Array.from(document.getElementById(`sites-${itemId}`).options).map(option => option.value);
                 }
                 else if (field === 'geolocalizacao') { available = dropdownData.geolocalizacao; }
@@ -1196,16 +1561,17 @@
                     <input type="text" id="cidades-${itemId}">
                 </div>
 
-                ${buildMultiGroup("Idade", "idades", itemId)}
-                
-                ${buildMultiGroup("Gênero", "generos", itemId)}
-                
-                ${buildMultiGroup("Potencial de Consumo", "potencialConsumo", itemId)}
-                
-                ${buildMultiGroup("Interesse", "interesses", itemId, false, false, {
-                    text: "Lista de Segmentos",
-                    url: "https://app.powerbi.com/view?r=eyJrIjoiMzExYzVjMDEtMzA5OC00NTAwLTk4YTctYzQzNWU0ODY2OWViIiwidCI6ImE3Y2RjNDQ3LTNiMjktNGI0MS1iNzNlLThhMmNiNTRiMDZjNiIsImMiOjR9"
-                })}
+                <div class="form-group segment-field">
+                    <div class="field-header">
+                        <label for="segment-trigger-${itemId}">Segmentação de audiência</label>
+                        <a class="field-link" href="https://app.powerbi.com/view?r=eyJrIjoiMzExYzVjMDEtMzA5OC00NTAwLTk4YTctYzQzNWU0ODY2OWViIiwidCI6ImE3Y2RjNDQ3LTNiMjktNGI0MS1iNzNlLThhMmNiNTRiMDZjNiIsImMiOjR9" target="_blank" rel="noopener noreferrer">Lista de Segmentos</a>
+                    </div>
+                    <button type="button" id="segment-trigger-${itemId}" class="segment-trigger" aria-haspopup="dialog"
+                        aria-describedby="segment-summary-${itemId}" onclick="openSegmentPicker(${itemId})">
+                        Selecionar segmentos <span id="segment-summary-${itemId}">Nenhum selecionado</span>
+                    </button>
+                    ${audienceFields.map(field => `<select id="${field}-${itemId}" multiple hidden></select>`).join('')}
+                </div>
 
                 <div class="form-group">
                     <label>Observações</label>
@@ -1244,11 +1610,7 @@
                 { id: 'posicao', data: dropdownData.posicao },
                 { id: 'sites', data: standardSites },
                 { id: 'geolocalizacao', data: dropdownData.geolocalizacao },
-                { id: 'programarDisponivel', data: dropdownData.programarDisponivel },
-                { id: 'idades', data: dropdownData.idades },
-                { id: 'generos', data: dropdownData.generos },
-                { id: 'potencialConsumo', data: dropdownData.potencialConsumo },
-                { id: 'interesses', data: dropdownData.interesses }
+                { id: 'programarDisponivel', data: dropdownData.programarDisponivel }
             ];
 
             multiSetup.forEach(m => {
@@ -1652,7 +2014,7 @@
             }
 
             // 3. Copy other Choices.js instances in dependent order
-            const choiceFields = ['propriedade', 'posicaoVideo', 'skip', 'posicao', 'sites', 'geolocalizacao', 'programarDisponivel', 'idades', 'generos', 'potencialConsumo', 'interesses'];
+            const choiceFields = ['propriedade', 'posicaoVideo', 'skip', 'posicao', 'sites', 'geolocalizacao', 'programarDisponivel'];
             choiceFields.forEach(f => {
                 const srcChoice = choicesInstances.find(c => c.id === `${f}-${sourceId}`);
                 const dstChoice = choicesInstances.find(c => c.id === `${f}-${newId}`);
@@ -1668,6 +2030,8 @@
                     }
                 }
             });
+
+            writeSegmentSelection(newId, readSegmentSelection(sourceId));
 
             // 4. Copy standard inputs
             const fields = ['globoplay', 'dataInicio', 'dataFim', 'entregaDeterminada', 'valorUnitario', 'desconto', 'editoria', 'cidades', 'observacoes'];
