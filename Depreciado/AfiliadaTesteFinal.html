@@ -357,43 +357,42 @@
             padding-right: 25px;
         }
 
-        /* Custom Dropdown Actions */
-        .custom-dropdown-actions {
+        .bulk-select {
             display: flex;
-            padding: 10px;
-            gap: 10px;
-            border-bottom: 1px solid var(--border-color);
-            background-color: var(--item-bg);
-            position: sticky;
-            top: 0;
-            z-index: 10;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0 8px;
+            padding: 0 10px;
+            border-block-end: 1px solid var(--border-color);
+            background: var(--item-bg);
         }
 
-        .action-btn {
-            flex: 1;
-            padding: 8px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            border: none;
-            border-radius: 6px;
+        .bulk-select label {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            min-block-size: 44px;
+            margin: 0;
             cursor: pointer;
-            background-color: var(--accent-bg);
-            color: var(--primary);
-            transition: all 0.2s;
         }
 
-        .action-btn:hover {
-            background-color: var(--item-bg);
+        .bulk-select input {
+            flex: none;
+            inline-size: 16px;
+            block-size: 16px;
+            margin: 0;
+            accent-color: var(--action-bg);
         }
 
-        .action-btn.danger {
-            background-color: rgba(239, 68, 68, 0.1);
-            color: var(--danger);
+        .bulk-select label:has(input:disabled) { color: var(--text-muted); cursor: default; }
+        .bulk-select-count {
+            color: var(--text-muted);
+            font-size: .75rem;
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
         }
 
-        .action-btn.danger:hover {
-            background-color: rgba(239, 68, 68, 0.2);
-        }
         .segment-field { grid-column: 1 / -1; }
         .segment-field .field-header { margin-bottom: 8px; }
         .segment-trigger {
@@ -960,8 +959,6 @@
             console.log('Base normalizada carregada:', { dropdownData, mappings, standardSites, daiSiteMappings });
         }
 
-        const fieldsWithAll = ['formatos', 'posicao', 'sites', 'geolocalizacao'];
-
         const commonSearchOpts = {
             searchEnabled: true,
             searchResultLimit: 100,
@@ -1093,30 +1090,27 @@
             return true;
         }
 
-        function updateSitesForDAI(itemId) {
-            const choiceSitesObj = choicesInstances.find(c => c.id === `sites-${itemId}`);
-            if (!choiceSitesObj || !choiceSitesObj.instance) return;
-
-            const formatSelect = document.getElementById(`formatos-${itemId}`);
-            if (!formatSelect) return;
-
-            const hasDAI = hasSelectedFormatMode(itemId, 'DAI');
-
-            if (hasDAI) {
-                const afiliada = document.getElementById('cg-afiliadas').value;
-                const daiSites = daiSiteMappings[afiliada] || [];
-                choiceSitesObj.instance.clearStore();
-                choiceSitesObj.instance.setChoices(formatChoices(daiSites), 'value', 'label', true);
-            } else {
-                let nonDaiSites = [...standardSites];
-                // Add Globoplay only for Video lines (non-DAI)
-                const tipoLinha = document.getElementById(`tipoLinha-${itemId}`);
-                if (tipoLinha && tipoLinha.value === 'VIDEO' && !nonDaiSites.includes('Globoplay')) {
-                    nonDaiSites = ['Globoplay', ...nonDaiSites];
-                }
-                choiceSitesObj.instance.clearStore();
-                choiceSitesObj.instance.setChoices(formatChoices(nonDaiSites), 'value', 'label', true);
+        function availableSites(itemId) {
+            if (hasSelectedFormatMode(itemId, 'DAI')) {
+                const affiliate = document.getElementById('cg-afiliadas').value;
+                return daiSiteMappings[affiliate] || [];
             }
+            const type = document.getElementById(`tipoLinha-${itemId}`).value;
+            return type === 'VIDEO' && !standardSites.includes('Globoplay')
+                ? ['Globoplay', ...standardSites] : standardSites;
+        }
+
+        function availableFormats(type) {
+            if (type === 'DISPLAY') return displayFormatos;
+            if (type === 'VIDEO') return videoFormatos;
+            return dropdownData.formatos;
+        }
+
+        function updateSitesForDAI(itemId) {
+            const entry = choicesInstances.find(choice => choice.id === `sites-${itemId}`);
+            if (!entry) return;
+            entry.instance.clearStore();
+            entry.instance.setChoices(formatChoices(availableSites(itemId)), 'value', 'label', true);
         }
 
         function initApp() {
@@ -1349,32 +1343,61 @@
             segmentPicker = undefined;
         });
 
-        function selectAll(field, itemId) {
-            const choiceObj = choicesInstances.find(c => c.id === `${field}-${itemId}`);
-            if (choiceObj) {
-                let available = [];
-                if (field === 'formatos') {
-                    const tipo = document.getElementById(`tipoLinha-${itemId}`).value;
-                    if (tipo === 'DISPLAY') available = displayFormatos;
-                    else if (tipo === 'VIDEO') available = videoFormatos;
-                    else available = dropdownData.formatos;
-                } else if (field === 'sites') {
-                    available = Array.from(document.getElementById(`sites-${itemId}`).options).map(option => option.value);
+        function setupBulkSelection(select, choice, text, getOptions) {
+            const header = document.createElement('div');
+            header.className = 'bulk-select';
+            const label = document.createElement('label');
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            label.append(checkbox, text);
+            const count = document.createElement('span');
+            count.className = 'bulk-select-count';
+            count.id = `${select.id}-bulk-count`;
+            checkbox.setAttribute('aria-describedby', count.id);
+            header.append(label, count);
+            choice.dropdown.element.prepend(header);
+
+            const update = () => {
+                const options = getOptions();
+                const selected = new Set(choice.getValue(true));
+                const selectedCount = options.filter(value => selected.has(value)).length;
+                checkbox.checked = options.length > 0 && selectedCount === options.length;
+                checkbox.indeterminate = selectedCount > 0 && !checkbox.checked;
+                checkbox.disabled = options.length === 0;
+                count.textContent = `${selectedCount} de ${options.length}`;
+            };
+            for (const event of ['showDropdown', 'addItem', 'removeItem']) {
+                select.addEventListener(event, update);
+            }
+            checkbox.addEventListener('change', () => {
+                if (checkbox.checked) choice.setChoiceByValue(getOptions());
+                else choice.removeActiveItems();
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+                update();
+            });
+
+            const field = select.closest('.form-group');
+            const search = choice.input.element;
+            // Choices captures pointer events and closes on search blur. Keep the bulk checkbox reachable inside it.
+            field.addEventListener('mousedown', event => {
+                if (header.contains(event.target)) event.stopPropagation();
+            }, true);
+            field.addEventListener('blur', event => {
+                if (event.target === search && event.relatedTarget === checkbox) event.stopPropagation();
+            }, true);
+            field.addEventListener('keydown', event => {
+                if (event.target !== checkbox) return;
+                event.stopPropagation();
+                if (event.key === 'Escape') {
+                    search.focus();
+                    choice.hideDropdown(true);
                 }
-                else if (field === 'geolocalizacao') { available = dropdownData.geolocalizacao; }
-                else if (field === 'posicao') { available = dropdownData.posicao; }
+            }, true);
+            checkbox.addEventListener('blur', event => {
+                if (event.relatedTarget !== search) choice.hideDropdown(true);
+            });
 
-                choiceObj.instance.setChoiceByValue(available);
-                formatLineName(itemId);
-            }
-        }
-
-        function deselectAll(field, itemId) {
-            const choiceObj = choicesInstances.find(c => c.id === `${field}-${itemId}`);
-            if (choiceObj) {
-                choiceObj.instance.removeActiveItems();
-                formatLineName(itemId);
-            }
+            update();
         }
 
         function formatPtBrDate(dateStr) {
@@ -1663,9 +1686,9 @@
             setConditionalRequired(itemId, 'sites', true);
 
             const multiSetup = [
-                { id: 'posicao', data: dropdownData.posicao },
-                { id: 'sites', data: standardSites },
-                { id: 'geolocalizacao', data: dropdownData.geolocalizacao },
+                { id: 'posicao', data: dropdownData.posicao, bulkLabel: 'Todas as posições' },
+                { id: 'sites', data: standardSites, bulkLabel: 'Todos os sites' },
+                { id: 'geolocalizacao', data: dropdownData.geolocalizacao, bulkLabel: 'Todos os locais' },
                 { id: 'programarDisponivel', data: dropdownData.programarDisponivel }
             ];
 
@@ -1678,36 +1701,15 @@
                 choicesInstances.push({ id: `${m.id}-${itemId}`, instance: choice });
                 el(m.id).addEventListener('change', () => formatLineName(itemId));
 
-                if (fieldsWithAll.includes(m.id)) {
-                    el(m.id).addEventListener('showDropdown', function () {
-                        const dropdown = choice.containerOuter.element.querySelector('.choices__list--dropdown');
-                        if (dropdown && !dropdown.querySelector('.custom-dropdown-actions')) {
-                            const actionDiv = document.createElement('div');
-                            actionDiv.className = 'custom-dropdown-actions';
-                            actionDiv.innerHTML = `
-                            <button type="button" class="action-btn" onclick="selectAll('${m.id}', ${itemId})">Selecionar tudo</button>
-                            <button type="button" class="action-btn danger" onclick="deselectAll('${m.id}', ${itemId})">Desmarcar tudo</button>
-                        `;
-                            dropdown.insertBefore(actionDiv, dropdown.firstChild);
-                        }
-                    });
+                if (m.bulkLabel) {
+                    const options = m.id === 'sites' ? () => availableSites(itemId) : () => m.data;
+                    setupBulkSelection(el(m.id), choice, m.bulkLabel, options);
                 }
             });
 
-            // Format special setup
+            setupBulkSelection(el('formatos'), choiceFormatos, 'Todos os formatos',
+                () => availableFormats(el('tipoLinha').value));
             el('formatos').addEventListener('change', () => formatLineName(itemId));
-            el('formatos').addEventListener('showDropdown', function () {
-                const dropdown = choiceFormatos.containerOuter.element.querySelector('.choices__list--dropdown');
-                if (dropdown && !dropdown.querySelector('.custom-dropdown-actions')) {
-                    const actionDiv = document.createElement('div');
-                    actionDiv.className = 'custom-dropdown-actions';
-                    actionDiv.innerHTML = `
-                    <button type="button" class="action-btn" onclick="selectAll('formatos', ${itemId})">Selecionar tudo</button>
-                    <button type="button" class="action-btn danger" onclick="deselectAll('formatos', ${itemId})">Desmarcar tudo</button>
-                `;
-                    dropdown.insertBefore(actionDiv, dropdown.firstChild);
-                }
-            });
 
             el('tipoLinha').addEventListener('change', function (e) {
                 const tipo = e.target.value;
@@ -1741,9 +1743,7 @@
                 if (sitesChoice) sitesChoice.instance.removeActiveItems();
 
                 // 2. Show/hide panels and set required based on type
-                let availableFormatos = [];
                 if (tipo === "DISPLAY") {
-                    availableFormatos = displayFormatos;
                     fgPosVideo.classList.add('hidden');
                     fgSkip.classList.add('hidden');
                     fgPosicao.classList.remove('hidden');
@@ -1751,7 +1751,6 @@
                     setConditionalRequired(itemId, 'skip', false);
                     setConditionalRequired(itemId, 'posicao', true);
                 } else if (tipo === "VIDEO") {
-                    availableFormatos = videoFormatos;
                     fgPosVideo.classList.add('hidden');
                     fgSkip.classList.add('hidden');
                     fgPosicao.classList.add('hidden');
@@ -1759,7 +1758,6 @@
                     setConditionalRequired(itemId, 'skip', false);
                     setConditionalRequired(itemId, 'posicao', false);
                 } else {
-                    availableFormatos = dropdownData.formatos;
                     fgPosVideo.classList.add('hidden');
                     fgSkip.classList.add('hidden');
                     fgPosicao.classList.add('hidden');
@@ -1768,7 +1766,7 @@
                     setConditionalRequired(itemId, 'posicao', false);
                 }
 
-                choiceFormatos.setChoices(formatChoices(availableFormatos), 'value', 'label', true);
+                choiceFormatos.setChoices(formatChoices(availableFormats(tipo)), 'value', 'label', true);
                 updateSitesForDAI(itemId);
                 updateGloboplayField(itemId);
                 formatLineName(itemId);
