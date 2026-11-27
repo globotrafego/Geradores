@@ -836,9 +836,17 @@
             mappings[field] = segments;
         }
 
-        function hasSelectedFormatMode(itemId, mode) {
+        function getSelectedFormats(itemId) {
+            if (document.getElementById(`tipoLinha-${itemId}`).value === 'VIDEO') {
+                const format = document.getElementById(`videoFormato-${itemId}`).value;
+                return format ? [format] : [];
+            }
             const select = document.getElementById(`formatos-${itemId}`);
-            return Array.from(select?.selectedOptions || []).some(option => mappings.formatoModes[option.value] === mode);
+            return Array.from(select.selectedOptions, option => option.value);
+        }
+
+        function hasSelectedFormatMode(itemId, mode) {
+            return getSelectedFormats(itemId).some(value => mappings.formatoModes[value] === mode);
         }
 
         async function loadBaseData() {
@@ -1013,13 +1021,11 @@
             const group = document.getElementById(`fg-globoplay-${itemId}`);
             const field = document.getElementById(`globoplay-${itemId}`);
             const tipoLinha = document.getElementById(`tipoLinha-${itemId}`);
-            const formatos = document.getElementById(`formatos-${itemId}`);
             const posicaoVideo = document.getElementById(`posicaoVideo-${itemId}`);
-            if (!group || !field || !tipoLinha || !formatos || !posicaoVideo) return;
+            if (!group || !field || !tipoLinha || !posicaoVideo) return;
 
             const shouldShow = tipoLinha.value === 'VIDEO'
                 && hasSelectedFormatMode(itemId, 'VIDEO')
-                && !hasSelectedFormatMode(itemId, 'DAI')
                 && isPreRoll(posicaoVideo.value);
 
             group.classList.toggle('hidden', !shouldShow);
@@ -1034,10 +1040,13 @@
                 if (!idMatch) continue;
                 const itemId = idMatch[1];
                 const lineNumber = index + 1;
+                const isVideoLine = document.getElementById(`tipoLinha-${itemId}`).value === 'VIDEO';
                 const checks = [
                     { id: `propriedade-${itemId}`, message: `Preencha o campo obrigatório Propriedades na Linha ${lineNumber}.` },
                     { id: `tipoLinha-${itemId}`, message: `Preencha o campo obrigatório Tipo de Linha na Linha ${lineNumber}.` },
-                    { id: `formatos-${itemId}`, message: `Selecione ao menos um Formato na Linha ${lineNumber}.`, isMulti: true },
+                    isVideoLine
+                        ? { id: `videoFormato-${itemId}`, message: `Selecione Video ou DAI na Linha ${lineNumber}.` }
+                        : { id: `formatos-${itemId}`, message: `Selecione ao menos um Formato na Linha ${lineNumber}.`, isMulti: true },
                     { id: `dataInicio-${itemId}`, message: `Preencha Data de Início na Linha ${lineNumber}.` },
                     { id: `dataFim-${itemId}`, message: `Preencha Data Fim na Linha ${lineNumber}.` },
                     { id: `entregaDeterminada-${itemId}`, message: `Preencha Entrega Determinada na Linha ${lineNumber}.` },
@@ -1096,14 +1105,9 @@
                 return daiSiteMappings[affiliate] || [];
             }
             const type = document.getElementById(`tipoLinha-${itemId}`).value;
+            if (type === 'DISPLAY') return standardSites.filter(site => site !== 'Globoplay');
             return type === 'VIDEO' && !standardSites.includes('Globoplay')
                 ? ['Globoplay', ...standardSites] : standardSites;
-        }
-
-        function availableFormats(type) {
-            if (type === 'DISPLAY') return displayFormatos;
-            if (type === 'VIDEO') return videoFormatos;
-            return dropdownData.formatos;
         }
 
         function updateSitesForDAI(itemId) {
@@ -1111,6 +1115,7 @@
             if (!entry) return;
             entry.instance.clearStore();
             entry.instance.setChoices(formatChoices(availableSites(itemId)), 'value', 'label', true);
+            document.getElementById(entry.id).dispatchEvent(new Event('change', { bubbles: true }));
         }
 
         function initApp() {
@@ -1366,14 +1371,13 @@
                 checkbox.disabled = options.length === 0;
                 count.textContent = `${selectedCount} de ${options.length}`;
             };
-            for (const event of ['showDropdown', 'addItem', 'removeItem']) {
+            for (const event of ['showDropdown', 'addItem', 'removeItem', 'change']) {
                 select.addEventListener(event, update);
             }
             checkbox.addEventListener('change', () => {
                 if (checkbox.checked) choice.setChoiceByValue(getOptions());
                 else choice.removeActiveItems();
                 select.dispatchEvent(new Event('change', { bubbles: true }));
-                update();
             });
 
             const field = select.closest('.form-group');
@@ -1418,50 +1422,34 @@
             else if (propUpper.includes("DIVULGA")) prop = "MD";
 
             const tipoLinha = el('tipoLinha').value || "[Tipo de Linha]";
+            const formats = getSelectedFormats(itemId);
+            const isDAI = tipoLinha === 'VIDEO' && mappings.formatoModes[formats[0]] === 'DAI';
+            const formato = isDAI ? 'DAI' : formats.length >= 4 ? 'Diversos' : formats.join(',') || '[Formato]';
+            const nameParts = [prop, tipoLinha, formato];
 
-            let formato = "[Formato]";
-            const selectFormatos = el('formatos');
-            if (selectFormatos && selectFormatos.selectedOptions) {
-                const selected = Array.from(selectFormatos.selectedOptions).map(o => o.value);
-                if (selected.length > 0) {
-                    if (selected.length <= 3) formato = selected.join(",");
-                    else formato = "Diversos";
+            if (tipoLinha === 'VIDEO' && !isDAI) {
+                const position = el('posicaoVideo').value;
+                const skip = el('skip').value;
+                if (position) nameParts.push(position);
+                if (skip) nameParts.push(skip);
+                if (isPreRoll(position) && el('globoplay').value.toLowerCase() === 'sim') {
+                    nameParts.push('Globoplay');
                 }
             }
 
-            let site = "[Site]";
-            const selectSites = el('sites');
-            if (selectSites && selectSites.selectedOptions) {
-                const selected = Array.from(selectSites.selectedOptions).map(o => o.value);
-                if (selected.length > 0) site = selected.join(",");
+            if (!isDAI) {
+                const selectedSites = new Set(Array.from(el('sites').selectedOptions, option => option.value));
+                const allSites = availableSites(itemId);
+                const isROS = allSites.length > 0 && allSites.every(site => selectedSites.has(site));
+                nameParts.push(isROS ? 'ROS' : [...selectedSites].join(',') || '[Site]');
             }
 
-            let geo = "";
-
-            const dInicioRaw = el('dataInicio').value;
-            const dFimRaw = el('dataFim').value;
-
-            const dInicio = formatPtBrDate(dInicioRaw) || "[Data Inicio]";
-            const dFim = formatPtBrDate(dFimRaw) || "[Data Fim]";
-
-            let nameParts = [prop, tipoLinha, formato];
-
-            if (tipoLinha === "VIDEO") {
-                const hasDAI = hasSelectedFormatMode(itemId, 'DAI');
-
-                const posVid = hasDAI ? "DAI" : el('posicaoVideo').value;
-                if (posVid) nameParts.push(posVid);
-
-                if (!hasDAI) {
-                    const skipVal = el('skip').value;
-                    if (skipVal) nameParts.push(skipVal);
-                }
-            }
-
-            const itemContainer = document.getElementById(`line-item-container-${itemId}`);
+            const start = formatPtBrDate(el('dataInicio').value) || '[Data Inicio]';
+            const end = formatPtBrDate(el('dataFim').value) || '[Data Fim]';
+            const item = document.getElementById(`line-item-container-${itemId}`);
             const orderedItems = Array.from(document.querySelectorAll('#line-items-container .line-item'));
-            const lineNumber = itemContainer ? orderedItems.indexOf(itemContainer) + 1 : itemId;
-            nameParts.push(site, dInicio, dFim, lineNumber);
+            const lineNumber = item ? orderedItems.indexOf(item) + 1 : itemId;
+            nameParts.push(start, end, lineNumber);
 
             const name = nameParts.filter(Boolean).join('_');
             el('lineItemName').value = name;
@@ -1554,7 +1542,14 @@
                             <select id="tipoLinha-${itemId}" required><option value="">Selecione...</option></select>
                         </div>
 
-                        ${buildMultiGroup("Formatos", "formatos", itemId, false, true)}
+                        ${buildMultiGroup("Formatos", "formatos", itemId, true)}
+
+                        <div class="form-group hidden" id="fg-videoFormato-${itemId}">
+                            <label for="videoFormato-${itemId}">Formato *</label>
+                            <select id="videoFormato-${itemId}">
+                                <option value="" disabled selected>Selecione Video ou DAI</option>
+                            </select>
+                        </div>
 
                         <div class="form-group hidden" id="fg-posicaoVideo-${itemId}">
                             <label for="posicaoVideo-${itemId}">Posição Vídeo *</label>
@@ -1671,6 +1666,7 @@
             initDropdownOptions(el('posicaoVideo'), dropdownData.posicaoVideo);
             initDropdownOptions(el('skip'), dropdownData.skip);
             initDropdownOptions(el('globoplay'), dropdownData.globoplay);
+            initDropdownOptions(el('videoFormato'), videoFormatos);
 
             const choicePropriedade = new Choices(el('propriedade'), { ...commonSearchOpts, itemSelectText: '' });
             const choicePosicaoVideo = new Choices(el('posicaoVideo'), { ...commonSearchOpts, itemSelectText: '' });
@@ -1680,14 +1676,13 @@
             choicesInstances.push({ id: `posicaoVideo-${itemId}`, instance: choicePosicaoVideo });
             choicesInstances.push({ id: `skip-${itemId}`, instance: choiceSkip });
 
-            const choiceFormatos = new Choices(el('formatos'), { ...commonSearchOpts, removeItemButton: true, choices: formatChoices(dropdownData.formatos) });
+            const choiceFormatos = new Choices(el('formatos'), { ...commonSearchOpts, removeItemButton: true, choices: formatChoices(displayFormatos) });
             choicesInstances.push({ id: `formatos-${itemId}`, instance: choiceFormatos });
-            setConditionalRequired(itemId, 'formatos', true);
             setConditionalRequired(itemId, 'sites', true);
 
             const multiSetup = [
                 { id: 'posicao', data: dropdownData.posicao, bulkLabel: 'Todas as posições' },
-                { id: 'sites', data: standardSites, bulkLabel: 'Todos os sites' },
+                { id: 'sites', data: availableSites(itemId), bulkLabel: 'Todos os sites' },
                 { id: 'geolocalizacao', data: dropdownData.geolocalizacao, bulkLabel: 'Todos os locais' },
                 { id: 'programarDisponivel', data: dropdownData.programarDisponivel }
             ];
@@ -1707,121 +1702,41 @@
                 }
             });
 
-            setupBulkSelection(el('formatos'), choiceFormatos, 'Todos os formatos',
-                () => availableFormats(el('tipoLinha').value));
+            setupBulkSelection(el('formatos'), choiceFormatos, 'Todos os formatos', () => displayFormatos);
             el('formatos').addEventListener('change', () => formatLineName(itemId));
 
-            el('tipoLinha').addEventListener('change', function (e) {
-                const tipo = e.target.value;
-                const fgPosVideo = document.getElementById(`fg-posicaoVideo-${itemId}`);
-                const fgPosicao = document.getElementById(`fg-posicao-${itemId}`);
-                const fgSkip = document.getElementById(`fg-skip-${itemId}`);
-
-                // 1. Clear all dependent field VALUES to prevent stale data in Excel
-                choiceFormatos.clearStore();
-
-                // Clear Posição Vídeo (Choices.js single-select)
-                choicePosicaoVideo.clearStore();
-                choicePosicaoVideo.setChoices(
-                    dropdownData.posicaoVideo.filter(p => p && p !== 'Selecione...').map(opt => ({ value: opt, label: opt })),
-                    'value', 'label', true
-                );
-
-                // Clear Skip (Choices.js single-select)
-                choiceSkip.clearStore();
-                choiceSkip.setChoices(
-                    dropdownData.skip.map(opt => ({ value: opt, label: opt })),
-                    'value', 'label', true
-                );
-
-                // Clear Posição (multi-select)
-                const posicaoChoice = choicesInstances.find(c => c.id === `posicao-${itemId}`);
-                if (posicaoChoice) posicaoChoice.instance.removeActiveItems();
-
-                // Clear Sites (multi-select) — will be re-populated by updateSitesForDAI
-                const sitesChoice = choicesInstances.find(c => c.id === `sites-${itemId}`);
-                if (sitesChoice) sitesChoice.instance.removeActiveItems();
-
-                // 2. Show/hide panels and set required based on type
-                if (tipo === "DISPLAY") {
-                    fgPosVideo.classList.add('hidden');
-                    fgSkip.classList.add('hidden');
-                    fgPosicao.classList.remove('hidden');
-                    setConditionalRequired(itemId, 'posicaoVideo', false);
-                    setConditionalRequired(itemId, 'skip', false);
-                    setConditionalRequired(itemId, 'posicao', true);
-                } else if (tipo === "VIDEO") {
-                    fgPosVideo.classList.add('hidden');
-                    fgSkip.classList.add('hidden');
-                    fgPosicao.classList.add('hidden');
-                    setConditionalRequired(itemId, 'posicaoVideo', false);
-                    setConditionalRequired(itemId, 'skip', false);
-                    setConditionalRequired(itemId, 'posicao', false);
-                } else {
-                    fgPosVideo.classList.add('hidden');
-                    fgSkip.classList.add('hidden');
-                    fgPosicao.classList.add('hidden');
-                    setConditionalRequired(itemId, 'posicaoVideo', false);
-                    setConditionalRequired(itemId, 'skip', false);
-                    setConditionalRequired(itemId, 'posicao', false);
+            const resetVideoControls = () => {
+                const hasVideo = hasSelectedFormatMode(itemId, 'VIDEO');
+                for (const [choice, options] of [[choicePosicaoVideo, dropdownData.posicaoVideo], [choiceSkip, dropdownData.skip]]) {
+                    choice.clearStore();
+                    choice.setChoices([
+                        { value: '', label: 'Selecione...', placeholder: true, selected: true },
+                        ...formatChoices(options)
+                    ], 'value', 'label', true);
                 }
-
-                choiceFormatos.setChoices(formatChoices(availableFormats(tipo)), 'value', 'label', true);
-                updateSitesForDAI(itemId);
+                el('fg-posicaoVideo').classList.toggle('hidden', !hasVideo);
+                el('fg-skip').classList.add('hidden');
+                setConditionalRequired(itemId, 'posicaoVideo', hasVideo);
+                setConditionalRequired(itemId, 'skip', false);
                 updateGloboplayField(itemId);
-                formatLineName(itemId);
+            };
+
+            el('tipoLinha').addEventListener('change', event => {
+                const display = event.target.value === 'DISPLAY';
+                const video = event.target.value === 'VIDEO';
+                for (const [field, show] of [['formatos', display], ['videoFormato', video], ['posicao', display]]) {
+                    el(`fg-${field}`).classList.toggle('hidden', !show);
+                    setConditionalRequired(itemId, field, show);
+                }
+                choiceFormatos.removeActiveItems();
+                el('videoFormato').value = '';
+                choicesInstances.find(c => c.id === `posicao-${itemId}`).instance.removeActiveItems();
+                resetVideoControls();
+                updateSitesForDAI(itemId);
             });
 
-            // Video/DAI format logic: driven by Formatos selection
-            el('formatos').addEventListener('change', function () {
-                const hasVideo = hasSelectedFormatMode(itemId, 'VIDEO');
-                const hasDAI = hasSelectedFormatMode(itemId, 'DAI');
-                const fgPosVideo = document.getElementById(`fg-posicaoVideo-${itemId}`);
-                const fgSkip = document.getElementById(`fg-skip-${itemId}`);
-                const posVideoSelect = el('posicaoVideo');
-                const skipSelect = el('skip');
-
-                // A format change invalidates the previous video-position/skip pair.
-                choiceSkip.clearStore();
-                choiceSkip.setChoices(
-                    dropdownData.skip.map(opt => ({ value: opt, label: opt })),
-                    'value', 'label', true
-                );
-                skipSelect.value = '';
-
-                if (hasVideo && !hasDAI) {
-                    // Show Posição Vídeo WITHOUT the DAI option
-                    fgPosVideo.classList.remove('hidden');
-                    setConditionalRequired(itemId, 'posicaoVideo', true);
-                    setConditionalRequired(itemId, 'skip', false);
-
-                    // Filter out placeholder-like values and keep only spreadsheet options
-                    const nonPlaceholderOptions = dropdownData.posicaoVideo.filter(p => {
-                        const normalized = String(p).trim().toLowerCase();
-                        return normalized && normalized !== 'selecione...' && normalized !== 'selecione';
-                    });
-                    choicePosicaoVideo.clearStore();
-                    choicePosicaoVideo.setChoices(
-                        nonPlaceholderOptions.map(opt => ({ value: opt, label: opt })),
-                        'value', 'label', true
-                    );
-                    posVideoSelect.value = '';
-                } else if (hasDAI) {
-                    // Hide both Posição Vídeo and Skip for DAI and clear stale values
-                    fgPosVideo.classList.add('hidden');
-                    fgSkip.classList.add('hidden');
-                    setConditionalRequired(itemId, 'posicaoVideo', false);
-                    setConditionalRequired(itemId, 'skip', false);
-                    posVideoSelect.value = '';
-                } else {
-                    fgPosVideo.classList.add('hidden');
-                    fgSkip.classList.add('hidden');
-                    setConditionalRequired(itemId, 'posicaoVideo', false);
-                    setConditionalRequired(itemId, 'skip', false);
-                    posVideoSelect.value = '';
-                }
-                updateGloboplayField(itemId);
-                formatLineName(itemId);
+            el('videoFormato').addEventListener('change', () => {
+                resetVideoControls();
                 updateSitesForDAI(itemId);
             });
 
@@ -1842,7 +1757,7 @@
                 el(id).addEventListener('input', () => calculateTotals(itemId));
             });
 
-            ['propriedade', 'posicaoVideo', 'skip', 'dataInicio', 'dataFim'].forEach(id => {
+            ['propriedade', 'posicaoVideo', 'skip', 'globoplay', 'dataInicio', 'dataFim'].forEach(id => {
                 el(id).addEventListener('input', () => formatLineName(itemId));
                 el(id).addEventListener('change', () => formatLineName(itemId));
             });
@@ -1921,14 +1836,6 @@
             return Array.from(select.selectedOptions).map(o => o.value).join(", ");
         }
 
-        function mapValues(valString, mapObj) {
-            if (!valString) return "";
-            return valString.split(",").map(v => {
-                let key = v.trim();
-                return mapObj[key] !== undefined ? mapObj[key] : key;
-            }).join(", ");
-        }
-
         function getAudienceIds(field, itemId, isDAI) {
             const select = document.getElementById(`${field}-${itemId}`);
             const idType = isDAI ? 'audience' : 'permutive';
@@ -1980,7 +1887,7 @@
                     const id = idMatch[1];
                     const el = field => document.getElementById(`${field}-${id}`) ? document.getElementById(`${field}-${id}`).value : "";
 
-                    const formatRaw = getMultipleChoicesValue(`formatos-${id}`);
+                    const formats = getSelectedFormats(id);
                     const isDAI = hasSelectedFormatMode(id, 'DAI');
                     const isVideo = hasSelectedFormatMode(id, 'VIDEO');
                     const tipoLinha = el('tipoLinha');
@@ -1991,7 +1898,7 @@
                         ? el('globoplay').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
                         : '';
 
-                    const formatMapped = mapValues(formatRaw, mappings.formatos);
+                    const formatMapped = formats.map(format => mappings.formatos[format] ?? format).join(', ');
 
                     const idadeMapped = getAudienceIds('idades', id, isDAI);
                     const generoMapped = getAudienceIds('generos', id, isDAI);
@@ -2055,15 +1962,15 @@
                 dstTipoLinha.dispatchEvent(new Event('change'));
             }
 
-            // 2. Copy formatos (Choices.js multi-select)
-            const srcFormatos = choicesInstances.find(c => c.id === `formatos-${sourceId}`);
-            const dstFormatos = choicesInstances.find(c => c.id === `formatos-${newId}`);
-            if (srcFormatos && dstFormatos) {
-                const selectedValues = srcFormatos.instance.getValue(true);
-                if (selectedValues && selectedValues.length > 0) {
-                    dstFormatos.instance.setChoiceByValue(selectedValues);
-                    document.getElementById(`formatos-${newId}`).dispatchEvent(new Event('change'));
-                }
+            // 2. Copy the format before the controls that depend on it.
+            if (srcTipoLinha.value === 'VIDEO') {
+                const destination = document.getElementById(`videoFormato-${newId}`);
+                destination.value = document.getElementById(`videoFormato-${sourceId}`).value;
+                destination.dispatchEvent(new Event('change'));
+            } else {
+                const source = choicesInstances.find(c => c.id === `formatos-${sourceId}`).instance;
+                const destination = choicesInstances.find(c => c.id === `formatos-${newId}`).instance;
+                destination.setChoiceByValue(source.getValue(true));
             }
 
             // 3. Copy other Choices.js instances in dependent order
