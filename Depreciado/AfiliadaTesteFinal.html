@@ -357,6 +357,90 @@
             padding-right: 25px;
         }
 
+        .compact-multi .choices__inner {
+            display: flex;
+            align-items: center;
+            block-size: 40px;
+            padding: 0 28px 0 10px;
+        }
+
+        .compact-multi::after {
+            content: '';
+            position: absolute;
+            inset-inline-end: 12px;
+            inset-block-start: 15px;
+            inline-size: 7px;
+            block-size: 7px;
+            border-inline-end: 1px solid var(--text-muted);
+            border-block-end: 1px solid var(--text-muted);
+            transform: rotate(45deg);
+            pointer-events: none;
+        }
+
+        .compact-multi .choices__input--cloned {
+            flex: 1 1 0;
+            min-inline-size: 0;
+            inline-size: 0 !important;
+            margin: 0;
+            padding: 0;
+            font: inherit;
+            font-size: .85rem;
+            box-shadow: none;
+        }
+
+        .compact-selection-summary {
+            min-inline-size: 0;
+            max-inline-size: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: .85rem;
+            color: var(--text-main);
+        }
+
+        .compact-multi.is-open .compact-selection-summary { display: none; }
+
+        .compact-multi .choices__list--dropdown > .choices__list {
+            max-block-size: min(16rem, 38dvh);
+        }
+
+        .compact-selection-items {
+            padding: 8px 9px 5px;
+            border-block-end: 1px solid var(--border-color);
+        }
+
+        .compact-selection-items p {
+            margin-block-end: 5px;
+            color: var(--text-muted);
+            font-size: .75rem;
+            font-weight: 600;
+        }
+
+        .compact-multi .compact-selection-items .choices__list--multiple {
+            display: flex;
+            flex-wrap: wrap;
+            align-content: flex-start;
+            gap: 4px;
+            max-block-size: 104px;
+            overflow: auto;
+            overscroll-behavior: contain;
+            padding: 3px;
+        }
+
+        .compact-multi .compact-selection-items .choices__item[data-deletable] {
+            max-inline-size: 100%;
+            margin: 0;
+            padding: 4px 12px 4px 7px;
+            font-size: .78rem;
+            word-break: normal;
+            overflow-wrap: anywhere;
+        }
+
+        .compact-selection-items button:focus-visible {
+            outline: 2px solid #fff;
+            outline-offset: 2px;
+        }
+
         .bulk-select {
             display: flex;
             flex-wrap: wrap;
@@ -1347,6 +1431,73 @@
             segmentPicker = undefined;
         });
 
+        function setupCompactSelection(select, choice) {
+            const outer = choice.containerOuter.element;
+            const dropdown = choice.dropdown.element;
+            const search = choice.input.element;
+            const selectedPanel = document.createElement('div');
+            selectedPanel.className = 'compact-selection-items';
+            const heading = document.createElement('p');
+            heading.textContent = 'Selecionados';
+            selectedPanel.append(heading, choice.itemList.element);
+            dropdown.prepend(selectedPanel);
+
+            const summary = document.createElement('span');
+            summary.id = `${select.id}-selection-summary`;
+            summary.className = 'compact-selection-summary';
+            search.before(summary);
+            outer.classList.add('compact-multi');
+            search.setAttribute('aria-describedby', summary.id);
+            if (!search.hasAttribute('aria-label') && select.labels[0]) {
+                search.setAttribute('aria-label', select.labels[0].textContent.trim());
+            }
+
+            const update = () => {
+                const selected = choice.getValue(true);
+                summary.hidden = selected.length === 0;
+                summary.textContent = selected.length === 1 ? selected[0] : `${selected.length} selecionados`;
+                summary.title = selected.length === 1 ? selected[0] : '';
+                selectedPanel.hidden = selected.length === 0;
+                search.placeholder = dropdown.classList.contains('is-active') ? 'Buscar...' : selected.length ? '' : 'Selecionar...';
+            };
+            for (const event of ['showDropdown', 'hideDropdown', 'addItem', 'removeItem', 'change']) {
+                select.addEventListener(event, update);
+            }
+
+            const field = select.closest('.form-group');
+            const isDropdownControl = target =>
+                target instanceof Element && dropdown.contains(target) && target.matches('input, button');
+            // Choices captures pointer events and closes on search blur. Keep controls in the open dropdown reachable.
+            field.addEventListener('mousedown', event => {
+                if (selectedPanel.contains(event.target) || event.target.closest?.('.bulk-select')) event.stopPropagation();
+            }, true);
+            field.addEventListener('blur', event => {
+                if (event.target === search && isDropdownControl(event.relatedTarget)) event.stopPropagation();
+                if (isDropdownControl(event.target) && event.relatedTarget !== search && !isDropdownControl(event.relatedTarget)) {
+                    choice.hideDropdown(true);
+                }
+            }, true);
+            field.addEventListener('keydown', event => {
+                if (!isDropdownControl(event.target)) return;
+                event.stopPropagation();
+                if (event.key === 'Escape') {
+                    search.focus();
+                    choice.hideDropdown(true);
+                }
+            }, true);
+
+            selectedPanel.addEventListener('click', event => {
+                const button = event.target.closest('button[data-button]');
+                if (!button) return;
+                event.stopPropagation();
+                const { value } = button.closest('[data-item]').dataset;
+                if (document.activeElement === button) search.focus();
+                choice.removeActiveItemsByValue(value);
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+            });
+            update();
+        }
+
         function setupBulkSelection(select, choice, text, getOptions) {
             const header = document.createElement('div');
             header.className = 'bulk-select';
@@ -1377,27 +1528,6 @@
                 if (checkbox.checked) choice.setChoiceByValue(getOptions());
                 else choice.removeActiveItems();
                 select.dispatchEvent(new Event('change', { bubbles: true }));
-            });
-
-            const field = select.closest('.form-group');
-            const search = choice.input.element;
-            // Choices captures pointer events and closes on search blur. Keep the bulk checkbox reachable inside it.
-            field.addEventListener('mousedown', event => {
-                if (header.contains(event.target)) event.stopPropagation();
-            }, true);
-            field.addEventListener('blur', event => {
-                if (event.target === search && event.relatedTarget === checkbox) event.stopPropagation();
-            }, true);
-            field.addEventListener('keydown', event => {
-                if (event.target !== checkbox) return;
-                event.stopPropagation();
-                if (event.key === 'Escape') {
-                    search.focus();
-                    choice.hideDropdown(true);
-                }
-            }, true);
-            checkbox.addEventListener('blur', event => {
-                if (event.relatedTarget !== search) choice.hideDropdown(true);
             });
 
             update();
@@ -1693,6 +1823,7 @@
                     choices: formatChoices(m.data)
                 });
                 choicesInstances.push({ id: `${m.id}-${itemId}`, instance: choice });
+                setupCompactSelection(el(m.id), choice);
                 el(m.id).addEventListener('change', () => formatLineName(itemId));
 
                 if (m.bulkLabel) {
@@ -1701,6 +1832,7 @@
                 }
             });
 
+            setupCompactSelection(el('formatos'), choiceFormatos);
             setupBulkSelection(el('formatos'), choiceFormatos, 'Todos os formatos', () => displayFormatos);
             el('formatos').addEventListener('change', () => formatLineName(itemId));
 
