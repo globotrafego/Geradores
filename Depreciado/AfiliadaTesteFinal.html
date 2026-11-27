@@ -1467,16 +1467,26 @@
             const field = select.closest('.form-group');
             const isDropdownControl = target =>
                 target instanceof Element && dropdown.contains(target) && target.matches('input, button');
-            // Choices captures pointer events and closes on search blur. Keep controls in the open dropdown reachable.
+            let mouseDownInside = false;
+            let mouseDownTimer;
+            // A click on dropdown text, padding, or a scrollbar can blur search without moving focus to a control.
             field.addEventListener('mousedown', event => {
+                if (!dropdown.contains(event.target)) return;
+                mouseDownInside = true;
+                clearTimeout(mouseDownTimer);
+                mouseDownTimer = setTimeout(() => { mouseDownInside = false; }, 0);
                 if (selectedPanel.contains(event.target) || event.target.closest?.('.bulk-select')) event.stopPropagation();
             }, true);
             field.addEventListener('blur', event => {
-                if (event.target === search && isDropdownControl(event.relatedTarget)) event.stopPropagation();
-                if (isDropdownControl(event.target) && event.relatedTarget !== search && !isDropdownControl(event.relatedTarget)) {
+                const inside = isDropdownControl(event.relatedTarget) || (mouseDownInside && !event.relatedTarget);
+                if (event.target === search && inside) event.stopPropagation();
+                if (isDropdownControl(event.target) && event.relatedTarget !== search && !inside) {
                     choice.hideDropdown(true);
                 }
             }, true);
+            dropdown.addEventListener('click', () => {
+                if (document.activeElement === document.body) search.focus({ preventScroll: true });
+            });
             field.addEventListener('keydown', event => {
                 if (!isDropdownControl(event.target)) return;
                 event.stopPropagation();
