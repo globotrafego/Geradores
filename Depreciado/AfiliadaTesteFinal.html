@@ -1106,8 +1106,7 @@
             }
             const type = document.getElementById(`tipoLinha-${itemId}`).value;
             if (type === 'DISPLAY') return standardSites.filter(site => site !== 'Globoplay');
-            return type === 'VIDEO' && !standardSites.includes('Globoplay')
-                ? ['Globoplay', ...standardSites] : standardSites;
+            return standardSites;
         }
 
         function updateSitesForDAI(itemId) {
